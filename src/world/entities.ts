@@ -167,6 +167,7 @@ export function updateAvatar(
   avatar.position.x = Math.min(Math.max(avatar.position.x, minX), maxX);
   avatar.position.z = Math.min(Math.max(avatar.position.z, minZ), maxZ);
 
+  // TODO: apply role-based stage constraints from constraints.ts
   if (insideStageXZ(avatar.position.x, avatar.position.z) && (avatar.position.y - AVATAR_SIZE / 2) < (stageTopY + 0.01)) {
     avatar.position.x = prev.x;
     avatar.position.z = prev.z;

@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from 'react';
-import { AvatarUser } from '@/domain/roles';
+import { AvatarUser, Role, SubRole } from '@/domain/roles';
 
 type Listener = () => void;
 
@@ -56,7 +56,7 @@ export const userStore = {
 };
 
 // Initialize with a default local user
-setLocalUser({ id: 'local-1', name: 'macaris64', role: 'learner', subRole: 'pro' });
+setLocalUser({ id: 'local-1', name: 'macaris64', role: 'learner', subRole: 'pro', isAdmin: true });
 
 export function useUsers(): AvatarUser[] {
   return useSyncExternalStore(userStore.subscribe, userStore.all);
@@ -68,4 +68,16 @@ export function useLocalUser(): AvatarUser | null {
 
 export function useOnlineCount(): number {
   return useSyncExternalStore(userStore.subscribe, userStore.count);
+}
+
+export function updateLocalRole(role: Role, subRole?: SubRole): void {
+  if (!localId) return;
+  const current = users.get(localId);
+  if (!current) return;
+  users.set(localId, { ...current, role, subRole });
+  emit();
+}
+
+export function isLocalAdmin(): boolean {
+  return Boolean(getLocal()?.isAdmin);
 }

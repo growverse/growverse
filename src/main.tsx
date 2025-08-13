@@ -16,6 +16,8 @@ import { runtime } from '@/state/runtime';
 import { BotManager } from '@/world/bots/BotManager';
 import { botControls } from '@/state/bots';
 import * as nameTags from '@/world/nameTags';
+import { setWorldRefs } from '@/world/spawn';
+import { onTeleportLocal } from '@/world/worldBus';
 import '@/styles/global.css';
 
 // Bootstrap React
@@ -57,6 +59,8 @@ function initializeThreeWorld() {
   const roomPos = new THREE.Vector3(planeSize / 2 - STAGE_W / 2, 0, 0);
   const { room: glassRoom, block: roomBlock } = createGlassRoom(scene, { w: STAGE_W, d: STAGE_D, position: roomPos });
 
+  setWorldRefs({ stage, glassRoom, dims: { STAGE_W, STAGE_D, STAGE_H, planeSize } });
+
   // NFT Bina: garden sol-orta; merkez (5,0,135)
   const nftPos = new THREE.Vector3(5, 0, 135);
   const { building: nftBuilding, block: buildingBlock } = createNftBuilding(scene, { w: 60, d: 40, h: 22, position: nftPos, doorRatio: 0.35 });
@@ -72,6 +76,14 @@ function initializeThreeWorld() {
   avatar.rotation.y = -Math.PI / 2;
   camera.position.set(avatar.position.x + 12, avatar.position.y + 8, avatar.position.z + 0);
   controls.target.copy(avatar.position);
+
+  onTeleportLocal(({ position, rotationY }) => {
+    avatar.position.set(position.x, position.y, position.z);
+    if (typeof rotationY === 'number') avatar.rotation.y = rotationY;
+    const offset = camera.position.clone().sub(controls.target);
+    controls.target.copy(avatar.position);
+    camera.position.copy(avatar.position.clone().add(offset));
+  });
 
   // Portal (mor binanın karşısı)
   const portalPos = new THREE.Vector3(-5, 0, -135);
