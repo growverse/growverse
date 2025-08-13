@@ -13,6 +13,8 @@ import { createPortalSystem, createPresetController } from '@/systems/portal';
 import { createMarquee } from '@/systems/marquee';
 import { createTeleprompterRig } from '@/scene/teleprompter/createTeleprompterRig';
 import { runtime } from '@/state/runtime';
+import { BotManager } from '@/world/bots/BotManager';
+import { botControls } from '@/state/bots';
 import '@/styles/global.css';
 
 // Bootstrap React
@@ -100,6 +102,13 @@ function initializeThreeWorld() {
 
   // Instructor teleprompter + timer display
   const teleprompter = createTeleprompterRig(THREE, scene, { stage, stageTopY });
+
+  // Bot avatars
+  const botManager = new BotManager();
+  botManager.init({ scene, glassRoomRef: { room: glassRoom, w: STAGE_W, d: STAGE_D }, avatarFactory });
+  botControls.setEnabled = (v: boolean) => botManager.setEnabled(v);
+  botControls.setCount = (n: number) => botManager.setCount(n);
+  window.addEventListener('beforeunload', () => botManager.dispose());
 
   // UI / Teleport akışı — tüm ID'ler aynı spawn (varsayılan)
   function spawnDefault() {
@@ -192,6 +201,7 @@ function initializeThreeWorld() {
     updatePortalProximity();
     marquee.update(dt);
     teleprompter.update(dt);
+    botManager.update(dt);
     adaptiveQuality();
     controls.update();
     renderer.render(scene, camera);
