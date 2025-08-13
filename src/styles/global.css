@@ -157,3 +157,11 @@ canvas {
 .hint.visible { 
   display:block; 
 }
+
+#nameTags-root {
+  position: fixed;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+  z-index: 6;
+}

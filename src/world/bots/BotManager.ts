@@ -1,5 +1,7 @@
 import * as THREE from 'three';
 import { AvatarFactory } from '@/world/entities';
+import { userStore } from '@/state/userStore';
+import * as nameTags from '@/world/nameTags';
 
 export interface BotManagerInit {
   scene: THREE.Scene;
@@ -66,7 +68,10 @@ export class BotManager {
     while (this.bots.length < this.count) {
       const bot = this.factory.create();
       const index = this.bots.length + 1;
-      bot.userData.name = `Bot - #${index}`;
+      const id = `bot-${index}`;
+      const name = `Bot - #${index}`;
+      bot.userData.userId = id;
+      bot.userData.name = name;
       const cx = this.room.position.x;
       const cz = this.room.position.z;
       const x = cx + (Math.random() - 0.5) * this.w;
@@ -74,10 +79,17 @@ export class BotManager {
       bot.position.set(x, 1, z);
       this.scene.add(bot);
       this.bots.push(bot);
+      userStore.addOrUpdate({ id, name, role: 'learner', subRole: 'basic', isBot: true });
+      const tagId = nameTags.register(bot, name);
+      bot.userData.tagId = tagId;
     }
     while (this.bots.length > this.count) {
       const bot = this.bots.pop();
-      if (bot) this.scene.remove(bot);
+      if (bot) {
+        if (bot.userData.userId) userStore.remove(bot.userData.userId);
+        nameTags.unregisterByObject(bot);
+        this.scene.remove(bot);
+      }
     }
   }
 
@@ -85,6 +97,8 @@ export class BotManager {
     if (this.scene) {
       for (const bot of this.bots) {
         this.scene.remove(bot);
+        if (bot.userData.userId) userStore.remove(bot.userData.userId);
+        nameTags.unregisterByObject(bot);
       }
     }
     this.bots = [];
