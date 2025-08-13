@@ -12,6 +12,7 @@ export interface AvatarUser {
   isLocal?: boolean;
   isBot?: boolean;
   color?: string;
+  isAdmin?: boolean;
 }
 
 export const RoleLabels: Record<Role, { label: string; color: string }> = {
@@ -22,4 +23,9 @@ export const RoleLabels: Record<Role, { label: string; color: string }> = {
 export const RoleCapabilities: Record<Role, string[]> = {
   instructor: [],
   learner: [],
+};
+
+export const RoleSubRolesMap: Record<Role, SubRole[]> = {
+  instructor: ['instructor', 'co_instructor', 'learning_assistant'],
+  learner: ['vip', 'pro', 'basic'],
 };

@@ -16,6 +16,8 @@ import { runtime } from '@/state/runtime';
 import { BotManager } from '@/world/bots/BotManager';
 import { botControls } from '@/state/bots';
 import * as nameTags from '@/world/nameTags';
+import { setWorldRefs } from '@/world/spawn';
+import { onTeleportLocal } from '@/world/worldBus';
 import '@/styles/global.css';
 
 // Bootstrap React
@@ -50,12 +52,14 @@ function initializeThreeWorld() {
   const { scene, camera, renderer, controls, amb, sun, adaptiveQuality } = createSceneSetup();
   const keys = createInput();
 
-  const { planeSize, stage, STAGE_W, STAGE_D, STAGE_H, insideStageXZ, groundYAt, boardBlock, boardZCenter, boardYCenter } = createGarden(scene);
+  const { planeSize, stage, STAGE_W, STAGE_D, STAGE_H, insideStageXZ, groundYAt, boardBlock, stageBlock, boardZCenter, boardYCenter } = createGarden(scene);
   const stageTopY = stage.position.y + STAGE_H / 2;
 
   // Camlı oda: sahne ile aynı boyut; haritanın en sağ kenarı (varsayılan)
   const roomPos = new THREE.Vector3(planeSize / 2 - STAGE_W / 2, 0, 0);
   const { room: glassRoom, block: roomBlock } = createGlassRoom(scene, { w: STAGE_W, d: STAGE_D, position: roomPos });
+
+  setWorldRefs({ stage, glassRoom, dims: { STAGE_W, STAGE_D, STAGE_H, planeSize } });
 
   // NFT Bina: garden sol-orta; merkez (5,0,135)
   const nftPos = new THREE.Vector3(5, 0, 135);
@@ -72,6 +76,14 @@ function initializeThreeWorld() {
   avatar.rotation.y = -Math.PI / 2;
   camera.position.set(avatar.position.x + 12, avatar.position.y + 8, avatar.position.z + 0);
   controls.target.copy(avatar.position);
+
+  onTeleportLocal(({ position, rotationY }) => {
+    avatar.position.set(position.x, position.y, position.z);
+    if (typeof rotationY === 'number') avatar.rotation.y = rotationY;
+    const offset = camera.position.clone().sub(controls.target);
+    controls.target.copy(avatar.position);
+    camera.position.copy(avatar.position.clone().add(offset));
+  });
 
   // Portal (mor binanın karşısı)
   const portalPos = new THREE.Vector3(-5, 0, -135);
@@ -103,7 +115,7 @@ function initializeThreeWorld() {
   });
 
   // Instructor teleprompter + timer display
-  const teleprompter = createTeleprompterRig(THREE, scene, { stage, stageTopY });
+  const teleprompter = createTeleprompterRig(THREE, scene);
 
   // Bot avatars
   const botManager = new BotManager();
@@ -193,7 +205,8 @@ function initializeThreeWorld() {
       stageTopY,
       roomBlock,
       buildingBlock,
-      boardBlock
+      boardBlock,
+      stageBlock
     });
     runtime.avatar.x = avatar.position.x;
     runtime.avatar.y = avatar.position.y;
