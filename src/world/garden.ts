@@ -11,6 +11,7 @@ export interface GardenSetup {
   insideStageXZ: (x: number, z: number, half?: number) => boolean;
   groundYAt: (x: number, z: number, half?: number) => number;
   boardBlock: (pos: THREE.Vector3, prev: THREE.Vector3, half?: number) => void;
+  stageBlock: (pos: THREE.Vector3, prev: THREE.Vector3, half?: number) => void;
   board: THREE.Mesh;
   boardSize: number;
   boardZCenter: number;
@@ -66,6 +67,20 @@ export function createGarden(scene: THREE.Scene): GardenSetup {
     if (sidePrev !== 0 && sideNow !== 0 && sidePrev !== sideNow) { pos.x = prev.x; return; }
   }
 
+  function stageBlock(pos: THREE.Vector3, prev: THREE.Vector3, half = 1) {
+    const top = stage.position.y + STAGE_H / 2;
+    const wasOnStage = prev.y >= top - half && insideStageXZ(prev.x, prev.z, half);
+    if (!wasOnStage) return;
+
+    const sxMin = stage.position.x - STAGE_W / 2 + half;
+    const sxMax = stage.position.x + STAGE_W / 2 - half;
+    const szMin = stage.position.z - STAGE_D / 2 + half;
+    const szMax = stage.position.z + STAGE_D / 2 - half;
+
+    pos.x = Math.min(Math.max(pos.x, sxMin), sxMax);
+    pos.z = Math.min(Math.max(pos.z, szMin), szMax);
+  }
+
   function insideStageXZ(x: number, z: number, half = 1): boolean {
     const sxMin = stage.position.x - STAGE_W / 2 - half,
       sxMax = stage.position.x + STAGE_W / 2 + half,
@@ -92,10 +107,11 @@ export function createGarden(scene: THREE.Scene): GardenSetup {
     stage, 
     STAGE_W, 
     STAGE_D, 
-    STAGE_H, 
-    insideStageXZ, 
-    groundYAt, 
+    STAGE_H,
+    insideStageXZ,
+    groundYAt,
     boardBlock,
+    stageBlock,
     board,
     boardSize,
     boardZCenter,

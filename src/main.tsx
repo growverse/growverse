@@ -52,7 +52,7 @@ function initializeThreeWorld() {
   const { scene, camera, renderer, controls, amb, sun, adaptiveQuality } = createSceneSetup();
   const keys = createInput();
 
-  const { planeSize, stage, STAGE_W, STAGE_D, STAGE_H, insideStageXZ, groundYAt, boardBlock, boardZCenter, boardYCenter } = createGarden(scene);
+  const { planeSize, stage, STAGE_W, STAGE_D, STAGE_H, insideStageXZ, groundYAt, boardBlock, stageBlock, boardZCenter, boardYCenter } = createGarden(scene);
   const stageTopY = stage.position.y + STAGE_H / 2;
 
   // Camlı oda: sahne ile aynı boyut; haritanın en sağ kenarı (varsayılan)
@@ -205,7 +205,8 @@ function initializeThreeWorld() {
       stageTopY,
       roomBlock,
       buildingBlock,
-      boardBlock
+      boardBlock,
+      stageBlock
     });
     runtime.avatar.x = avatar.position.x;
     runtime.avatar.y = avatar.position.y;
