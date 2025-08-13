@@ -3,7 +3,7 @@ import { useLocalUser } from '@/state/userStore';
 import { InfoTab } from '@/ui/tabs/InfoTab';
 import { ChatTab } from '@/ui/tabs/ChatTab';
 import { SettingsTab } from '@/ui/tabs/SettingsTab';
-import { AdminTab } from '@/ui/tabs/AdminTab';
+import AdminPanel from '@/ui/admin/AdminPanel';
 import './dock.css';
 
 type Tab = 'info' | 'chat' | 'settings' | 'admin';
@@ -71,7 +71,7 @@ export function Dock(): JSX.Element {
         {active === 'info' && <InfoTab />}
         {active === 'chat' && <ChatTab />}
         {active === 'settings' && <SettingsTab />}
-        {isAdmin && active === 'admin' && <AdminTab />}
+        {isAdmin && active === 'admin' && <AdminPanel />}
       </div>
     </div>
   );
