@@ -115,7 +115,7 @@ function initializeThreeWorld() {
   });
 
   // Instructor teleprompter + timer display
-  const teleprompter = createTeleprompterRig(THREE, scene, { stage, stageTopY });
+  const teleprompter = createTeleprompterRig(THREE, scene);
 
   // Bot avatars
   const botManager = new BotManager();
