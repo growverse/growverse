@@ -1,0 +1,55 @@
+.admin-home-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.admin-home-item {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  background: none;
+  border: none;
+  color: inherit;
+  padding: 8px 4px;
+  cursor: pointer;
+  text-align: left;
+}
+.admin-home-item:hover,
+.admin-home-item:focus {
+  background: rgba(130,180,255,.18);
+}
+.admin-home-item .icon {
+  margin-right: 8px;
+  font-size: 20px;
+}
+.admin-home-item .text {
+  flex: 1;
+}
+.admin-home-item .title {
+  font-weight: 600;
+}
+.admin-home-item .desc {
+  font-size: 13px;
+  opacity: 0.8;
+}
+.admin-home-item .chevron {
+  margin-left: 8px;
+}
+.admin-detail-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.admin-detail-header .back-btn {
+  margin-right: 8px;
+}
+.admin-detail-header h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.admin-bots-panel .buttons {
+  margin-top: 8px;
+  display: flex;
+  gap: 8px;
+}
