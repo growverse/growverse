@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { botControls } from '@/state/bots';
+import { AdminRoleSwitcher } from '@/ui/admin/AdminRoleSwitcher';
 
 export function AdminTab(): JSX.Element {
   const [count, setCount] = useState(0);
@@ -21,6 +22,10 @@ export function AdminTab(): JSX.Element {
   return (
     <div className="admin-tab">
       <h2>Admin</h2>
+      <div>
+        <h3>Role & Spawn</h3>
+        <AdminRoleSwitcher />
+      </div>
       <div>
         <h3>Bot Avatars</h3>
         <label>
