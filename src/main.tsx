@@ -18,6 +18,7 @@ import { botControls } from '@/state/bots';
 import * as nameTags from '@/world/nameTags';
 import { setWorldRefs } from '@/world/spawn';
 import { onTeleportLocal } from '@/world/worldBus';
+import { createGrowverseSign } from '@/scene/signage/GrowverseSign';
 import '@/styles/global.css';
 
 // Bootstrap React
@@ -31,10 +32,10 @@ root.render(<App />);
 
 // Initialize Three.js world after React has rendered
 setTimeout(() => {
-  initializeThreeWorld();
+  void initializeThreeWorld();
 }, 0);
 
-function initializeThreeWorld() {
+async function initializeThreeWorld() {
   nameTags.mountNameTagsRoot();
   // Get DOM elements that React has rendered
   const nameTag = document.getElementById('nameTag');
@@ -90,6 +91,23 @@ function initializeThreeWorld() {
   const portal = createPortalSystem(scene, { portalUI, portalList, btnCancel, btnTeleport, portalHint, fade });
   portal.group.position.copy(portalPos);
 
+  const sign = await createGrowverseSign(THREE, scene, {
+    text: 'growverse',
+    anchor: new THREE.Vector3(10, 1, -136),
+    size: 6,
+    height: 1.1,
+    bevelEnabled: true,
+    bevelThickness: 0.12,
+    bevelSize: 0.3,
+    curveSegments: 6,
+    letterSpacing: 0.2,
+    lookAtTarget: portal?.group ?? new THREE.Vector3(0, 0, 0),
+    outline: { enabled: true, color: 0x92b6ff, opacity: 0.6 },
+    neon: { enabled: true, baseEmissive: 0.05, nightEmissive: 0.7, color: 0x66ccff, fakeBloom: true },
+    castShadow: true,
+    receiveShadow: false,
+  });
+
   // Preset controller (5 instance, varsayılan düzen)
   const applyPreset = createPresetController({
     objects: { stage, glassRoom, nftBuilding },
@@ -122,7 +140,10 @@ function initializeThreeWorld() {
   botManager.init({ scene, glassRoomRef: { room: glassRoom, w: STAGE_W, d: STAGE_D }, avatarFactory });
   botControls.setEnabled = (v: boolean) => botManager.setEnabled(v);
   botControls.setCount = (n: number) => botManager.setCount(n);
-  window.addEventListener('beforeunload', () => botManager.dispose());
+  window.addEventListener('beforeunload', () => {
+    botManager.dispose();
+    sign.dispose();
+  });
 
   // UI / Teleport akışı — tüm ID'ler aynı spawn (varsayılan)
   function spawnDefault() {
@@ -212,16 +233,17 @@ function initializeThreeWorld() {
     runtime.avatar.y = avatar.position.y;
     runtime.avatar.z = avatar.position.z;
     runtime.avatar.rotY = avatar.rotation.y;
-    worldfx.update();
-    updatePortalProximity();
-    marquee.update(dt);
-    teleprompter.update(dt);
-    botManager.update(dt);
-    adaptiveQuality();
-    controls.update();
-    renderer.render(scene, camera);
-    updateNameTag();
-    nameTags.update(camera);
+      worldfx.update();
+      updatePortalProximity();
+      marquee.update(dt);
+      teleprompter.update(dt);
+      sign.update(dt);
+      botManager.update(dt);
+      adaptiveQuality();
+      controls.update();
+      renderer.render(scene, camera);
+      updateNameTag();
+      nameTags.update(camera);
   }
   animate();
 }
