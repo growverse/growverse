@@ -93,7 +93,7 @@ async function initializeThreeWorld() {
 
   const sign = await createGrowverseSign(THREE, scene, {
     text: 'growverse',
-    anchor: new THREE.Vector3(10, 1, -136),
+    anchor: new THREE.Vector3(-106, 1, 0),
     size: 6,
     height: 1.1,
     bevelEnabled: true,
@@ -101,7 +101,7 @@ async function initializeThreeWorld() {
     bevelSize: 0.3,
     curveSegments: 6,
     letterSpacing: 0.2,
-    lookAtTarget: portal?.group ?? new THREE.Vector3(0, 0, 0),
+    lookAtTarget: glassRoom,
     outline: { enabled: true, color: 0x92b6ff, opacity: 0.6 },
     neon: { enabled: true, baseEmissive: 0.05, nightEmissive: 0.7, color: 0x66ccff, fakeBloom: true },
     castShadow: true,

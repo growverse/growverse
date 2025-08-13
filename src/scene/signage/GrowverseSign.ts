@@ -39,7 +39,7 @@ export async function createGrowverseSign(
   scene: THREEType.Scene,
   options?: Partial<GrowverseSignOptions>
 ): Promise<GrowverseSignHandle> {
-  const defaultAnchor = new THREE.Vector3(10, 1, -136);
+  const defaultAnchor = new THREE.Vector3(-106, 1, 0);
   const defaultOutline = { enabled: false, color: 0xffffff, opacity: 1 };
   const defaultNeon = { enabled: false, baseEmissive: 0.05, nightEmissive: 0.7, color: 0x66ccff, fakeBloom: false };
   const opts: GrowverseSignOptions = {
