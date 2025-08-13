@@ -15,6 +15,7 @@ import { createTeleprompterRig } from '@/scene/teleprompter/createTeleprompterRi
 import { runtime } from '@/state/runtime';
 import { BotManager } from '@/world/bots/BotManager';
 import { botControls } from '@/state/bots';
+import * as nameTags from '@/world/nameTags';
 import '@/styles/global.css';
 
 // Bootstrap React
@@ -32,6 +33,7 @@ setTimeout(() => {
 }, 0);
 
 function initializeThreeWorld() {
+  nameTags.mountNameTagsRoot();
   // Get DOM elements that React has rendered
   const nameTag = document.getElementById('nameTag');
   const portalUI = document.getElementById('portalUI');
@@ -206,6 +208,7 @@ function initializeThreeWorld() {
     controls.update();
     renderer.render(scene, camera);
     updateNameTag();
+    nameTags.update(camera);
   }
   animate();
 }
