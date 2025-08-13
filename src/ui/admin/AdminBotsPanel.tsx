@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { botControls } from '@/state/bots';
-import { AdminRoleSwitcher } from '@/ui/admin/AdminRoleSwitcher';
 
-export function AdminTab(): JSX.Element {
+export function AdminBotsPanel(): JSX.Element {
   const [count, setCount] = useState(0);
   const [enabled, setEnabled] = useState(false);
 
@@ -20,22 +19,14 @@ export function AdminTab(): JSX.Element {
   };
 
   return (
-    <div className="admin-tab">
-      <h2>Admin</h2>
-      <div>
-        <h3>Role & Spawn</h3>
-        <AdminRoleSwitcher />
-      </div>
-      <div>
-        <h3>Bot Avatars</h3>
-        <label>
-          Bot count:
-          <input type="number" min={0} max={50} value={count} onChange={onCountChange} />
-        </label>
-        <label>
-          <input type="checkbox" checked={enabled} onChange={onEnableChange} /> Enable Bot Avatars
-        </label>
-      </div>
+    <div className="admin-bots-panel">
+      <label>
+        Bot count:
+        <input type="number" min={0} max={50} value={count} onChange={onCountChange} />
+      </label>
+      <label>
+        <input type="checkbox" checked={enabled} onChange={onEnableChange} /> Enable Bot Avatars
+      </label>
     </div>
   );
 }
