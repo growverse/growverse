@@ -1,0 +1,840 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <title>Garden – Modular Single File (Three.js + Box‑Man + Glass Room + Portal, 5 Instances + Faz 7 Marquee)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    html, body { height: 100%; margin: 0; overflow: hidden; background: #000; }
+    canvas { display: block; }
+    .hud { position: fixed; left: 12px; top: 12px; color: #fff; font: 14px/1.4 system-ui, sans-serif; background: rgba(0,0,0,.45); padding: 8px 10px; border-radius: 8px; user-select: none; z-index: 5; white-space: pre; }
+    .name-tag { position: fixed; left: 0; top: 0; transform: translate(-50%, -100%); padding: 4px 8px; border-radius: 6px; font: 13px/1.2 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; color: #EAF2FF; background: rgba(18,18,24,.78); border: 1px solid rgba(255,255,255,.15); box-shadow: 0 2px 8px rgba(0,0,0,.35); pointer-events: none; z-index: 6; white-space: nowrap; }
+    .name-tag.hidden { display: none; }
+
+    /* Portal UI */
+    .portal-ui { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(90vw, 520px); background: rgba(10,12,18,.85); border: 1px solid rgba(255,255,255,.12); box-shadow: 0 20px 60px rgba(0,0,0,.5); color: #E8F0FF; font: 14px/1.45 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; border-radius: 14px; z-index: 10; display: none; }
+    .portal-ui.visible { display: block; }
+    .portal-ui header { padding: 14px 16px; font-weight: 600; letter-spacing: .2px; border-bottom: 1px solid rgba(255,255,255,.08); }
+    .portal-ui .list { max-height: 46vh; overflow: auto; padding: 6px; }
+    .portal-ui .item { display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:10px; cursor:pointer; border:1px solid transparent; }
+    .portal-ui .item:hover { background: rgba(255,255,255,.05); }
+    .portal-ui .item.selected { border-color: rgba(120,160,255,.45); background: rgba(120,160,255,.08); }
+    .portal-ui footer { display:flex; gap:10px; justify-content:flex-end; padding: 12px 16px; border-top: 1px solid rgba(255,255,255,.08); }
+    .btn { padding:8px 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.06); color:#E8F0FF; cursor:pointer; }
+    .btn.primary { border-color: rgba(130,180,255,.6); background: rgba(130,180,255,.18); }
+    .btn:active { transform: translateY(1px); }
+
+    /* Fade overlay for teleport */
+    .fade { position: fixed; inset: 0; background: #000; pointer-events: none; opacity: 0; transition: opacity .5s ease; z-index: 9; }
+    .fade.on { opacity: 1; }
+
+    /* Portal hint */
+    .hint { position: fixed; left: 50%; bottom: 32px; transform: translateX(-50%); padding: 8px 12px; border-radius: 12px; color: #dfe9ff; background: rgba(0,0,0,.55); border: 1px solid rgba(255,255,255,.14); font: 13px/1.3 system-ui, sans-serif; z-index: 7; display:none; }
+    .hint.visible { display:block; }
+  </style>
+</head>
+<body>
+  <!-- HUD: koordinatlar + yön -->
+  <div class="hud" id="hud">—</div>
+  <!-- Avatar etiketi -->
+  <div class="name-tag" id="nameTag">macaris64</div>
+
+  <!-- Portal UI -->
+  <div class="portal-ui" id="portalUI" role="dialog" aria-modal="true">
+    <header>Teleport — başka bir garden seç</header>
+    <div class="list" id="portalList"></div>
+    <footer>
+      <button class="btn" id="btnCancel">İptal (ESC)</button>
+      <button class="btn primary" id="btnTeleport">Git</button>
+    </footer>
+  </div>
+  <div class="hint" id="portalHint">Portala yaklaştın. Seçim paneli açıldı. Uzaklaşınca kapanır.</div>
+  <div class="fade" id="fade"></div>
+
+  <!-- import map: three + orbit -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.158.0/build/three.module.js",
+      "orbit": "https://unpkg.com/three@0.158.0/examples/jsm/controls/OrbitControls.js"
+    }
+  }
+  </script>
+
+  <!-- Utils -->
+  <script type="module" id="mod-utils">
+    export const deg = (rad)=> (rad * 180 / Math.PI);
+    export const fmt = (n)=> Number(n).toFixed(2);
+    export function lerp(a,b,t){ return a + (b-a)*t; }
+    export function clamp01(v){ return Math.max(0, Math.min(1, v)); }
+  </script>
+
+  <!-- Scene Setup (amb + sun referansları) + adaptive quality (Faz 6 parçası) -->
+  <script type="module" id="mod-scene">
+    export function createSceneSetup(THREE, OrbitControls){
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x87b7ff);
+
+      const camera = new THREE.PerspectiveCamera(60, innerWidth/innerHeight, 0.1, 8000);
+      camera.position.set(0, 10, 16);
+
+      const renderer = new THREE.WebGLRenderer({ antialias:true, powerPreference: 'high-performance' });
+      renderer.setSize(innerWidth, innerHeight);
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      document.body.appendChild(renderer.domElement);
+
+      const controls = new OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true; controls.dampingFactor = 0.08; controls.enablePan = false;
+      controls.minDistance = 6; controls.maxDistance = 100; controls.maxPolarAngle = Math.PI * 0.49;
+      controls.enableKeys = false; controls.keys = {}; controls.keyPanSpeed = 0;
+      controls.target.set(0, 2, 0);
+
+      const amb = new THREE.AmbientLight(0xffffff, 0.5); scene.add(amb);
+      const sun = new THREE.DirectionalLight(0xffffff, 0.9); sun.position.set(60,100,40); sun.castShadow = true; sun.shadow.mapSize.set(2048,2048); scene.add(sun);
+
+      // Adaptive pixel ratio (Faz 6)
+      let frameCount = 0; let lastTime = performance.now(); let targetPR = Math.min(1.5, window.devicePixelRatio || 1);
+      renderer.setPixelRatio(targetPR);
+      function adaptiveQuality(){
+        frameCount++;
+        const now = performance.now();
+        if (now - lastTime > 1500){
+          const fps = frameCount / ((now - lastTime)/1000);
+          frameCount = 0; lastTime = now;
+          if (fps < 45) targetPR = Math.max(0.75, targetPR - 0.1);
+          else if (fps > 58) targetPR = Math.min(1.75, targetPR + 0.05);
+          renderer.setPixelRatio(targetPR);
+          const m = (targetPR >= 1.2) ? 2048 : (targetPR >= 1.0 ? 1536 : 1024);
+          sun.shadow.mapSize.set(m,m);
+          sun.shadow.needsUpdate = true;
+        }
+      }
+
+      addEventListener('resize', ()=>{
+        camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight);
+      });
+
+      return { scene, camera, renderer, controls, amb, sun, adaptiveQuality };
+    }
+  </script>
+
+  <!-- Input -->
+  <script type="module" id="mod-input">
+    export function createInput(){
+      const keys = { w:false, a:false, s:false, d:false, space:false };
+      const mapKey = (e)=>{ const k=e.key; if(k===' '||k==='Spacebar') return 'space'; const low=(k||'').toLowerCase(); return low==='space'?'space':low; };
+      addEventListener('keydown',e=>{const k=mapKey(e); if(k in keys){keys[k]=true; if(k==='space') e.preventDefault();}});
+      addEventListener('keyup',  e=>{const k=mapKey(e); if(k in keys){keys[k]=false; if(k==='space') e.preventDefault();}});
+      return keys;
+    }
+  </script>
+
+  <!-- Garden (CIRCULAR ground + stage + side board w/ collision) -->
+  <script type="module" id="mod-garden">
+    export function createGarden(THREE, scene){
+      const planeSize = 400; // sahne ölçeği referansı
+
+      // Dairesel zemin
+      const groundR = planeSize * 0.78; // elips istenirse anisotropic scale
+      const circle = new THREE.Mesh(
+        new THREE.CircleGeometry(groundR, 128),
+        new THREE.MeshLambertMaterial({ color: 0x2faa2f })
+      );
+      circle.rotation.x = -Math.PI/2; circle.receiveShadow = true; scene.add(circle);
+
+      // Sahne (X sabit solda, Z ortada)
+      const STAGE_W = 90, STAGE_D = 90, STAGE_H = 15;
+      const stageMat = new THREE.MeshStandardMaterial({ color: 0x555555, metalness: 0.1, roughness: 0.8 });
+      const stage = new THREE.Mesh(new THREE.BoxGeometry(STAGE_W, STAGE_H, STAGE_D), stageMat);
+      stage.castShadow = true; stage.receiveShadow = true;
+      stage.position.set(-planeSize/2 + STAGE_W/2, STAGE_H/2, 0);
+      scene.add(stage);
+
+      // Sunum tahtası
+      const boardSize = 80; const boardX = -110; const boardZMin = -130, boardZMax = -50;
+      const boardZCenter = (boardZMin + boardZMax) * 0.5; const boardYCenter = boardSize * 0.5;
+      const board = new THREE.Mesh(
+        new THREE.PlaneGeometry(boardSize, boardSize),
+        new THREE.MeshStandardMaterial({ color: 0xffffff, metalness:0.0, roughness:0.25, side: THREE.DoubleSide })
+      );
+      board.position.set(boardX, boardYCenter, boardZCenter); board.rotation.y = -Math.PI/2; scene.add(board);
+
+      function boardBlock(pos, prev, half = 1){
+        const yMin = 0, yMax = boardSize; const zMin = boardZMin, zMax = boardZMax;
+        const withinZ = (pos.z > zMin - half && pos.z < zMax + half) || (prev.z > zMin - half && prev.z < zMax + half);
+        const withinY = (pos.y - half < yMax && pos.y + half > yMin) || (prev.y - half < yMax && prev.y + half > yMin);
+        if (!withinZ || !withinY) return;
+        const sidePrev = Math.sign(prev.x - boardX); const sideNow  = Math.sign(pos.x  - boardX);
+        if (sidePrev === 0 && sideNow === 0) return;
+        if (sidePrev === 0 && sideNow !== 0){ pos.x = boardX + (sideNow > 0 ? half : -half); return; }
+        if (sidePrev !== 0 && sideNow !== 0 && sidePrev !== sideNow){ pos.x = prev.x; return; }
+      }
+
+      function insideStageXZ(x, z, half=1){
+        const sxMin = stage.position.x - STAGE_W/2 - half,
+              sxMax = stage.position.x + STAGE_W/2 + half,
+              szMin = stage.position.z - STAGE_D/2 - half,
+              szMax = stage.position.z + STAGE_D/2 + half;
+        return x>=sxMin && x<=sxMax && z>=szMin && z<=szMax;
+      }
+
+      // Eliptik/dairesel zemin fonksiyonu
+      const a = groundR, b = groundR;
+      function insideEllipse(x, z){ return (x*x)/(a*a) + (z*z)/(b*b) <= 1.0; }
+
+      const groundYAt = (x,z,half=1)=> { if (insideStageXZ(x,z,half)) return 9999; return insideEllipse(x,z) ? 0 : 9999; };
+
+      return { ground: circle, planeSize, groundR, stage, STAGE_W, STAGE_D, STAGE_H, insideStageXZ, groundYAt, boardBlock };
+    }
+  </script>
+
+  <!-- Glass Room (camlı oda) – Kapı BATI -->
+  <script type="module" id="mod-glassroom">
+    export function createGlassRoom(THREE, scene, { w, d, position, doorRatio = 0.35 }){
+      const baseH  = 2.6, upperH = 15.0; const h = baseH + upperH; const t = 0.25;
+      const group = new THREE.Group();
+      const matPillar = new THREE.MeshStandardMaterial({ color: 0x111111, metalness: 0.6, roughness: 0.5 });
+      const matGlass  = new THREE.MeshStandardMaterial({ color: 0xffffff, transparent: true, opacity: 0.22, metalness: 0.0, roughness: 0.15 });
+      const matFloor  = new THREE.MeshStandardMaterial({ color: 0x303030 });
+
+      const floor = new THREE.Mesh(new THREE.BoxGeometry(w, t, d), matFloor); floor.position.y = 0; floor.receiveShadow = true; group.add(floor);
+
+      const doorW = Math.max(1.2, d * doorRatio); const segZ = Math.max(0, (d - doorW) / 2);
+      const northBase = new THREE.Mesh(new THREE.BoxGeometry(w, baseH, t), matPillar); northBase.position.set(0, baseH/2, -d/2); group.add(northBase);
+      const southBase = new THREE.Mesh(new THREE.BoxGeometry(w, baseH, t), matPillar); southBase.position.set(0, baseH/2,  d/2); group.add(southBase);
+      const eastBase  = new THREE.Mesh(new THREE.BoxGeometry(d, baseH, t), matPillar); eastBase.rotation.y = Math.PI/2; eastBase.position.set( w/2, baseH/2, 0); group.add(eastBase);
+      if (segZ > 0) {
+        const westBaseL = new THREE.Mesh(new THREE.BoxGeometry(segZ, baseH, t), matPillar); westBaseL.rotation.y = Math.PI/2; westBaseL.position.set(-w/2, baseH/2, -(doorW/2 + segZ/2)); group.add(westBaseL);
+        const westBaseR = new THREE.Mesh(new THREE.BoxGeometry(segZ, baseH, t), matPillar); westBaseR.rotation.y = Math.PI/2; westBaseR.position.set(-w/2, baseH/2,  (doorW/2 + segZ/2)); group.add(westBaseR);
+      }
+
+      const colW=2.4, panelW=1.2, cell=colW+panelW; const yUpperMid = baseH + upperH/2;
+      function buildUpperStrip({ along, L, fixedVal, isWestDoor=false }){
+        const count = Math.ceil(L / cell);
+        for (let i=0;i<count;i++){
+          const base = -L/2 + i*cell; const colLen = Math.min(colW, L - i*cell);
+          if (colLen > 0){
+            const col = new THREE.Mesh(along==='x'? new THREE.BoxGeometry(colLen, upperH, t) : new THREE.BoxGeometry(t, upperH, colLen), matPillar);
+            if (along==='x') col.position.set(base + colLen/2, yUpperMid, fixedVal); else col.position.set(fixedVal, yUpperMid, base + colLen/2);
+            if (!(isWestDoor && Math.abs(col.position.z) <= doorW/2)) group.add(col);
+          }
+          const panLen = Math.min(panelW, L - (i*cell + colLen));
+          if (panLen > 0){
+            const pan = new THREE.Mesh(along==='x'? new THREE.BoxGeometry(panLen, upperH, t) : new THREE.BoxGeometry(t, upperH, panLen), matGlass);
+            if (along==='x') pan.position.set(base + colLen + panLen/2, yUpperMid, fixedVal); else pan.position.set(fixedVal, yUpperMid, base + colLen + panLen/2);
+            if (!(isWestDoor && Math.abs(pan.position.z) <= doorW/2)) group.add(pan);
+          }
+        }
+      }
+      buildUpperStrip({ along:'x', L:w, fixedVal:-d/2, isWestDoor:false });
+      buildUpperStrip({ along:'x', L:w, fixedVal: d/2, isWestDoor:false });
+      buildUpperStrip({ along:'z', L:d, fixedVal: w/2, isWestDoor:false });
+      buildUpperStrip({ along:'z', L:d, fixedVal:-w/2, isWestDoor:true  });
+
+      const roof = new THREE.Mesh(new THREE.BoxGeometry(w, t, d), matGlass); roof.position.set(0, h + t/2, 0); group.add(roof);
+
+      group.position.copy(position); scene.add(group);
+
+      const hx = w/2, hz = d/2; const ixMin=-hx, ixMax=hx, izMin=-hz, izMax=hz;
+      function isInsideInner(lx, lz, half){ return (lx > ixMin + half && lx < ixMax - half && lz > izMin + half && lz < izMax - half); }
+      function roomBlock(pos, prev, half = 1){
+        const lx=pos.x-position.x, lz=pos.z-position.z, lpx=prev.x-position.x, lpz=prev.z-position.z;
+        const prevInside=isInsideInner(lpx,lpz,half), nowInside=isInsideInner(lx,lz,half);
+        const doorW = Math.max(1.2, d * 0.35);
+        const inDoorZ = Math.abs(lz) <= doorW/2; const westInnerPlane = ixMin + half;
+        const crossingWestOut=(lpx>=westInnerPlane && lx<westInnerPlane), crossingWestIn=(lpx<=westInnerPlane && lx>westInnerPlane);
+        if (prevInside && !nowInside){ const throughDoor=crossingWestOut && inDoorZ; if(!throughDoor){ pos.x=prev.x; pos.z=prev.z; return; } }
+        if (!prevInside && nowInside){ const throughDoor=crossingWestIn  && inDoorZ; if(!throughDoor){ pos.x=prev.x; pos.z=prev.z; return; } }
+        if (prevInside && nowInside){
+          pos.x = Math.min(Math.max(pos.x, position.x + ixMin + half), position.x + ixMax - half);
+          pos.z = Math.min(Math.max(pos.z, position.z + izMin + half), position.z + izMax - half);
+        }
+      }
+      return { room: group, height: h, block: roomBlock };
+    }
+  </script>
+
+  <!-- NFT / Sertifika Binası (kapı KUZEY, diğer 3 duvarda 3’er çerçeve) -->
+  <script type="module" id="mod-nft-building">
+    export function createNftBuilding(THREE, scene, {
+      w = 60, d = 40, h = 22,
+      position = new THREE.Vector3(5, 0, 135),
+      doorRatio = 0.35,
+    } = {}){
+      const group = new THREE.Group();
+      const purple = new THREE.MeshStandardMaterial({ color: 0x7a3cf6, metalness: 0.35, roughness: 0.6 });
+      const black  = new THREE.MeshStandardMaterial({ color: 0x111111, metalness: 0.5, roughness: 0.4 });
+      const whiteM = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.0, roughness: 0.2, side: THREE.DoubleSide });
+      const t = 0.3;
+
+      const floor = new THREE.Mesh(new THREE.BoxGeometry(w, t, d), purple); floor.position.y = 0; floor.receiveShadow = true; group.add(floor);
+
+      const doorW = Math.max(2.0, w * doorRatio); const doorH = Math.min(3.2, h * 0.5); const hx = w/2, hz = d/2;
+      const segW = Math.max(0, (w - doorW)/2);
+      if (segW > 0){
+        const northL = new THREE.Mesh(new THREE.BoxGeometry(segW, h, t), purple); northL.position.set(-(doorW/2 + segW/2), h/2, -hz); group.add(northL);
+        const northR = new THREE.Mesh(new THREE.BoxGeometry(segW, h, t), purple); northR.position.set( (doorW/2 + segW/2), h/2, -hz); group.add(northR);
+      }
+      const south = new THREE.Mesh(new THREE.BoxGeometry(w, h, t), purple); south.position.set(0, h/2,  hz); group.add(south);
+      const west  = new THREE.Mesh(new THREE.BoxGeometry(d, h, t), purple); west.rotation.y = Math.PI/2;  west.position.set(-hx, h/2, 0); group.add(west);
+      const east  = new THREE.Mesh(new THREE.BoxGeometry(d, h, t), purple); east.rotation.y = Math.PI/2;   east.position.set( hx, h/2, 0); group.add(east);
+
+      const fw = 8, fh = 6, gap = 3, inset = t/2 + 0.02, border = 0.4, depth = 0.2;
+      function makeFrame(){
+        const panel = new THREE.Mesh(new THREE.PlaneGeometry(fw-2*border, fh-2*border), whiteM);
+        const barH  = new THREE.BoxGeometry(fw, border, depth);
+        const barV  = new THREE.BoxGeometry(border, fh, depth);
+        const top = new THREE.Mesh(barH, black), bot=new THREE.Mesh(barH, black), lef=new THREE.Mesh(barV, black), rig=new THREE.Mesh(barV, black);
+        top.position.set(0,  (fh-border)/2, 0); bot.position.set(0, -(fh-border)/2, 0);
+        lef.position.set(-(fw-border)/2, 0, 0); rig.position.set( (fw-border)/2, 0, 0);
+        const g = new THREE.Group(); g.add(panel, top, bot, lef, rig); return g;
+      }
+      function addTriple(which){
+        const totalW = 3*fw + 2*gap; const y = h*0.55;
+        for(let i=0;i<3;i++){
+          const g = makeFrame(); const lx = -totalW/2 + i*(fw+gap) + fw/2;
+          if(which==='south'){ g.rotation.y = Math.PI; g.position.set(lx, y,  hz - inset); }
+          if(which==='west') { g.rotation.y =  Math.PI/2; g.position.set(-hx + inset, y, lx); }
+          if(which==='east') { g.rotation.y = -Math.PI/2; g.position.set( hx - inset, y, lx); }
+          group.add(g);
+        }
+      }
+      addTriple('south'); addTriple('west'); addTriple('east');
+
+      group.position.copy(position); scene.add(group);
+
+      const ixMin=-hx, ixMax=hx, izMin=-hz, izMax=hz;
+      function isInside(lx,lz,half){ return (lx > ixMin + half && lx < ixMax - half && lz > izMin + half && lz < izMax - half); }
+      function buildingBlock(pos, prev, half=1){
+        const lx=pos.x-position.x, lz=pos.z-position.z, lpx=prev.x-position.x, lpz=prev.z-position.z;
+        const prevInside=isInside(lpx,lpz,half), nowInside=isInside(lx,lz,half);
+        const inDoorX = Math.abs(lx) <= doorW/2; const inDoorY = (pos.y - half) <= doorH; const northPlane = izMin + half;
+        const crossingNorthOut=(lpz >= northPlane && lz <  northPlane); const crossingNorthIn =(lpz <= northPlane && lz >  northPlane);
+        if (prevInside && !nowInside){ const through = crossingNorthOut && inDoorX && inDoorY; if(!through){ pos.x=prev.x; pos.z=prev.z; return; } }
+        if (!prevInside && nowInside){ const through = crossingNorthIn && inDoorX && inDoorY; if(!through){ pos.x=prev.x; pos.z=prev.z; return; } }
+        if (prevInside && nowInside){
+          pos.x = Math.min(Math.max(pos.x, position.x + ixMin + half), position.x + ixMax - half);
+          pos.z = Math.min(Math.max(pos.z, position.z + izMin + half), position.z + izMax - half);
+        }
+      }
+      return { building: group, block: buildingBlock, size:{w,d,h}, door:{w:doorW,h:doorH} };
+    }
+  </script>
+
+  <!-- Avatar Factory + Animator -->
+  <script type="module" id="mod-entities">
+    export function createAvatarMesh(THREE, materials){
+      const { skin, limb, black, white } = materials;
+      const gBox = (x,y,z,m)=>{ const mesh=new THREE.Mesh(new THREE.BoxGeometry(x,y,z), m); mesh.castShadow=true; return mesh; };
+      const root  = new THREE.Group();
+      const torso = gBox(1.2, 1.6, 0.6, skin); torso.position.y = 1.6; root.add(torso);
+      const head  = gBox(0.9, 0.9, 0.9, skin); head.position.y  = 2.65; root.add(head);
+      const face = new THREE.Group(); face.position.set(0, 2.65, 0.455);
+      const eyeW_L = gBox(0.22,0.18,0.02, white); eyeW_L.position.set(-0.22,0.08,0);
+      const eyeW_R = eyeW_L.clone(); eyeW_R.position.x *= -1;
+      const eye_L  = gBox(0.08,0.08,0.03, black); eye_L.position.set(-0.22,0.08,0.02);
+      const eye_R  = eye_L.clone(); eye_R.position.x *= -1;
+      const brow_L = gBox(0.28,0.05,0.03, black); brow_L.position.set(-0.22,0.2,0.01);
+      const brow_R = brow_L.clone(); brow_R.position.x *= -1;
+      face.add(eyeW_L, eyeW_R, eye_L, eye_R, brow_L, brow_R); root.add(face);
+      const arm = gBox(0.35, 1.2, 0.35, limb), leg = gBox(0.45, 1.4, 0.45, limb);
+      const aL = new THREE.Group(), aR = new THREE.Group(), lL = new THREE.Group(), lR = new THREE.Group();
+      const armL = arm.clone(), armR = arm.clone(), legL = leg.clone(), legR = leg.clone();
+      armL.position.set(0,-0.6,0); armR.position.copy(armL.position);
+      legL.position.set(0,-0.7,0); legR.position.copy(legL.position);
+      aL.position.set(-0.9, 2.2, 0); aR.position.set( 0.9, 2.2, 0);
+      lL.position.set(-0.3, 1.4, 0); lR.position.set( 0.3, 1.4, 0);
+      aL.add(armL); aR.add(armR); lL.add(legL); lR.add(legR);
+      root.add(aL,aR,lL,lR);
+      root.userData.limbs = { aL, aR, lL, lR };
+      return root;
+    }
+
+    export function AvatarFactory(THREE){
+      const materials = {
+        skin:  new THREE.MeshStandardMaterial({ color: 0xffe0bd }),
+        limb:  new THREE.MeshStandardMaterial({ color: 0x888888 }),
+        black: new THREE.MeshStandardMaterial({ color: 0x111111 }),
+        white: new THREE.MeshStandardMaterial({ color: 0xffffff }),
+      };
+      return { create(){ return createAvatarMesh(THREE, materials); } };
+    }
+
+    export function updateAvatar(THREE, dt, avatar, keys, camera, controls, helpers){
+      if(!avatar) return;
+      const { insideStageXZ, groundYAt, planeSize, stageTopY, roomBlock, buildingBlock, boardBlock } = helpers;
+      const AVATAR_SIZE = 2;
+
+      const forward = new THREE.Vector3(); camera.getWorldDirection(forward); forward.y=0; forward.normalize();
+      const right   = new THREE.Vector3().crossVectors(forward, camera.up).normalize();
+
+      const moveX = (keys.d?1:0) + (keys.a?-1:0);
+      const moveZ = (keys.s?1:0) + (keys.w?-1:0);
+      const move = new THREE.Vector3().addScaledVector(forward, -moveZ).addScaledVector(right, moveX);
+      if (move.lengthSq()>0) move.normalize();
+
+      avatar.userData.vel ??= new THREE.Vector3(0,0,0);
+      const vel = avatar.userData.vel;
+      const speed = 18, gravity = 22, jumpSpeed = 8.5, friction = 10;
+      vel.x += (move.x*speed - vel.x)*Math.min(1, dt*8);
+      vel.z += (move.z*speed - vel.z)*Math.min(1, dt*8);
+      if (move.lengthSq()===0){ const damp=Math.max(0,1-friction*dt); vel.x*=damp; vel.z*=damp; }
+
+      const gY = groundYAt(avatar.position.x, avatar.position.z, AVATAR_SIZE/2) + AVATAR_SIZE/2;
+      const onGround = Math.abs(avatar.position.y - gY) < 0.01;
+      if (onGround && keys.space) vel.y = jumpSpeed; else if (!onGround) vel.y -= gravity*dt; else vel.y = 0;
+
+      const prev = avatar.position.clone();
+      avatar.position.x += vel.x*dt; avatar.position.y = Math.max(avatar.position.y + vel.y*dt, AVATAR_SIZE/2); avatar.position.z += vel.z*dt;
+
+      const minX = -planeSize/2 + AVATAR_SIZE/2, maxX = planeSize/2 - AVATAR_SIZE/2, minZ = -planeSize/2 + AVATAR_SIZE/2, maxZ = planeSize/2 - AVATAR_SIZE/2;
+      avatar.position.x = Math.min(Math.max(avatar.position.x, minX), maxX);
+      avatar.position.z = Math.min(Math.max(avatar.position.z, minZ), maxZ);
+
+      if (insideStageXZ(avatar.position.x, avatar.position.z) && (avatar.position.y - AVATAR_SIZE/2) < (stageTopY + 0.01)){
+        avatar.position.x = prev.x; avatar.position.z = prev.z; vel.x = 0; vel.z = 0;
+      }
+
+      if (typeof roomBlock === 'function')      roomBlock(avatar.position, prev, AVATAR_SIZE/2);
+      if (typeof buildingBlock === 'function')  buildingBlock(avatar.position, prev, AVATAR_SIZE/2);
+      if (typeof boardBlock === 'function')     boardBlock(avatar.position, prev, AVATAR_SIZE/2);
+
+      const nGY = groundYAt(avatar.position.x, avatar.position.z, AVATAR_SIZE/2) + AVATAR_SIZE/2;
+      if (avatar.position.y < nGY){ avatar.position.y = nGY; vel.y = 0; }
+
+      if (vel.lengthSq()>0.0001){ const dirY = Math.atan2(vel.x, vel.z); if(!Number.isNaN(dirY)) avatar.rotation.y = dirY; }
+
+      avatar.userData.animBlend ??= 0;            
+      avatar.userData.swingTime ??= 0;            
+      const speed2D = Math.hypot(vel.x, vel.z);
+      const targetRun = Math.min(1, speed2D / speed);
+      const blendK = 12; 
+      avatar.userData.animBlend += (targetRun - avatar.userData.animBlend) * Math.min(1, dt * blendK);
+      if (avatar.userData.animBlend < 0.05) avatar.userData.swingTime = 0; 
+      const freq = THREE.MathUtils.lerp(2.0, 6.0, avatar.userData.animBlend);
+      avatar.userData.swingTime += dt * freq;
+      const amp  = THREE.MathUtils.lerp(0.1, 0.6, avatar.userData.animBlend);
+      const s = Math.sin(avatar.userData.swingTime);
+      const { aL, aR, lL, lR } = avatar.userData.limbs;
+      aL.rotation.x =  s * amp; aR.rotation.x = -s * amp; lL.rotation.x = -s * amp; lR.rotation.x =  s * amp;
+      if(!onGround){ aL.rotation.x += 0.6; aR.rotation.x += 0.6; }
+
+      const desiredTarget = avatar.position.clone(); const deltaTarget = desiredTarget.clone().sub(controls.target); camera.position.add(deltaTarget); controls.target.copy(avatar.position);
+    }
+  </script>
+
+  <!-- WORLD FX (Phase 1: Fog + Horizon Curtain + Gradient Sky) (Phase 2: Day/Night) (Phase 3: Instanced Distant Props) -->
+  <script type="module" id="mod-worldfx">
+    import * as THREE from 'three';
+    export function createWorldFX(THREE, scene, { planeSize }, { amb, sun }){
+      const group = new THREE.Group(); scene.add(group);
+
+      // --- Phase 1: Fog + Gradient Sky ---
+      let skyTopDay = new THREE.Color(0x87b7ff);
+      let skyBotDay = new THREE.Color(0xcfe8ff);
+      let skyTopNight = new THREE.Color(0x0a0d1a);
+      let skyBotNight = new THREE.Color(0x182033);
+
+      scene.fog = new THREE.FogExp2(skyBotDay.clone(), 0.0012);
+
+      const skyGeo = new THREE.SphereGeometry(5000, 32, 16);
+      const skyMat = new THREE.ShaderMaterial({
+        side: THREE.BackSide,
+        uniforms: {
+          topColor:   { value: skyTopDay.clone() },
+          bottomColor:{ value: skyBotDay.clone() },
+          offset:     { value: 33 },
+          exponent:   { value: 0.6 }
+        },
+        vertexShader: `varying vec3 vWorldPosition; void main(){ vec4 p = modelMatrix * vec4(position,1.0); vWorldPosition = p.xyz; gl_Position = projectionMatrix * viewMatrix * p; }`,
+        fragmentShader: `uniform vec3 topColor; uniform vec3 bottomColor; uniform float offset; uniform float exponent; varying vec3 vWorldPosition; void main(){ float h = normalize(vWorldPosition + vec3(0.0, offset, 0.0)).y; float f = max(pow(max(h, 0.0), exponent), 0.0); gl_FragColor = vec4( mix(bottomColor, topColor, f), 1.0 ); }`
+      });
+      const sky = new THREE.Mesh(skyGeo, skyMat); group.add(sky);
+
+      // Horizon curtain
+      const r = planeSize*0.8;
+      const curtain = new THREE.Mesh(
+        new THREE.CylinderGeometry(r, r, 200, 48, 1, true),
+        new THREE.MeshStandardMaterial({ color: 0x7aa7ff, metalness:0.0, roughness:1.0, side: THREE.BackSide, transparent:true, opacity:0.85 })
+      );
+      curtain.position.y = 100; group.add(curtain);
+
+      // --- Phase 3: Instanced distant trees (performant) ---
+      const props = new THREE.Group(); group.add(props);
+      const ringR = planeSize*0.6 + 40; const count = 64;
+      const dummy = new THREE.Object3D();
+      // Trunks
+      const trunkGeom = new THREE.CylinderGeometry(0.4, 0.6, 4, 6);
+      const trunkMat  = new THREE.MeshStandardMaterial({ color: 0x6e4b2a, roughness:0.9 }); trunkMat.shadowSide = THREE.FrontSide;
+      const trunks = new THREE.InstancedMesh(trunkGeom, trunkMat, count); trunks.castShadow = false; trunks.receiveShadow = false; props.add(trunks);
+      // Cones
+      const coneGeom = new THREE.ConeGeometry(2.5, 6, 8);
+      const coneMat  = new THREE.MeshStandardMaterial({ color: 0x2b7a2b, roughness:0.8 });
+      const cones = new THREE.InstancedMesh(coneGeom, coneMat, count); cones.castShadow = false; cones.receiveShadow = false; props.add(cones);
+
+      for(let i=0;i<count;i++){
+        const a = i / count * Math.PI*2;
+        const px = Math.cos(a) * ringR;
+        const pz = Math.sin(a) * ringR;
+        dummy.position.set(px, 2, pz); dummy.rotation.y = a; dummy.updateMatrix(); trunks.setMatrixAt(i, dummy.matrix);
+        dummy.position.set(px, 7, pz); dummy.updateMatrix(); cones.setMatrixAt(i, dummy.matrix);
+      }
+      trunks.instanceMatrix.needsUpdate = true; cones.instanceMatrix.needsUpdate = true;
+
+      // --- Phase 2: Day/Night blending ---
+      function dayNightFactor(date){ const h = date.getHours() + date.getMinutes()/60; const t = Math.cos((h-12)/12 * Math.PI); return (t+1)/2; }
+      function updateLights(t){
+        const colTop = skyTopNight.clone().lerp(skyTopDay, t);
+        const colBot = skyBotNight.clone().lerp(skyBotDay, t);
+        sky.material.uniforms.topColor.value.copy(colTop);
+        sky.material.uniforms.bottomColor.value.copy(colBot);
+        scene.fog.color.copy(colBot.clone());
+        amb.intensity = 0.25 + 0.55*t; sun.intensity = 0.2  + 0.9*t; sun.color.copy(new THREE.Color(0xffe7b0).lerp(new THREE.Color(0xffffff), t));
+        curtain.material.color.copy(colBot.clone().lerp(colTop, 0.3));
+      }
+      updateLights(dayNightFactor(new Date()));
+
+      return { update(){ const t = dayNightFactor(new Date()); updateLights(t); } };
+    }
+  </script>
+
+  <!-- PORTAL (Faz 4: portal alanı + UI) & PRESETS (Faz 5) -->
+  <script type="module" id="mod-portal">
+    export function createPortalSystem(THREE, scene, dom){
+      // Visual portal
+      const group = new THREE.Group(); scene.add(group);
+      const radius = 10; const ringGeo = new THREE.RingGeometry(radius*0.7, radius, 64);
+      const ringMat = new THREE.MeshBasicMaterial({ color: 0x7fd1ff, transparent:true, opacity:0.6, side: THREE.DoubleSide });
+      const ring = new THREE.Mesh(ringGeo, ringMat); ring.rotation.x = -Math.PI/2; group.add(ring);
+
+      const beam = new THREE.Mesh(
+        new THREE.CylinderGeometry(radius*0.05, radius*0.3, 6, 16, 1, true),
+        new THREE.MeshBasicMaterial({ color: 0x9fd8ff, transparent:true, opacity:0.35, side: THREE.DoubleSide })
+      );
+      beam.position.y = 3; group.add(beam);
+
+      const ui = dom.portalUI, list = dom.portalList, btnCancel = dom.btnCancel, btnGo = dom.btnTeleport, hint = dom.portalHint, fade = dom.fade;
+      // 5 instance — hepsi varsayılan (aynı düzen)
+      const destinations = [
+        { id:'garden-alpha',   title:'Garden Alpha',   note:'Varsayılan düzen' },
+        { id:'garden-beta',    title:'Garden Beta',    note:'Varsayılan düzen' },
+        { id:'garden-gamma',   title:'Garden Gamma',   note:'Varsayılan düzen' },
+        { id:'garden-delta',   title:'Garden Delta',   note:'Varsayılan düzen' },
+        { id:'garden-epsilon', title:'Garden Epsilon', note:'Varsayılan düzen' },
+      ];
+      let selected = 0;
+      function renderList(){
+        list.innerHTML = '';
+        destinations.forEach((d,i)=>{
+          const el = document.createElement('div'); el.className = 'item' + (i===selected?' selected':'');
+          el.innerHTML = `<div style="width:8px; height:8px; border-radius:50%; background:#8cc2ff;"></div>
+                          <div style="flex:1">
+                            <div style="font-weight:600">${d.title}</div>
+                            <div style="opacity:.7; font-size:12px">${d.note}</div>
+                          </div>`;
+          el.addEventListener('click', ()=>{ selected=i; renderList(); });
+          list.appendChild(el);
+        });
+      }
+      renderList();
+
+      function openUI(){ ui.classList.add('visible'); hint.classList.add('visible'); }
+      function closeUI(){ ui.classList.remove('visible'); hint.classList.remove('visible'); }
+
+      btnCancel.addEventListener('click', closeUI);
+      function moveSel(d){ selected = (selected + d + destinations.length) % destinations.length; renderList(); }
+      function fadeOn(){ fade.classList.add('on'); }
+      function fadeOff(){ fade.classList.remove('on'); }
+
+      return {
+        group, radius, openUI, closeUI, moveSel,
+        getSelected: ()=> destinations[selected],
+        async teleportWith(applyPreset){
+          const dst = destinations[selected];
+          fadeOn();
+          await new Promise(r=>setTimeout(r, 420));
+          applyPreset(dst.id);
+          await new Promise(r=>setTimeout(r, 120));
+          fadeOff();
+        }
+      };
+    }
+
+    // --- Faz 5: Preset controller — TÜMÜ VARSAYILAN DÜZEN ---
+    export function createPresetController(THREE, sceneRefs){
+      const { objects, dims } = sceneRefs;
+      function applyDefault(){
+        objects.stage.position.set(-dims.planeSize/2 + dims.STAGE_W/2, dims.STAGE_H/2, 0);
+        objects.glassRoom.position.set( dims.planeSize/2 - dims.STAGE_W/2, 0, 0 );
+        objects.nftBuilding.position.set(5, 0, 135);
+      }
+      const presets = {
+        'garden-alpha': applyDefault,
+        'garden-beta': applyDefault,
+        'garden-gamma': applyDefault,
+        'garden-delta': applyDefault,
+        'garden-epsilon': applyDefault,
+      };
+      return function applyPreset(id){ (presets[id]||applyDefault)(); };
+    }
+  </script>
+
+  <!-- FAZ 7: Üst Direkler + Kayan Yazı Marquee -->
+  <script type="module" id="mod-marquee">
+    // === CONFIG (yalnızca burayı değiştir) =========================
+    const LEFT_FOOT  = { x: -113, y: 15, z: -40 };  // Sol direk ayak konumu
+    const RIGHT_FOOT = { x: -113, y: 15, z:  40 };  // Sağ direk ayak konumu
+    const FIXED_POLE_HEIGHT = 13;                   // Direk boyu (eşit), null => otomatik
+    const PANEL_DROP   = 1.0;                       // Panelin traversin altına mesafesi
+    const PANEL_MARGIN = 1.0;                       // Panel uç güvenlik payı
+    const PANEL_HEIGHT = 5.8;                       // Panel yüksekliği
+    const SCROLL_SPEED = 80;                        // px/sn — yazı akış hızı
+    const FACE_TOWARD_POSITIVE_X = true;            // true => panel +X yönüne (glassroom tarafı) baksın
+    // ===============================================================
+  
+    export function createMarquee(THREE, scene, {
+      stage,
+      dims,                 // imza korunuyor
+      stageTopY,            // auto yükseklik için (FIXED null ise)
+      boardZCenter,         // imza korunuyor
+      boardYCenter,         // auto yükseklik için (FIXED null ise)
+      text = "Marquee",
+      panelW,               // yoksayılıyor (otomatik)
+      panelH                // yoksayılıyor (PANEL_HEIGHT kullanılır)
+    }){
+      const group = new THREE.Group(); scene.add(group);
+  
+      // --- Yükseklik (eşit) ---
+      const autoPoleH = (Number.isFinite(boardYCenter) && Number.isFinite(stageTopY))
+        ? Math.max(1.2, boardYCenter - stageTopY)
+        : 8;
+      const poleH = Number.isFinite(FIXED_POLE_HEIGHT) ? FIXED_POLE_HEIGHT : autoPoleH;
+  
+      // Ayak & tepe noktaları
+      const footL = new THREE.Vector3(LEFT_FOOT.x,  LEFT_FOOT.y,  LEFT_FOOT.z);
+      const footR = new THREE.Vector3(RIGHT_FOOT.x, RIGHT_FOOT.y, RIGHT_FOOT.z);
+      const topL  = new THREE.Vector3(LEFT_FOOT.x,  LEFT_FOOT.y  + poleH, LEFT_FOOT.z);
+      const topR  = new THREE.Vector3(RIGHT_FOOT.x, RIGHT_FOOT.y + poleH, RIGHT_FOOT.z);
+      const mid   = new THREE.Vector3().addVectors(topL, topR).multiplyScalar(0.5);
+      const dir   = new THREE.Vector3().subVectors(topR, topL); // genişlik yönü
+      const span  = Math.max(0.001, dir.length());
+      const xAxis = dir.clone().normalize();
+      const yAxis = new THREE.Vector3(0,1,0);
+      const zAxis = new THREE.Vector3().crossVectors(xAxis, yAxis).normalize(); // panel normali
+      const yOrtho= new THREE.Vector3().crossVectors(zAxis, xAxis).normalize();
+      const rotM  = new THREE.Matrix4().makeBasis(xAxis, yOrtho, zAxis); // (x,y,z) -> (genişlik,yukarı,normal)
+  
+      // Malzemeler
+      const poleMat = new THREE.MeshStandardMaterial({ color: 0x333333, metalness: 0.4, roughness: 0.6 });
+  
+      // Direkler
+      const poleGeo = new THREE.CylinderGeometry(0.35, 0.45, poleH, 16);
+      const poleL = new THREE.Mesh(poleGeo, poleMat);
+      poleL.position.set(footL.x, footL.y + poleH*0.5, footL.z);
+      poleL.castShadow = true; poleL.receiveShadow = true; group.add(poleL);
+  
+      const poleR = new THREE.Mesh(poleGeo, poleMat);
+      poleR.position.set(footR.x, footR.y + poleH*0.5, footR.z);
+      poleR.castShadow = true; poleR.receiveShadow = true; group.add(poleR);
+  
+      // Üst travers (iki tepe arası)
+      const barGeo = new THREE.BoxGeometry(span, 0.2, 0.4);
+      const barMat = new THREE.MeshStandardMaterial({ color: 0x2a2a2a, metalness: 0.5, roughness: 0.5 });
+      const bar = new THREE.Mesh(barGeo, barMat);
+      bar.position.copy(mid);
+      bar.setRotationFromMatrix(rotM);
+      bar.castShadow = true; group.add(bar);
+  
+      // Panel: genişlik otomatik (span - 2*PANEL_MARGIN)
+      const autoPanelW = Math.max(2, span - 2*PANEL_MARGIN);
+      const panelGeo = new THREE.PlaneGeometry(autoPanelW, PANEL_HEIGHT);
+  
+      const canvas = document.createElement('canvas');
+      canvas.width = 1024; canvas.height = 256;
+      const ctx = canvas.getContext('2d');
+      const tex = new THREE.CanvasTexture(canvas);
+      tex.minFilter = THREE.LinearFilter; tex.magFilter = THREE.LinearFilter;
+  
+      const panelMat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, side: THREE.DoubleSide });
+      const panel = new THREE.Mesh(panelGeo, panelMat);
+      panel.position.copy(mid).add(new THREE.Vector3(0, -PANEL_DROP, 0));
+      panel.setRotationFromMatrix(rotM); // genişliği direkle hizala
+      group.add(panel);
+  
+      // === PANEL YÖNÜ: Glassroom tarafına (+X) çevir ===
+      if (FACE_TOWARD_POSITIVE_X) {
+        panel.updateMatrixWorld(true);
+        const normalW = new THREE.Vector3(0,0,1)
+          .applyMatrix4(new THREE.Matrix4().extractRotation(panel.matrixWorld)).normalize();
+        const targetDir = new THREE.Vector3(1,0,0); // +X
+        if (normalW.dot(targetDir) < 0) panel.rotateY(Math.PI); // tersse çevir
+      }
+  
+      // Kayan yazı (scroll)
+      const state = { text: String(text||''), offset: 0, needsScroll: false, speed: SCROLL_SPEED };
+      function redraw(){
+        const pad = 24;
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        ctx.fillStyle = 'rgba(8,11,18,0.95)'; ctx.fillRect(0,0,canvas.width,canvas.height);
+        ctx.strokeStyle = 'rgba(160,190,255,0.5)'; ctx.lineWidth = 4; ctx.strokeRect(2,2,canvas.width-4,canvas.height-4);
+        ctx.font = '700 64px system-ui, -apple-system, Segoe UI, Roboto, sans-serif';
+        ctx.fillStyle = '#E8F0FF';
+  
+        const m = ctx.measureText(state.text);
+        const textW = Math.ceil(m.width);
+        const viewW = canvas.width - pad*2;
+        state.needsScroll = textW > viewW;
+  
+        const y = canvas.height/2 + 24;
+        if (!state.needsScroll){
+          const x = (canvas.width - textW)/2;
+          ctx.fillText(state.text, x, y);
+        } else {
+          let x = pad - (state.offset % (textW + pad));
+          while (x < canvas.width) { ctx.fillText(state.text, x, y); x += textW + pad; }
+        }
+        tex.needsUpdate = true;
+      }
+      redraw();
+  
+      function setText(t){ state.text = String(t||''); state.offset = 0; redraw(); }
+      function update(dt){
+        if (state.needsScroll){
+          state.offset += (state.speed * (dt||0));
+          redraw();
+        }
+      }
+  
+      return { group, setText, update };
+    }
+  </script>
+
+  <!-- Main -->
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'orbit';
+
+    async function importById(id){ const el = document.getElementById(id); if(!el) throw new Error(`Modül bulunamadı: ${id}`); const code = el.textContent; const blob = new Blob([code], { type: 'text/javascript' }); const url = URL.createObjectURL(blob); try { return await import(url); } finally { URL.revokeObjectURL(url); } }
+
+    const utils                                    = await importById('mod-utils');
+    const { createSceneSetup }                     = await importById('mod-scene');
+    const { createInput }                          = await importById('mod-input');
+    const { createGarden }                         = await importById('mod-garden');
+    const { createGlassRoom }                      = await importById('mod-glassroom');
+    const { createNftBuilding }                    = await importById('mod-nft-building');
+    const { AvatarFactory, updateAvatar }          = await importById('mod-entities');
+    const { createWorldFX }                        = await importById('mod-worldfx');
+    const { createPortalSystem, createPresetController } = await importById('mod-portal');
+    const { createMarquee }                        = await importById('mod-marquee');
+
+    const hud = document.getElementById('hud');
+    const nameTag = document.getElementById('nameTag');
+    const portalUI = document.getElementById('portalUI');
+    const portalList = document.getElementById('portalList');
+    const btnCancel = document.getElementById('btnCancel');
+    const btnTeleport = document.getElementById('btnTeleport');
+    const portalHint = document.getElementById('portalHint');
+    const fade = document.getElementById('fade');
+
+    const { scene, camera, renderer, controls, amb, sun, adaptiveQuality } = createSceneSetup(THREE, OrbitControls);
+    const keys = createInput();
+
+    const { planeSize, groundR, stage, STAGE_W, STAGE_D, STAGE_H, insideStageXZ, groundYAt, boardBlock } = createGarden(THREE, scene);
+    const stageTopY = stage.position.y + STAGE_H/2;
+
+    // Camlı oda: sahne ile aynı boyut; haritanın en sağ kenarı (varsayılan)
+    const roomPos = new THREE.Vector3( planeSize/2 - STAGE_W/2, 0, 0 );
+    const { room: glassRoom, block: roomBlock } = createGlassRoom(THREE, scene, { w: STAGE_W, d: STAGE_D, position: roomPos });
+
+    // NFT Bina: garden sol-orta; merkez (5,0,135)
+    const nftPos = new THREE.Vector3(5, 0, 135);
+    const { building: nftBuilding, block: buildingBlock } = createNftBuilding(THREE, scene, { w: 60, d: 40, h: 22, position: nftPos, doorRatio: 0.35 });
+
+    // WORLD FX (Phases 1-3)
+    const worldfx = createWorldFX(THREE, scene, { planeSize }, { amb, sun });
+
+    // Avatar
+    const avatarFactory = AvatarFactory(THREE);
+    const avatar = avatarFactory.create(); scene.add(avatar);
+    avatar.position.set(roomPos.x, 1, roomPos.z); avatar.rotation.y = -Math.PI/2;
+    camera.position.set(avatar.position.x + 12, avatar.position.y + 8, avatar.position.z + 0); controls.target.copy(avatar.position);
+
+    // Portal (mor binanın karşısı)
+    const portalPos = new THREE.Vector3(-5, 0, -135);
+    const portal = createPortalSystem(THREE, scene, { portalUI, portalList, btnCancel, btnTeleport, portalHint, fade });
+    portal.group.position.copy(portalPos);
+
+    // Preset controller (5 instance, varsayılan düzen)
+    const applyPreset = createPresetController(THREE, {
+      objects: { stage, glassRoom, nftBuilding },
+      dims: { planeSize, STAGE_W, STAGE_D, STAGE_H },
+    });
+
+    // FAZ 7: Marquee kurulumu (metin örneği: tarih + instance bilgisi)
+    function currentSessionText(){
+      const now = new Date();
+      const pad = (n)=> String(n).padStart(2,'0');
+      const stamp = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+      return `Garden Live • ${stamp} • Instance: ${portal.getSelected().title} • Kullanıcı: macaris64 • W/A/S/D + SPACE`;
+    }
+    const marquee = createMarquee(THREE, scene, { stage, dims: { STAGE_W, STAGE_D }, text: currentSessionText(), panelW: 30, panelH: 3, poleH: 8 });
+
+    // UI / Teleport akışı — tüm ID’ler aynı spawn (varsayılan)
+    function spawnDefault(){
+      avatar.position.set(planeSize/2 - STAGE_W/2, 1, 0);
+      controls.target.copy(avatar.position);
+      camera.position.set(avatar.position.x + 12, avatar.position.y + 8, avatar.position.z + 0);
+    }
+    btnTeleport.addEventListener('click', ()=>{ portal.closeUI(); portal.teleportWith((id)=>{ applyPreset(id); spawnDefault(); marquee.setText(currentSessionText()); }); });
+
+    // Yakınlık tespiti (otomatik aç/kapat)
+    let uiOpen = false;
+    function updatePortalProximity(){
+      const dx = avatar.position.x - portal.group.position.x;
+      const dz = avatar.position.z - portal.group.position.z;
+      const dist2 = dx*dx + dz*dz; const R = portal.radius * 1.1;
+      const inside = dist2 < (R*R);
+      if (inside && !uiOpen){ portal.openUI(); uiOpen = true; }
+      else if (!inside && uiOpen){ portal.closeUI(); uiOpen = false; }
+      const t = performance.now()*0.001; portal.group.rotation.y = 0.1*Math.sin(t*1.5);
+    }
+
+    // Klavye: listede yukarı/aşağı + ESC/Enter
+    addEventListener('keydown', (e)=>{
+      if (!portalUI.classList.contains('visible')) return;
+      if (e.key==='ArrowDown'){ portal.moveSel(+1); marquee.setText(currentSessionText()); }
+      if (e.key==='ArrowUp'){ portal.moveSel(-1); marquee.setText(currentSessionText()); }
+      if (e.key==='Escape'){ portal.closeUI(); }
+      if (e.key==='Enter'){ btnTeleport.click(); }
+    });
+
+    function updateNameTag(){
+      const pos = avatar.position.clone(); pos.y += 3.2; pos.project(camera);
+      const out = (Math.abs(pos.x) > 1 || Math.abs(pos.y) > 1 || pos.z > 1);
+      if(out){ nameTag.classList.add('hidden'); return; }
+      nameTag.classList.remove('hidden');
+      const x = (pos.x * 0.5 + 0.5) * innerWidth; const y = (-pos.y * 0.5 + 0.5) * innerHeight;
+      nameTag.style.transform = `translate(-50%, -100%) translate(${x}px, ${y}px)`;
+    }
+
+    const clock = new THREE.Clock();
+    function animate(){
+      requestAnimationFrame(animate);
+      const dt = Math.min(0.033, clock.getDelta());
+      updateAvatar(THREE, dt, avatar, keys, camera, controls, { insideStageXZ, groundYAt, planeSize, stageTopY, roomBlock, buildingBlock, boardBlock });
+      worldfx.update(dt);
+      updatePortalProximity();
+      marquee.update(dt);
+      adaptiveQuality();
+      controls.update();
+      renderer.render(scene, camera);
+
+      const heading = ((utils.deg(avatar.rotation.y) % 360) + 360) % 360;
+      hud.textContent = `x: ${utils.fmt(avatar.position.x)}\ny: ${utils.fmt(avatar.position.y)}\nz: ${utils.fmt(avatar.position.z)}\nrotY: ${heading.toFixed(1)}°`;
+      updateNameTag();
+    }
+    animate();
+  </script>
+</body>
+</html>

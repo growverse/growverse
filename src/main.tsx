@@ -1,0 +1,198 @@
+// No React import needed for JSX in React 18+
+import { createRoot } from 'react-dom/client';
+import * as THREE from 'three';
+import { App } from '@/app/App';
+import { createSceneSetup } from '@/core/scene';
+import { createInput } from '@/core/input';
+import { createGarden } from '@/world/garden';
+import { createGlassRoom } from '@/world/glassroom';
+import { createNftBuilding } from '@/world/nftBuilding';
+import { AvatarFactory, updateAvatar } from '@/world/entities';
+import { createWorldFX } from '@/world/worldfx';
+import { createPortalSystem, createPresetController } from '@/systems/portal';
+import { createMarquee } from '@/systems/marquee';
+import * as utils from '@/core/utils';
+import '@/styles/global.css';
+
+// Bootstrap React
+const appElement = document.getElementById('app');
+if (!appElement) {
+  throw new Error('App element not found');
+}
+
+const root = createRoot(appElement);
+root.render(<App />);
+
+// Initialize Three.js world after React has rendered
+setTimeout(() => {
+  initializeThreeWorld();
+}, 0);
+
+function initializeThreeWorld() {
+  // Get DOM elements that React has rendered
+  const hud = document.getElementById('hud');
+  const nameTag = document.getElementById('nameTag');
+  const portalUI = document.getElementById('portalUI');
+  const portalList = document.getElementById('portalList');
+  const btnCancel = document.getElementById('btnCancel');
+  const btnTeleport = document.getElementById('btnTeleport');
+  const portalHint = document.getElementById('portalHint');
+  const fade = document.getElementById('fade');
+
+  if (!hud || !nameTag || !portalUI || !portalList || !btnCancel || !btnTeleport || !portalHint || !fade) {
+    throw new Error('Required DOM elements not found');
+  }
+
+  const { scene, camera, renderer, controls, amb, sun, adaptiveQuality } = createSceneSetup();
+  const keys = createInput();
+
+  const { planeSize, stage, STAGE_W, STAGE_D, STAGE_H, insideStageXZ, groundYAt, boardBlock, boardZCenter, boardYCenter } = createGarden(scene);
+  const stageTopY = stage.position.y + STAGE_H / 2;
+
+  // Camlı oda: sahne ile aynı boyut; haritanın en sağ kenarı (varsayılan)
+  const roomPos = new THREE.Vector3(planeSize / 2 - STAGE_W / 2, 0, 0);
+  const { room: glassRoom, block: roomBlock } = createGlassRoom(scene, { w: STAGE_W, d: STAGE_D, position: roomPos });
+
+  // NFT Bina: garden sol-orta; merkez (5,0,135)
+  const nftPos = new THREE.Vector3(5, 0, 135);
+  const { building: nftBuilding, block: buildingBlock } = createNftBuilding(scene, { w: 60, d: 40, h: 22, position: nftPos, doorRatio: 0.35 });
+
+  // WORLD FX (Phases 1-3)
+  const worldfx = createWorldFX(scene, { planeSize }, { amb, sun });
+
+  // Avatar
+  const avatarFactory = AvatarFactory();
+  const avatar = avatarFactory.create();
+  scene.add(avatar);
+  avatar.position.set(roomPos.x, 1, roomPos.z);
+  avatar.rotation.y = -Math.PI / 2;
+  camera.position.set(avatar.position.x + 12, avatar.position.y + 8, avatar.position.z + 0);
+  controls.target.copy(avatar.position);
+
+  // Portal (mor binanın karşısı)
+  const portalPos = new THREE.Vector3(-5, 0, -135);
+  const portal = createPortalSystem(scene, { portalUI, portalList, btnCancel, btnTeleport, portalHint, fade });
+  portal.group.position.copy(portalPos);
+
+  // Preset controller (5 instance, varsayılan düzen)
+  const applyPreset = createPresetController({
+    objects: { stage, glassRoom, nftBuilding },
+    dims: { planeSize, STAGE_W, STAGE_D, STAGE_H },
+  });
+
+  // FAZ 7: Marquee kurulumu (metin örneği: tarih + instance bilgisi)
+  function currentSessionText() {
+    const now = new Date();
+    const pad = (n: number) => String(n).padStart(2, '0');
+    const stamp = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    return `Garden Live • ${stamp} • Instance: ${portal.getSelected().title} • Kullanıcı: macaris64 • W/A/S/D + SPACE`;
+  }
+  const marquee = createMarquee(scene, { 
+    stage, 
+    dims: { STAGE_W, STAGE_D }, 
+    stageTopY, 
+    boardZCenter, 
+    boardYCenter,
+    text: currentSessionText(), 
+    panelW: 30, 
+    panelH: 3 
+  });
+
+  // UI / Teleport akışı — tüm ID'ler aynı spawn (varsayılan)
+  function spawnDefault() {
+    avatar.position.set(planeSize / 2 - STAGE_W / 2, 1, 0);
+    controls.target.copy(avatar.position);
+    camera.position.set(avatar.position.x + 12, avatar.position.y + 8, avatar.position.z + 0);
+  }
+  
+  btnTeleport.addEventListener('click', () => {
+    portal.closeUI();
+    portal.teleportWith((id) => {
+      applyPreset(id);
+      spawnDefault();
+      marquee.setText(currentSessionText());
+    });
+  });
+
+  // Yakınlık tespiti (otomatik aç/kapat)
+  let uiOpen = false;
+  function updatePortalProximity() {
+    const dx = avatar.position.x - portal.group.position.x;
+    const dz = avatar.position.z - portal.group.position.z;
+    const dist2 = dx * dx + dz * dz;
+    const R = portal.radius * 1.1;
+    const inside = dist2 < (R * R);
+    if (inside && !uiOpen) {
+      portal.openUI();
+      uiOpen = true;
+    } else if (!inside && uiOpen) {
+      portal.closeUI();
+      uiOpen = false;
+    }
+    const t = performance.now() * 0.001;
+    portal.group.rotation.y = 0.1 * Math.sin(t * 1.5);
+  }
+
+  // Klavye: listede yukarı/aşağı + ESC/Enter
+  window.addEventListener('keydown', (e) => {
+    if (!portalUI.classList.contains('visible')) return;
+    if (e.key === 'ArrowDown') {
+      portal.moveSel(+1);
+      marquee.setText(currentSessionText());
+    }
+    if (e.key === 'ArrowUp') {
+      portal.moveSel(-1);
+      marquee.setText(currentSessionText());
+    }
+    if (e.key === 'Escape') {
+      portal.closeUI();
+    }
+    if (e.key === 'Enter') {
+      btnTeleport.click();
+    }
+  });
+
+  function updateNameTag() {
+    if (!nameTag) return;
+    const pos = avatar.position.clone();
+    pos.y += 3.2;
+    pos.project(camera);
+    const out = (Math.abs(pos.x) > 1 || Math.abs(pos.y) > 1 || pos.z > 1);
+    if (out) {
+      nameTag.classList.add('hidden');
+      return;
+    }
+    nameTag.classList.remove('hidden');
+    const x = (pos.x * 0.5 + 0.5) * window.innerWidth;
+    const y = (-pos.y * 0.5 + 0.5) * window.innerHeight;
+    nameTag.style.transform = `translate(-50%, -100%) translate(${x}px, ${y}px)`;
+  }
+
+  const clock = new THREE.Clock();
+  function animate() {
+    requestAnimationFrame(animate);
+    const dt = Math.min(0.033, clock.getDelta());
+    updateAvatar(dt, avatar, keys, camera, controls, { 
+      insideStageXZ, 
+      groundYAt, 
+      planeSize, 
+      stageTopY, 
+      roomBlock, 
+      buildingBlock, 
+      boardBlock 
+    });
+    worldfx.update();
+    updatePortalProximity();
+    marquee.update(dt);
+    adaptiveQuality();
+    controls.update();
+    renderer.render(scene, camera);
+
+    const heading = ((utils.deg(avatar.rotation.y) % 360) + 360) % 360;
+    if (hud) {
+      hud.textContent = `x: ${utils.fmt(avatar.position.x)}\ny: ${utils.fmt(avatar.position.y)}\nz: ${utils.fmt(avatar.position.z)}\nrotY: ${heading.toFixed(1)}°`;
+    }
+    updateNameTag();
+  }
+  animate();
+}
