@@ -11,7 +11,7 @@ import { AvatarFactory, updateAvatar } from '@/world/entities';
 import { createWorldFX } from '@/world/worldfx';
 import { createPortalSystem, createPresetController } from '@/systems/portal';
 import { createMarquee } from '@/systems/marquee';
-import * as utils from '@/core/utils';
+import { runtime } from '@/state/runtime';
 import '@/styles/global.css';
 
 // Bootstrap React
@@ -30,7 +30,6 @@ setTimeout(() => {
 
 function initializeThreeWorld() {
   // Get DOM elements that React has rendered
-  const hud = document.getElementById('hud');
   const nameTag = document.getElementById('nameTag');
   const portalUI = document.getElementById('portalUI');
   const portalList = document.getElementById('portalList');
@@ -39,7 +38,7 @@ function initializeThreeWorld() {
   const portalHint = document.getElementById('portalHint');
   const fade = document.getElementById('fade');
 
-  if (!hud || !nameTag || !portalUI || !portalList || !btnCancel || !btnTeleport || !portalHint || !fade) {
+  if (!nameTag || !portalUI || !portalList || !btnCancel || !btnTeleport || !portalHint || !fade) {
     throw new Error('Required DOM elements not found');
   }
 
@@ -172,26 +171,25 @@ function initializeThreeWorld() {
   function animate() {
     requestAnimationFrame(animate);
     const dt = Math.min(0.033, clock.getDelta());
-    updateAvatar(dt, avatar, keys, camera, controls, { 
-      insideStageXZ, 
-      groundYAt, 
-      planeSize, 
-      stageTopY, 
-      roomBlock, 
-      buildingBlock, 
-      boardBlock 
+    updateAvatar(dt, avatar, keys, camera, controls, {
+      insideStageXZ,
+      groundYAt,
+      planeSize,
+      stageTopY,
+      roomBlock,
+      buildingBlock,
+      boardBlock
     });
+    runtime.avatar.x = avatar.position.x;
+    runtime.avatar.y = avatar.position.y;
+    runtime.avatar.z = avatar.position.z;
+    runtime.avatar.rotY = avatar.rotation.y;
     worldfx.update();
     updatePortalProximity();
     marquee.update(dt);
     adaptiveQuality();
     controls.update();
     renderer.render(scene, camera);
-
-    const heading = ((utils.deg(avatar.rotation.y) % 360) + 360) % 360;
-    if (hud) {
-      hud.textContent = `x: ${utils.fmt(avatar.position.x)}\ny: ${utils.fmt(avatar.position.y)}\nz: ${utils.fmt(avatar.position.z)}\nrotY: ${heading.toFixed(1)}°`;
-    }
     updateNameTag();
   }
   animate();
