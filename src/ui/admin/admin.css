@@ -47,3 +47,9 @@
   margin: 0;
   font-size: 16px;
 }
+
+.admin-bots-panel .buttons {
+  margin-top: 8px;
+  display: flex;
+  gap: 8px;
+}
