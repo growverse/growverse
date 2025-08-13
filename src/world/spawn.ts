@@ -17,12 +17,8 @@ export function setWorldRefs(r: WorldRefs): void {
 
 export function getInstructorSpawn() {
   if (!refs) throw new Error('World refs not set');
-  const { stage, dims } = refs;
-  const position = {
-    x: stage.position.x,
-    y: stage.position.y + dims.STAGE_H / 2 + AVATAR_HALF,
-    z: stage.position.z - dims.STAGE_D / 2 + 2,
-  };
+  const { dims } = refs;
+  const position = { x: -150, y: dims.STAGE_H + AVATAR_HALF, z: 23 };
   return { position, rotationY: 0 };
 }
 
