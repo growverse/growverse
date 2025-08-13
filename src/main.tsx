@@ -11,7 +11,7 @@ import { AvatarFactory, updateAvatar } from '@/world/entities';
 import { createWorldFX } from '@/world/worldfx';
 import { createPortalSystem, createPresetController } from '@/systems/portal';
 import { createMarquee } from '@/systems/marquee';
-import { createStageRig } from '@/scene/stageRig/createStageRig';
+import { createTeleprompterRig } from '@/scene/teleprompter/createTeleprompterRig';
 import { runtime } from '@/state/runtime';
 import '@/styles/global.css';
 
@@ -98,8 +98,8 @@ function initializeThreeWorld() {
     panelH: 3
   });
 
-  // Instructor stage rig (podium, teleprompter, timer, lights)
-  const stageRig = createStageRig(THREE, scene, { stage, stageTopY });
+  // Instructor teleprompter + timer display
+  const teleprompter = createTeleprompterRig(THREE, scene, { stage, stageTopY });
 
   // UI / Teleport akışı — tüm ID'ler aynı spawn (varsayılan)
   function spawnDefault() {
@@ -191,7 +191,7 @@ function initializeThreeWorld() {
     worldfx.update();
     updatePortalProximity();
     marquee.update(dt);
-    stageRig.update(dt);
+    teleprompter.update(dt);
     adaptiveQuality();
     controls.update();
     renderer.render(scene, camera);
