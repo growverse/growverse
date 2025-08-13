@@ -32,10 +32,10 @@ export function createTeleprompterRig(
 
   // derive stage dimensions to place the monitor in front of the stage
   const stageGeom = stage.geometry as THREE.BoxGeometry;
-  const { width: stageW, height: stageH } = stageGeom.parameters;
+  const { width: stageW } = stageGeom.parameters;
   const frontX = stage.position.x + stageW / 2;
-  const groundY = stageTopY - stageH;
   const monitorX = frontX + 2; // slightly forward of stage front
+  const monitorY = stageTopY + 0.5; // sit on stage surface
 
   const anchor = new THREE.Vector3(stage.position.x, stageTopY, 0);
 
@@ -61,8 +61,8 @@ export function createTeleprompterRig(
   const screenMat = new THREE.MeshBasicMaterial({ map: screenTex });
   const screenGeom = new THREE.PlaneGeometry(1.8, 1.0);
   const screen = new THREE.Mesh(screenGeom, screenMat);
-  // place the monitor on the ground in front of the stage
-  screen.position.set(monitorX, groundY + 0.6, anchor.z);
+  // place the monitor just above the stage surface
+  screen.position.set(monitorX, monitorY, anchor.z);
   screen.rotation.y = -Math.PI / 2; // face instructor (-X)
   group.add(screen);
 
@@ -83,7 +83,7 @@ export function createTeleprompterRig(
   const timerGeom = new THREE.PlaneGeometry(0.8, 0.2);
   const timerMesh = new THREE.Mesh(timerGeom, timerMat);
   // position timer above the monitor
-  timerMesh.position.set(monitorX, groundY + 1.5, anchor.z);
+  timerMesh.position.set(monitorX, monitorY + 0.9, anchor.z);
   timerMesh.rotation.y = -Math.PI / 2;
   group.add(timerMesh);
 
