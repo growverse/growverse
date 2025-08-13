@@ -30,19 +30,26 @@ export function createTeleprompterRig(
   const group = new THREE.Group();
   scene.add(group);
 
+  // derive stage dimensions to place the monitor in front of the stage
+  const stageGeom = stage.geometry as THREE.BoxGeometry;
+  const { width: stageW, height: stageH } = stageGeom.parameters;
+  const frontX = stage.position.x + stageW / 2;
+  const groundY = stageTopY - stageH;
+  const monitorX = frontX + 2; // slightly forward of stage front
+
   const anchor = new THREE.Vector3(stage.position.x, stageTopY, 0);
 
   // --- Teleprompter screen ---
   const screenCanvas = document.createElement('canvas');
-  screenCanvas.width = 512;
-  screenCanvas.height = 256;
+  screenCanvas.width = 1024;
+  screenCanvas.height = 512;
   const screenCtx = screenCanvas.getContext('2d')!;
   function drawScreen(text: string) {
     screenCtx.fillStyle = '#ffffff';
     screenCtx.fillRect(0, 0, screenCanvas.width, screenCanvas.height);
     if (text) {
       screenCtx.fillStyle = '#000000';
-      screenCtx.font = 'bold 48px sans-serif';
+      screenCtx.font = 'bold 96px sans-serif';
       screenCtx.textAlign = 'center';
       screenCtx.textBaseline = 'middle';
       screenCtx.fillText(text, screenCanvas.width / 2, screenCanvas.height / 2);
@@ -52,9 +59,10 @@ export function createTeleprompterRig(
   const screenTex = new THREE.CanvasTexture(screenCanvas);
   drawScreen('');
   const screenMat = new THREE.MeshBasicMaterial({ map: screenTex });
-  const screenGeom = new THREE.PlaneGeometry(1.2, 0.7);
+  const screenGeom = new THREE.PlaneGeometry(1.8, 1.0);
   const screen = new THREE.Mesh(screenGeom, screenMat);
-  screen.position.set(anchor.x + 3.5, anchor.y + 0.5, anchor.z);
+  // place the monitor on the ground in front of the stage
+  screen.position.set(monitorX, groundY + 0.6, anchor.z);
   screen.rotation.y = -Math.PI / 2; // face instructor (-X)
   group.add(screen);
 
@@ -74,7 +82,8 @@ export function createTeleprompterRig(
   const timerMat = new THREE.MeshBasicMaterial({ map: timerTex });
   const timerGeom = new THREE.PlaneGeometry(0.8, 0.2);
   const timerMesh = new THREE.Mesh(timerGeom, timerMat);
-  timerMesh.position.set(anchor.x + 3.5, anchor.y + 1.1, anchor.z);
+  // position timer above the monitor
+  timerMesh.position.set(monitorX, groundY + 1.5, anchor.z);
   timerMesh.rotation.y = -Math.PI / 2;
   group.add(timerMesh);
 
