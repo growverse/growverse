@@ -11,6 +11,7 @@ import { AvatarFactory, updateAvatar } from '@/world/entities';
 import { createWorldFX } from '@/world/worldfx';
 import { createPortalSystem, createPresetController } from '@/systems/portal';
 import { createMarquee } from '@/systems/marquee';
+import { createTeleprompterRig } from '@/scene/teleprompter/createTeleprompterRig';
 import { runtime } from '@/state/runtime';
 import '@/styles/global.css';
 
@@ -86,16 +87,19 @@ function initializeThreeWorld() {
     const stamp = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
     return `Garden Live • ${stamp} • Instance: ${portal.getSelected().title} • Kullanıcı: macaris64 • W/A/S/D + SPACE`;
   }
-  const marquee = createMarquee(scene, { 
-    stage, 
-    dims: { STAGE_W, STAGE_D }, 
-    stageTopY, 
-    boardZCenter, 
+  const marquee = createMarquee(scene, {
+    stage,
+    dims: { STAGE_W, STAGE_D },
+    stageTopY,
+    boardZCenter,
     boardYCenter,
-    text: currentSessionText(), 
-    panelW: 30, 
-    panelH: 3 
+    text: currentSessionText(),
+    panelW: 30,
+    panelH: 3
   });
+
+  // Instructor teleprompter + timer display
+  const teleprompter = createTeleprompterRig(THREE, scene, { stage, stageTopY });
 
   // UI / Teleport akışı — tüm ID'ler aynı spawn (varsayılan)
   function spawnDefault() {
@@ -187,6 +191,7 @@ function initializeThreeWorld() {
     worldfx.update();
     updatePortalProximity();
     marquee.update(dt);
+    teleprompter.update(dt);
     adaptiveQuality();
     controls.update();
     renderer.render(scene, camera);
