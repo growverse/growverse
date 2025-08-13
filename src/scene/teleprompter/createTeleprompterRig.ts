@@ -28,7 +28,7 @@ export function createTeleprompterRig(
   scene: THREE.Scene,
   opts: TeleprompterRigOptions = {}
 ): TeleprompterRig {
-  const { position = { x: -120, y: 18, z: 23 }, scale = 3 } = opts;
+  const { position = { x: -120, y: 20, z: 23 }, scale = 6 } = opts;
   const group = new THREE.Group();
   group.position.set(position.x, position.y, position.z);
   group.scale.set(scale, scale, scale);
@@ -68,11 +68,11 @@ export function createTeleprompterRig(
   group.add(back);
 
   // support pole between y=16 and y=18 (world units)
-  const poleH = 2 / scale;
+  const poleH = 4 / scale;
   const poleGeom = new THREE.CylinderGeometry(0.05 / scale, 0.05 / scale, poleH);
   const poleMat = new THREE.MeshStandardMaterial({ color: 0x000000 });
   const pole = new THREE.Mesh(poleGeom, poleMat);
-  pole.position.y = -poleH / 2;
+  pole.position.y = -poleH / 0.8;
   group.add(pole);
 
   let lastText = '';
