@@ -81,7 +81,7 @@ export function createGarden(scene: THREE.Scene): GardenSetup {
   }
 
   const groundYAt = (x: number, z: number, half = 1): number => {
-    if (insideStageXZ(x, z, half)) return 9999;
+    if (insideStageXZ(x, z, half)) return stage.position.y + STAGE_H / 2;
     return insideEllipse(x, z) ? 0 : 9999;
   };
 

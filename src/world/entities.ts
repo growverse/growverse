@@ -120,7 +120,7 @@ export function updateAvatar(
 ): void {
   if (!avatar) return;
   
-  const { insideStageXZ, groundYAt, planeSize, stageTopY, roomBlock, buildingBlock, boardBlock } = helpers;
+  const { groundYAt, planeSize, roomBlock, buildingBlock, boardBlock } = helpers;
   const AVATAR_SIZE = 2;
 
   const forward = new THREE.Vector3();
@@ -168,12 +168,6 @@ export function updateAvatar(
   avatar.position.z = Math.min(Math.max(avatar.position.z, minZ), maxZ);
 
   // TODO: apply role-based stage constraints from constraints.ts
-  if (insideStageXZ(avatar.position.x, avatar.position.z) && (avatar.position.y - AVATAR_SIZE / 2) < (stageTopY + 0.01)) {
-    avatar.position.x = prev.x;
-    avatar.position.z = prev.z;
-    vel.x = 0;
-    vel.z = 0;
-  }
 
   if (typeof roomBlock === 'function') roomBlock(avatar.position, prev, AVATAR_SIZE / 2);
   if (typeof buildingBlock === 'function') buildingBlock(avatar.position, prev, AVATAR_SIZE / 2);
