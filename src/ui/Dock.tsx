@@ -2,9 +2,10 @@ import { useState, useEffect, useCallback } from 'react';
 import { InfoTab } from '@/ui/tabs/InfoTab';
 import { ChatTab } from '@/ui/tabs/ChatTab';
 import { SettingsTab } from '@/ui/tabs/SettingsTab';
+import { AdminTab } from '@/ui/tabs/AdminTab';
 import './dock.css';
 
-type Tab = 'info' | 'chat' | 'settings';
+type Tab = 'info' | 'chat' | 'settings' | 'admin';
 
 export function Dock(): JSX.Element {
   const [active, setActive] = useState<Tab>('info');
@@ -14,6 +15,7 @@ export function Dock(): JSX.Element {
     if (e.key === '1') setActive('info');
     if (e.key === '2') setActive('chat');
     if (e.key === '3') setActive('settings');
+    if (e.key === '4') setActive('admin');
   }, []);
 
   useEffect(() => {
@@ -45,11 +47,19 @@ export function Dock(): JSX.Element {
         >
           ⚙️
         </button>
+        <button
+          className={active === 'admin' ? 'tab active' : 'tab'}
+          onClick={() => setActive('admin')}
+          aria-label="Admin"
+        >
+          🛠️
+        </button>
       </div>
       <div className="content">
         {active === 'info' && <InfoTab />}
         {active === 'chat' && <ChatTab />}
         {active === 'settings' && <SettingsTab />}
+        {active === 'admin' && <AdminTab />}
       </div>
     </div>
   );
