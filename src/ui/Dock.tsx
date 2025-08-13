@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useLocalUser } from '@/state/userStore';
 import { InfoTab } from '@/ui/tabs/InfoTab';
 import { ChatTab } from '@/ui/tabs/ChatTab';
 import { SettingsTab } from '@/ui/tabs/SettingsTab';
@@ -9,19 +10,28 @@ type Tab = 'info' | 'chat' | 'settings' | 'admin';
 
 export function Dock(): JSX.Element {
   const [active, setActive] = useState<Tab>('info');
+  const local = useLocalUser();
+  const isAdmin = local?.isAdmin;
 
-  const handleKey = useCallback((e: KeyboardEvent) => {
-    if (!e.altKey) return;
-    if (e.key === '1') setActive('info');
-    if (e.key === '2') setActive('chat');
-    if (e.key === '3') setActive('settings');
-    if (e.key === '4') setActive('admin');
-  }, []);
+  const handleKey = useCallback(
+    (e: KeyboardEvent) => {
+      if (!e.altKey) return;
+      if (e.key === '1') setActive('info');
+      if (e.key === '2') setActive('chat');
+      if (e.key === '3') setActive('settings');
+      if (e.key === '4' && isAdmin) setActive('admin');
+    },
+    [isAdmin]
+  );
 
   useEffect(() => {
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
   }, [handleKey]);
+
+  useEffect(() => {
+    if (!isAdmin && active === 'admin') setActive('info');
+  }, [isAdmin, active]);
 
   return (
     <div className="dock" id="dock">
@@ -47,19 +57,21 @@ export function Dock(): JSX.Element {
         >
           ⚙️
         </button>
-        <button
-          className={active === 'admin' ? 'tab active' : 'tab'}
-          onClick={() => setActive('admin')}
-          aria-label="Admin"
-        >
-          🛠️
-        </button>
+        {isAdmin && (
+          <button
+            className={active === 'admin' ? 'tab active' : 'tab'}
+            onClick={() => setActive('admin')}
+            aria-label="Admin"
+          >
+            🛠️
+          </button>
+        )}
       </div>
       <div className="content">
         {active === 'info' && <InfoTab />}
         {active === 'chat' && <ChatTab />}
         {active === 'settings' && <SettingsTab />}
-        {active === 'admin' && <AdminTab />}
+        {isAdmin && active === 'admin' && <AdminTab />}
       </div>
     </div>
   );

@@ -9,6 +9,7 @@ export interface AvatarHelpers {
   roomBlock?: (pos: THREE.Vector3, prev: THREE.Vector3, half?: number) => void;
   buildingBlock?: (pos: THREE.Vector3, prev: THREE.Vector3, half?: number) => void;
   boardBlock?: (pos: THREE.Vector3, prev: THREE.Vector3, half?: number) => void;
+  stageBlock?: (pos: THREE.Vector3, prev: THREE.Vector3, half?: number) => void;
 }
 
 export interface AvatarMaterials {
@@ -120,7 +121,7 @@ export function updateAvatar(
 ): void {
   if (!avatar) return;
   
-  const { insideStageXZ, groundYAt, planeSize, stageTopY, roomBlock, buildingBlock, boardBlock } = helpers;
+  const { groundYAt, planeSize, roomBlock, buildingBlock, boardBlock, stageBlock } = helpers;
   const AVATAR_SIZE = 2;
 
   const forward = new THREE.Vector3();
@@ -167,13 +168,9 @@ export function updateAvatar(
   avatar.position.x = Math.min(Math.max(avatar.position.x, minX), maxX);
   avatar.position.z = Math.min(Math.max(avatar.position.z, minZ), maxZ);
 
-  if (insideStageXZ(avatar.position.x, avatar.position.z) && (avatar.position.y - AVATAR_SIZE / 2) < (stageTopY + 0.01)) {
-    avatar.position.x = prev.x;
-    avatar.position.z = prev.z;
-    vel.x = 0;
-    vel.z = 0;
-  }
+  // TODO: apply role-based stage constraints from constraints.ts
 
+  if (typeof stageBlock === 'function') stageBlock(avatar.position, prev, AVATAR_SIZE / 2);
   if (typeof roomBlock === 'function') roomBlock(avatar.position, prev, AVATAR_SIZE / 2);
   if (typeof buildingBlock === 'function') buildingBlock(avatar.position, prev, AVATAR_SIZE / 2);
   if (typeof boardBlock === 'function') boardBlock(avatar.position, prev, AVATAR_SIZE / 2);

@@ -1,36 +1,48 @@
 import { useState } from 'react';
-import { botControls } from '@/state/bots';
+import { AdminRoleSwitcher } from '@/ui/admin/AdminRoleSwitcher';
+import { AdminBotAvatars } from '@/ui/admin/AdminBotAvatars';
+
+type AdminView = 'menu' | 'roleSpawn' | 'botAvatars';
 
 export function AdminTab(): JSX.Element {
-  const [count, setCount] = useState(0);
-  const [enabled, setEnabled] = useState(false);
+  const [view, setView] = useState<AdminView>('menu');
 
-  const onCountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = Math.max(0, Math.min(50, Number(e.target.value)));
-    setCount(value);
-    if (enabled) botControls.setCount(value);
-  };
+  const showMenu = () => setView('menu');
 
-  const onEnableChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const checked = e.target.checked;
-    setEnabled(checked);
-    botControls.setEnabled(checked);
-    if (checked) botControls.setCount(count);
-  };
+  let content: JSX.Element;
+  if (view === 'roleSpawn') {
+    content = (
+      <div>
+        <button onClick={showMenu}>Back</button>
+        <h3>Role Spawn</h3>
+        <AdminRoleSwitcher />
+      </div>
+    );
+  } else if (view === 'botAvatars') {
+    content = (
+      <div>
+        <button onClick={showMenu}>Back</button>
+        <h3>Bot Avatars</h3>
+        <AdminBotAvatars />
+      </div>
+    );
+  } else {
+    content = (
+      <ul>
+        <li>
+          <button onClick={() => setView('roleSpawn')}>Role Spawn</button>
+        </li>
+        <li>
+          <button onClick={() => setView('botAvatars')}>Bot Avatars</button>
+        </li>
+      </ul>
+    );
+  }
 
   return (
     <div className="admin-tab">
       <h2>Admin</h2>
-      <div>
-        <h3>Bot Avatars</h3>
-        <label>
-          Bot count:
-          <input type="number" min={0} max={50} value={count} onChange={onCountChange} />
-        </label>
-        <label>
-          <input type="checkbox" checked={enabled} onChange={onEnableChange} /> Enable Bot Avatars
-        </label>
-      </div>
+      {content}
     </div>
   );
 }
