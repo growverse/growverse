@@ -1,7 +1,10 @@
 import * as THREE from 'three';
+import { createTreesController } from '@/engine/perf/treesController';
 
 export interface WorldFXSetup {
-  update: () => void;
+  update: (dt: number) => void;
+  setThrottleHz: (hz: number) => void;
+  trees: { setDensity: (ratio: number) => void };
 }
 
 export interface WorldFXConfig {
@@ -139,10 +142,29 @@ export function createWorldFX(scene: THREE.Scene, config: WorldFXConfig, lights:
   
   updateLights(dayNightFactor(new Date()));
 
+  const trunkCtl = createTreesController(trunks);
+  const coneCtl = createTreesController(cones);
+  const trees = {
+    setDensity(r: number) {
+      trunkCtl.setDensity(r);
+      coneCtl.setDensity(r);
+    }
+  };
+
+  let throttleHz = 0;
+  let acc = 0;
+
   return {
-    update() {
+    update(dt: number) {
+      acc += dt;
+      if (throttleHz > 0 && acc < 1 / throttleHz) return;
+      acc = 0;
       const t = dayNightFactor(new Date());
       updateLights(t);
-    }
+    },
+    setThrottleHz(hz: number) {
+      throttleHz = hz;
+    },
+    trees,
   };
 }

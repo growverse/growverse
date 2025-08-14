@@ -39,6 +39,16 @@ export default function UserPreferencesView({ onNavigate }: Props): JSX.Element 
             <span className="chevron">›</span>
           </button>
         </li>
+        <li>
+          <button className="settings-home-item" onClick={() => onNavigate(SettingsRoute.Performance)}>
+            <span className="icon">⚙️</span>
+            <div className="text">
+              <div className="title">Performance / Quality</div>
+              <div className="desc">Adjust graphics quality.</div>
+            </div>
+            <span className="chevron">›</span>
+          </button>
+        </li>
       </ul>
     </div>
   );

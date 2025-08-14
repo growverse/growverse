@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 // @ts-ignore - TypeScript has issues with this import path but it works at runtime
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { createAdaptiveQualityBridge } from '@/engine/perf/adaptiveQualityBridge';
 
 export interface SceneSetup {
   scene: THREE.Scene;
@@ -10,6 +11,7 @@ export interface SceneSetup {
   amb: THREE.AmbientLight;
   sun: THREE.DirectionalLight;
   adaptiveQuality: () => void;
+  adaptiveQualityCtrl: { setBounds: (min: number, max: number) => void };
 }
 
 export function createSceneSetup(): SceneSetup {
@@ -45,26 +47,9 @@ export function createSceneSetup(): SceneSetup {
   scene.add(sun);
 
   // Adaptive pixel ratio (Faz 6)
-  let frameCount = 0;
-  let lastTime = performance.now();
-  let targetPR = Math.min(1.5, window.devicePixelRatio || 1);
-  renderer.setPixelRatio(targetPR);
-  
-  function adaptiveQuality() {
-    frameCount++;
-    const now = performance.now();
-    if (now - lastTime > 1500) {
-      const fps = frameCount / ((now - lastTime) / 1000);
-      frameCount = 0;
-      lastTime = now;
-      if (fps < 45) targetPR = Math.max(0.75, targetPR - 0.1);
-      else if (fps > 58) targetPR = Math.min(1.75, targetPR + 0.05);
-      renderer.setPixelRatio(targetPR);
-      const m = (targetPR >= 1.2) ? 2048 : (targetPR >= 1.0 ? 1536 : 1024);
-      sun.shadow.mapSize.set(m, m);
-      sun.shadow.needsUpdate = true;
-    }
-  }
+  const aq = createAdaptiveQualityBridge(renderer, sun);
+  const adaptiveQuality = aq.loop;
+  const adaptiveQualityCtrl = { setBounds: aq.setBounds };
 
   window.addEventListener('resize', () => {
     camera.aspect = window.innerWidth / window.innerHeight;
@@ -72,5 +57,5 @@ export function createSceneSetup(): SceneSetup {
     renderer.setSize(window.innerWidth, window.innerHeight);
   });
 
-  return { scene, camera, renderer, controls, amb, sun, adaptiveQuality };
+  return { scene, camera, renderer, controls, amb, sun, adaptiveQuality, adaptiveQualityCtrl };
 }
