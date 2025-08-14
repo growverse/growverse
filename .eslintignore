@@ -4,6 +4,3 @@ build
 .vite
 coverage
 *.tsbuildinfo
-index.html
-src
-vite.config.ts
