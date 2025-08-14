@@ -1,0 +1,49 @@
+.settings-home-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.settings-home-item {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  background: none;
+  border: none;
+  color: inherit;
+  padding: 8px 4px;
+  cursor: pointer;
+  text-align: left;
+}
+.settings-home-item:hover,
+.settings-home-item:focus {
+  background: rgba(130,180,255,.18);
+}
+.settings-home-item .icon {
+  margin-right: 8px;
+  font-size: 20px;
+}
+.settings-home-item .text {
+  flex: 1;
+}
+.settings-home-item .title {
+  font-weight: 600;
+}
+.settings-home-item .desc {
+  font-size: 13px;
+  opacity: 0.8;
+}
+.settings-home-item .chevron {
+  margin-left: 8px;
+}
+.settings-detail-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.settings-detail-header .back-btn {
+  margin-right: 8px;
+}
+.settings-detail-header h3 {
+  margin: 0;
+  font-size: 16px;
+}

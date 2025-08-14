@@ -114,9 +114,33 @@ canvas {
   cursor:pointer; 
 }
 
-.btn.primary { 
-  border-color: rgba(130,180,255,.6); 
-  background: rgba(130,180,255,.18); 
+.btn.primary {
+  border-color: rgba(130,180,255,.6);
+  background: rgba(130,180,255,.18);
+}
+
+.finished-badge {
+  background: #3b82f6;
+  color: #fff;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.5; }
+  50% { opacity: 1; }
+  100% { opacity: 0.5; }
+}
+
+.pulse {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pulse {
+    animation: none;
+  }
 }
 
 .btn:active { 

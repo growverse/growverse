@@ -11,6 +11,7 @@ import { AvatarFactory, updateAvatar } from '@/world/entities';
 import { createWorldFX } from '@/world/worldfx';
 import { createPortalSystem, createPresetController } from '@/systems/portal';
 import { createMarquee } from '@/systems/marquee';
+import { sessionStore, setActiveSession } from '@/state/sessionStore';
 import { createTeleprompterRig } from '@/scene/teleprompter/createTeleprompterRig';
 import { runtime } from '@/state/runtime';
 import { BotManager } from '@/world/bots/BotManager';
@@ -116,10 +117,11 @@ async function initializeThreeWorld() {
 
   // FAZ 7: Marquee kurulumu (metin örneği: tarih + instance bilgisi)
   function currentSessionText() {
+    const session = sessionStore.getState().activeSession;
     const now = new Date();
     const pad = (n: number) => String(n).padStart(2, '0');
-    const stamp = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
-    return `Garden Live • ${stamp} • Instance: ${portal.getSelected().title} • Kullanıcı: macaris64 • W/A/S/D + SPACE`;
+    const stamp = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+    return `${session?.name ?? ''} • ${stamp} • ${session?.instanceTitle ?? ''}`;
   }
   const marquee = createMarquee(scene, {
     stage,
@@ -154,9 +156,11 @@ async function initializeThreeWorld() {
   
   btnTeleport.addEventListener('click', () => {
     portal.closeUI();
+    const dst = portal.getSelected();
     portal.teleportWith((id) => {
       applyPreset(id);
       spawnDefault();
+      setActiveSession(dst.id);
       marquee.setText(currentSessionText());
     });
   });

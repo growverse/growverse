@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { sessionStore } from '@/state/sessionStore';
 
 export interface PortalDOMElements {
   portalUI: HTMLElement;
@@ -45,14 +46,10 @@ export function createPortalSystem(scene: THREE.Scene, dom: PortalDOMElements): 
 
   const { portalUI, portalList, btnCancel, portalHint, fade } = dom;
   
-  // 5 instance — hepsi varsayılan (aynı düzen)
-  const destinations: Destination[] = [
-    { id: 'garden-alpha', title: 'Garden Alpha', note: 'Varsayılan düzen' },
-    { id: 'garden-beta', title: 'Garden Beta', note: 'Varsayılan düzen' },
-    { id: 'garden-gamma', title: 'Garden Gamma', note: 'Varsayılan düzen' },
-    { id: 'garden-delta', title: 'Garden Delta', note: 'Varsayılan düzen' },
-    { id: 'garden-epsilon', title: 'Garden Epsilon', note: 'Varsayılan düzen' },
-  ];
+  // Sessions from central store
+  const destinations: Destination[] = sessionStore
+    .getState()
+    .sessions.map((s) => ({ id: s.id, title: s.name, note: s.description || '' }));
   let selected = 0;
   
   function renderList() {
