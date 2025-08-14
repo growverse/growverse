@@ -1,10 +1,9 @@
-import { UserPreferences } from './UserPreferences';
+import SettingsPanel from '../settings/SettingsPanel';
 
 export function SettingsTab(): JSX.Element {
   return (
     <div className="settings-tab">
-      <h2>Settings</h2>
-      <UserPreferences />
+      <SettingsPanel />
     </div>
   );
 }
