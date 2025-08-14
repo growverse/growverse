@@ -4,6 +4,7 @@ import UserPreferencesView from './views/UserPreferencesView';
 import TimeFormatView from './views/TimeFormatView';
 import NotificationsView from './views/NotificationsView';
 import ThemeView from './views/ThemeView';
+import PerformanceView from './views/PerformanceView';
 import './settings.css';
 
 export default function SettingsPanel(): JSX.Element {
@@ -17,6 +18,9 @@ export default function SettingsPanel(): JSX.Element {
   }
   if (route === SettingsRoute.Theme) {
     return <ThemeView onBack={() => setRoute(SettingsRoute.UserPreferences)} />;
+  }
+  if (route === SettingsRoute.Performance) {
+    return <PerformanceView onBack={() => setRoute(SettingsRoute.UserPreferences)} />;
   }
 
   return <UserPreferencesView onNavigate={setRoute} />;

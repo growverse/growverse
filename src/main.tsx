@@ -22,6 +22,8 @@ import { onTeleportLocal } from '@/world/worldBus';
 import { createGrowverseSign } from '@/scene/signage/GrowverseSign';
 import { systemStore } from '@/state/systemStore';
 import { registerTeleport } from '@/systems/teleport';
+import { applyPerformancePreset, EngineHandles } from '@/engine/perf/applyPerformancePreset';
+import { setEngineHandles } from '@/engine/perf/presets';
 import '@/styles/global.css';
 
 // Bootstrap React
@@ -65,7 +67,7 @@ async function initializeThreeWorld() {
     throw new Error('Required DOM elements not found');
   }
 
-  const { scene, camera, renderer, controls, amb, sun, adaptiveQuality } = createSceneSetup();
+  const { scene, camera, renderer, controls, amb, sun, adaptiveQuality, adaptiveQualityCtrl } = createSceneSetup();
   const keys = createInput();
 
   const { planeSize, stage, STAGE_W, STAGE_D, STAGE_H, insideStageXZ, groundYAt, boardBlock, stageBlock, boardZCenter, boardYCenter } = createGarden(scene);
@@ -278,7 +280,7 @@ async function initializeThreeWorld() {
     runtime.avatar.y = avatar.position.y;
     runtime.avatar.z = avatar.position.z;
     runtime.avatar.rotY = avatar.rotation.y;
-      worldfx.update();
+      worldfx.update(dt);
       updatePortalProximityFn();
       marquee.update(dt);
       teleprompter.update(dt);
@@ -290,5 +292,16 @@ async function initializeThreeWorld() {
       updateNameTag();
       nameTags.update(camera);
   }
+  const handles: EngineHandles = {
+    renderer,
+    sun,
+    worldfx,
+    trees: worldfx.trees,
+    marquee,
+    adaptiveQuality: adaptiveQualityCtrl,
+  };
+  setEngineHandles(handles);
+  applyPerformancePreset('high', handles);
+
   animate();
 }
