@@ -160,3 +160,21 @@
   font-size: 12px;
   opacity: .7;
 }
+
+/* Info tab */
+.info-tab .info-section {
+  margin-bottom: 12px;
+}
+
+.info-tab .info-section h3 {
+  margin: 0 0 4px;
+  font-size: 12px;
+  text-transform: uppercase;
+  opacity: .7;
+}
+
+.info-tab .info-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}

@@ -5,6 +5,7 @@ import { useLocalUser } from '@/state/userStore';
 import { RoleLabels } from '@/domain/roles';
 import { useSessionStore } from '@/state/sessionStore';
 import { formatCountdown, clampToZero } from '@/utils/time';
+import { destroyWorld } from '@/world/lifecycle';
 
 interface AvatarState {
   x: number;
@@ -57,28 +58,51 @@ export function InfoTab(): JSX.Element {
     : 0;
   const finished = remainingMs === 0;
 
+  function handleCopyUrl() {
+    void navigator.clipboard.writeText(window.location.href);
+  }
+
+  function handleLeaveSession() {
+    const params = new URLSearchParams();
+    if (activeSession) {
+      params.set('name', activeSession.name);
+      params.set('currentLearners', String(activeSession.currentLearners));
+      params.set('maxLearners', String(activeSession.maxLearners));
+      params.set('currentTime', activeSession.currentTime);
+      params.set('currentTimezone', activeSession.currentTimezone);
+    }
+    destroyWorld();
+    const query = params.toString();
+    const url = query ? `/session/leave?${query}` : '/session/leave';
+    window.location.href = url;
+  }
+
   return (
     <div className="info-tab">
       {local && (
-        <div>
-          User: {local.name}{' '}
-          <span
-            style={{
-              background: RoleLabels[local.role].color,
-              color: '#fff',
-              padding: '2px 6px',
-              borderRadius: '4px',
-            }}
-          >
-            {RoleLabels[local.role].label}
-            {local.subRole ? ` > ${local.subRole}` : ''}
-          </span>
+        <div className="info-section">
+          <h3>User</h3>
+          <div>
+            {local.name}{' '}
+            <span
+              style={{
+                background: RoleLabels[local.role].color,
+                color: '#fff',
+                padding: '2px 6px',
+                borderRadius: '4px',
+              }}
+            >
+              {RoleLabels[local.role].label}
+              {local.subRole ? ` > ${local.subRole}` : ''}
+            </span>
+          </div>
         </div>
       )}
       {activeSession && (
-        <>
+        <div className="info-section">
+          <h3>Session</h3>
           <div>
-            Session: {activeSession.name}
+            {activeSession.name}
             {activeSession.instanceTitle ? ` – ${activeSession.instanceTitle}` : ''}
           </div>
           <div>
@@ -91,13 +115,20 @@ export function InfoTab(): JSX.Element {
             Countdown: {formatCountdown(remainingMs)}{' '}
             {finished && <span className="finished-badge pulse">Session finished</span>}
           </div>
-        </>
+        </div>
       )}
-      <div>
-        Position: {utils.fmt(avatar.x)} / {utils.fmt(avatar.y)} / {utils.fmt(avatar.z)}
+      <div className="info-section">
+        <h3>Metrics</h3>
+        <div>Position: {utils.fmt(avatar.x)} / {utils.fmt(avatar.y)} / {utils.fmt(avatar.z)}</div>
+        <div>Rot Y: {heading.toFixed(1)}</div>
+        <div>FPS: {fps.toFixed(1)}</div>
       </div>
-      <div>Rot Y: {heading.toFixed(1)}</div>
-      <div>FPS: {fps.toFixed(1)}</div>
+      {activeSession && (
+        <div className="info-actions">
+          <button className="btn" onClick={handleCopyUrl}>Copy session URL</button>
+          <button className="btn danger" onClick={handleLeaveSession}>Leave session</button>
+        </div>
+      )}
     </div>
   );
 }
