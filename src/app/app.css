@@ -9,17 +9,6 @@ body {
   overflow-x: hidden;
 }
 
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background:
-    radial-gradient(#fff 1px, transparent 1px) 0 0/40px 40px,
-    radial-gradient(#fff 1px, transparent 1px) 20px 20px/40px 40px;
-  opacity: 0.15;
-  pointer-events: none;
-}
-
 .navbar {
   display: flex;
   justify-content: space-between;
@@ -165,4 +154,38 @@ tbody tr:hover {
   display: grid;
   gap: 1rem;
   max-width: 320px;
+}
+
+.session-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.join-card {
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.session-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+}
+
+.session-card {
+  cursor: pointer;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.session-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
 }

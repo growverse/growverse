@@ -1,30 +1,30 @@
-// No React import needed for JSX in React 18+
-import { NameTag } from '@/ui/NameTag';
-import { PortalUI } from '@/ui/PortalUI';
-import { Dock } from '@/ui/Dock';
-import { DesktopGate } from '@/components/DesktopGate/DesktopGate';
-import { SessionProvider } from '@/state/sessionStore';
-import { UserProvider } from '@/state/userStore';
-import { SystemProvider, useTeleportEnabled } from '@/state/systemStore';
-
-function InnerApp(): JSX.Element {
-  const teleportEnabled = useTeleportEnabled();
-  return (
-    <UserProvider>
-      <SessionProvider>
-        <DesktopGate />
-        <NameTag name="macaris64" />
-        {teleportEnabled && <PortalUI />}
-        <Dock />
-      </SessionProvider>
-    </UserProvider>
-  );
-}
+import { Routes, Route, useLocation } from 'react-router-dom';
+import { Navbar } from '@/components/Navbar';
+import Landing from '@/pages/Landing/Landing';
+import About from '@/pages/About/About';
+import Auth from '@/pages/Auth/Auth';
+import World from '@/pages/World';
+import SessionLeave from '@/pages/Session/SessionLeave';
+import Profile from '@/pages/Profile/Profile';
+import SessionCreate from '@/pages/Session/SessionCreate';
+import SessionDetail from '@/pages/Session/SessionDetail';
 
 export function App(): JSX.Element {
+  const location = useLocation();
+  const showNav = location.pathname !== '/world';
   return (
-    <SystemProvider>
-      <InnerApp />
-    </SystemProvider>
+    <>
+      {showNav && <Navbar />}
+      <Routes>
+        <Route path="/" element={<Landing />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/auth" element={<Auth />} />
+        <Route path="/world" element={<World />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/session/create" element={<SessionCreate />} />
+        <Route path="/session/leave" element={<SessionLeave />} />
+        <Route path="/session/:sessionId" element={<SessionDetail />} />
+      </Routes>
+    </>
   );
 }
