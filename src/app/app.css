@@ -1,0 +1,24 @@
+body {
+  margin: 0;
+  font-family: sans-serif;
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  padding: 1rem;
+  border-bottom: 1px solid #ccc;
+}
+
+.navbar a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.nav-right > * {
+  margin-left: 1rem;
+}
+
+.container {
+  padding: 1rem;
+}

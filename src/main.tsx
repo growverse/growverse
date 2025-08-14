@@ -1,7 +1,7 @@
 // No React import needed for JSX in React 18+
 import { createRoot } from 'react-dom/client';
 import * as THREE from 'three';
-import { App } from '@/app/App';
+import { AppRouter } from '@/app/AppRouter';
 import { createSceneSetup } from '@/core/scene';
 import { createInput } from '@/core/input';
 import { createGarden } from '@/world/garden';
@@ -33,12 +33,14 @@ if (!appElement) {
 }
 
 const root = createRoot(appElement);
-root.render(<App />);
+root.render(<AppRouter />);
 
-// Initialize Three.js world after React has rendered
-setTimeout(() => {
-  void initializeThreeWorld();
-}, 0);
+// Initialize Three.js world only on /garden
+if (window.location.pathname === '/garden') {
+  setTimeout(() => {
+    void initializeThreeWorld();
+  }, 0);
+}
 
 async function initializeThreeWorld() {
   nameTags.mountNameTagsRoot();
