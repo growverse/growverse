@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom';
-
-const isAuthed = false;
+import { useAuth } from '@/context/auth/AuthContext';
 
 export function Navbar(): JSX.Element {
+  const { user, logout } = useAuth();
   return (
     <nav className="navbar">
       <Link to="/" className="nav-logo">
@@ -10,8 +10,8 @@ export function Navbar(): JSX.Element {
       </Link>
       <div className="nav-right">
         <Link to="/about">About</Link>
-        {isAuthed ? (
-          <button className="btn secondary" type="button">
+        {user ? (
+          <button className="btn secondary" type="button" onClick={logout}>
             Logout
           </button>
         ) : (

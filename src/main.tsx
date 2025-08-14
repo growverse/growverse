@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { App } from '@/app/App';
 import './styles/global.css';
 import './app/app.css';
+import { AuthProvider } from '@/context/auth/AuthContext';
 
 const appElement = document.getElementById('app');
 if (!appElement) {
@@ -12,7 +13,9 @@ if (!appElement) {
 
 const root = createRoot(appElement);
 root.render(
-  <BrowserRouter>
-    <App />
-  </BrowserRouter>,
+  <AuthProvider>
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
+  </AuthProvider>,
 );
