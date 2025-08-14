@@ -1,4 +1,4 @@
-import type * as THREEType from 'three';
+import * as THREE from 'three';
 // @ts-ignore - FontLoader is provided via three examples
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
 // @ts-ignore - TextGeometry is provided via three examples
@@ -6,7 +6,7 @@ import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
 
 export type GrowverseSignOptions = {
   text?: string;
-  anchor?: THREEType.Vector3;
+  anchor?: THREE.Vector3;
   size?: number;
   height?: number;
   bevelEnabled?: boolean;
@@ -14,7 +14,7 @@ export type GrowverseSignOptions = {
   bevelSize?: number;
   curveSegments?: number;
   letterSpacing?: number;
-  lookAtTarget?: THREEType.Vector3 | THREEType.Object3D;
+  lookAtTarget?: THREE.Vector3 | THREE.Object3D;
   outline?: { enabled: boolean; color?: number; opacity?: number };
   neon?: {
     enabled: boolean;
@@ -29,19 +29,24 @@ export type GrowverseSignOptions = {
 };
 
 export type GrowverseSignHandle = {
-  group: THREEType.Group;
+  group: THREE.Group;
   update: (dt: number) => void;
   dispose: () => void;
 };
 
 export async function createGrowverseSign(
-  THREE: typeof import('three'),
-  scene: THREEType.Scene,
-  options?: Partial<GrowverseSignOptions>
+  scene: THREE.Scene,
+  options?: Partial<GrowverseSignOptions>,
 ): Promise<GrowverseSignHandle> {
   const defaultAnchor = new THREE.Vector3(-106, 1, 0);
   const defaultOutline = { enabled: false, color: 0xffffff, opacity: 1 };
-  const defaultNeon = { enabled: false, baseEmissive: 0.05, nightEmissive: 0.7, color: 0x66ccff, fakeBloom: false };
+  const defaultNeon = {
+    enabled: false,
+    baseEmissive: 0.05,
+    nightEmissive: 0.7,
+    color: 0x66ccff,
+    fakeBloom: false,
+  };
   const opts: GrowverseSignOptions = {
     text: 'Growverse',
     anchor: defaultAnchor,
@@ -58,7 +63,7 @@ export async function createGrowverseSign(
     getDayNightFactor: undefined,
     castShadow: true,
     receiveShadow: false,
-    ...(options || {})
+    ...(options || {}),
   };
   opts.anchor = (options?.anchor || defaultAnchor).clone();
   opts.outline = { ...defaultOutline, ...(options?.outline || {}) };
@@ -119,7 +124,7 @@ export async function createGrowverseSign(
       metalness: 0.25,
       roughness: 0.45,
       emissive: new THREE.Color(opts.neon?.color ?? 0x66ccff),
-      emissiveIntensity: opts.neon?.enabled ? opts.neon.baseEmissive ?? 0.05 : 0
+      emissiveIntensity: opts.neon?.enabled ? (opts.neon.baseEmissive ?? 0.05) : 0,
     });
     const mesh = new THREE.Mesh(geom, mat);
     mesh.castShadow = opts.castShadow ?? true;
@@ -136,7 +141,7 @@ export async function createGrowverseSign(
         transparent: true,
         opacity: 0.25,
         blending: THREE.AdditiveBlending,
-        depthWrite: false
+        depthWrite: false,
       });
       const glowMesh = new THREE.Mesh(geom, glowMat);
       glowMesh.position.copy(mesh.position);
@@ -150,7 +155,7 @@ export async function createGrowverseSign(
       const lineMat = new THREE.LineBasicMaterial({
         color: opts.outline.color,
         transparent: true,
-        opacity: opts.outline.opacity
+        opacity: opts.outline.opacity,
       });
       const outline = new THREE.LineSegments(eGeo, lineMat);
       outline.position.copy(mesh.position);
@@ -165,9 +170,10 @@ export async function createGrowverseSign(
   group.position.copy(opts.anchor);
 
   if (opts.lookAtTarget) {
-    const targetPos = opts.lookAtTarget instanceof THREE.Object3D
-      ? opts.lookAtTarget.getWorldPosition(new THREE.Vector3())
-      : opts.lookAtTarget.clone();
+    const targetPos =
+      opts.lookAtTarget instanceof THREE.Object3D
+        ? opts.lookAtTarget.getWorldPosition(new THREE.Vector3())
+        : opts.lookAtTarget.clone();
     const pos = group.position.clone();
     const dx = targetPos.x - pos.x;
     const dz = targetPos.z - pos.z;
@@ -177,27 +183,41 @@ export async function createGrowverseSign(
   function localDayNightFactor() {
     const now = new Date();
     const h = now.getHours() + now.getMinutes() / 60;
-    return (Math.cos((h - 12) / 12 * Math.PI) + 1) / 2;
+    return (Math.cos(((h - 12) / 12) * Math.PI) + 1) / 2;
   }
 
   function update(_dt: number) {
     if (!opts.neon?.enabled) return;
-    const factor = THREE.MathUtils.clamp(opts.getDayNightFactor ? opts.getDayNightFactor() : localDayNightFactor(), 0, 1);
-    const intensity = THREE.MathUtils.lerp(opts.neon.baseEmissive ?? 0, opts.neon.nightEmissive ?? 1, 1 - factor);
-    letterMaterials.forEach(m => { m.emissiveIntensity = intensity; });
+    const factor = THREE.MathUtils.clamp(
+      opts.getDayNightFactor ? opts.getDayNightFactor() : localDayNightFactor(),
+      0,
+      1,
+    );
+    const intensity = THREE.MathUtils.lerp(
+      opts.neon.baseEmissive ?? 0,
+      opts.neon.nightEmissive ?? 1,
+      1 - factor,
+    );
+    letterMaterials.forEach((m) => {
+      m.emissiveIntensity = intensity;
+    });
     if (opts.neon.fakeBloom) {
-      const glowFactor = (opts.neon.nightEmissive ? intensity / (opts.neon.nightEmissive || 1) : intensity);
-      glowMaterials.forEach(m => { m.opacity = 0.25 * glowFactor; });
+      const glowFactor = opts.neon.nightEmissive
+        ? intensity / (opts.neon.nightEmissive || 1)
+        : intensity;
+      glowMaterials.forEach((m) => {
+        m.opacity = 0.25 * glowFactor;
+      });
     }
   }
 
   function dispose() {
     scene.remove(group);
-    geometries.forEach(g => g.dispose());
-    letterMaterials.forEach(m => m.dispose());
-    glowMaterials.forEach(m => m.dispose());
-    edgeGeometries.forEach(g => g.dispose());
-    edgeMaterials.forEach(m => m.dispose());
+    geometries.forEach((g) => g.dispose());
+    letterMaterials.forEach((m) => m.dispose());
+    glowMaterials.forEach((m) => m.dispose());
+    edgeGeometries.forEach((g) => g.dispose());
+    edgeMaterials.forEach((m) => m.dispose());
   }
 
   return { group, update, dispose };

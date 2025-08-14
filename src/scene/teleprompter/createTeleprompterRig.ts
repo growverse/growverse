@@ -1,4 +1,4 @@
-import type * as THREE from 'three';
+import * as THREE from 'three';
 
 export type TeleprompterRigOptions = {
   /** World position of the teleprompter screen's center. */
@@ -24,9 +24,8 @@ export type TeleprompterRig = {
 
 /** Create a small monitor (teleprompter) with a countdown timer above it. */
 export function createTeleprompterRig(
-  THREE: typeof import('three'),
   scene: THREE.Scene,
-  opts: TeleprompterRigOptions = {}
+  opts: TeleprompterRigOptions = {},
 ): TeleprompterRig {
   const { position = { x: -120, y: 20, z: 23 }, scale = 6 } = opts;
   const group = new THREE.Group();

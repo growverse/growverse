@@ -8,8 +8,12 @@ export default function Landing(): JSX.Element {
       <h1>Growverse</h1>
       {user && (
         <div className="cta">
-          <Link className="btn" to="/profile">Profile</Link>
-          <Link className="btn" to="/session">Create / Join Session</Link>
+          <Link className="btn" to="/profile">
+            Profile
+          </Link>
+          <Link className="btn" to="/session">
+            Create / Join Session
+          </Link>
         </div>
       )}
       <div className="card" style={{ marginTop: '3rem' }}>

@@ -1,7 +1,21 @@
-import { createContext, useContext, useEffect, useReducer, useRef } from 'react';
-import { Role, InstructorSubRole, LearnerSubRole, AvatarUser as BasicUser } from '@/domain/roles';
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useReducer,
+  useRef,
+  useMemo,
+  type Dispatch,
+  type ReactNode,
+} from 'react';
+import type {
+  Role,
+  InstructorSubRole,
+  LearnerSubRole,
+  AvatarUser as BasicUser,
+} from '@/domain/roles';
 import { useBots, botControls } from '@/state/bots';
-import { AvatarUserPreferences, PerformancePreset } from '@/types/preferences';
+import type { AvatarUserPreferences, PerformancePreset } from '@/types/preferences';
 
 export interface AvatarUser {
   id: string;
@@ -58,9 +72,11 @@ const initialUser: AvatarUser = {
   },
 };
 
-const UserContext = createContext<{ state: UserState; dispatch: React.Dispatch<Action> } | undefined>(undefined);
+const UserContext = createContext<{ state: UserState; dispatch: Dispatch<Action> } | undefined>(
+  undefined,
+);
 
-export function UserProvider({ children }: { children: React.ReactNode }): JSX.Element {
+export function UserProvider({ children }: { children: ReactNode }): JSX.Element {
   const [state, dispatch] = useReducer(reducer, { user: initialUser });
   const stateRef = useRef(state);
   stateRef.current = state;
@@ -75,9 +91,8 @@ export function UserProvider({ children }: { children: React.ReactNode }): JSX.E
     else document.body.classList.remove('dark');
   }, [state.user.preferences.enableDarkMode]);
 
-  return (
-    <UserContext.Provider value={{ state, dispatch }}>{children}</UserContext.Provider>
-  );
+  const value = useMemo(() => ({ state, dispatch }), [state, dispatch]);
+  return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
 }
 
 export function useUserStore() {
@@ -128,7 +143,7 @@ export function setPerformancePreset(preset: PerformancePreset): void {
 }
 
 export const userStore = {
-  _dispatch: null as React.Dispatch<Action> | null,
+  _dispatch: null as Dispatch<Action> | null,
   _getLocal: () => initialUser,
   getLocal(): AvatarUser {
     return this._getLocal();

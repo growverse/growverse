@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { AvatarUser } from '@/domain/roles';
+import type { AvatarUser } from '@/domain/roles';
 import { useOnlineUsers } from '@/state/userStore';
 import { UsersList } from './UsersList';
 import { UserDetail } from './UserDetail';

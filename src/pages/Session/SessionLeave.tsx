@@ -26,7 +26,9 @@ export default function SessionLeave(): JSX.Element {
           )}
         </div>
       )}
-      <button className="btn" onClick={() => navigate('/')}>Return to Landing</button>
+      <button className="btn" onClick={() => navigate('/')}>
+        Return to Landing
+      </button>
     </div>
   );
 }

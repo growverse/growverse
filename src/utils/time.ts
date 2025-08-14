@@ -19,7 +19,7 @@ export function formatCountdown(ms: number): string {
 
 export function tzAbbrev(tz: string, date = new Date()): string {
   const fmt = new Intl.DateTimeFormat('en-US', { timeZone: tz, timeZoneName: 'short' });
-  const parts = fmt.formatToParts(date).find(p => p.type === 'timeZoneName');
+  const parts = fmt.formatToParts(date).find((p) => p.type === 'timeZoneName');
   return parts ? parts.value : tz;
 }
 

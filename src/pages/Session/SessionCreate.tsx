@@ -1,4 +1,5 @@
-import { FormEvent, useState } from 'react';
+import type { FormEvent } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 export default function SessionCreate(): JSX.Element {
@@ -29,7 +30,9 @@ export default function SessionCreate(): JSX.Element {
             <option value="instructor">Instructor</option>
           </select>
         </label>
-        <button className="btn" type="submit" disabled={disabled}>Create</button>
+        <button className="btn" type="submit" disabled={disabled}>
+          Create
+        </button>
       </div>
     </form>
   );

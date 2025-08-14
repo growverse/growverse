@@ -4,7 +4,7 @@ export interface NameTagProps {
   name?: string;
 }
 
-export function NameTag({ name = "macaris64" }: NameTagProps): JSX.Element {
+export function NameTag({ name = 'macaris64' }: NameTagProps): JSX.Element {
   return (
     <div className="name-tag" id="nameTag">
       {name}

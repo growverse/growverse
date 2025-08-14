@@ -1,6 +1,6 @@
 import { setPerformancePreset, useUserStore } from '@/state/userStore';
 import { applyCurrentPreset } from '@/engine/perf/presets';
-import { PerformancePreset } from '@/types/preferences';
+import type { PerformancePreset } from '@/types/preferences';
 
 interface Props {
   onBack: () => void;

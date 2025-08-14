@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import type * as THREE from 'three';
 
 export function createTreesController(instanced: THREE.InstancedMesh) {
   const max = instanced.count;
@@ -11,6 +11,6 @@ export function createTreesController(instanced: THREE.InstancedMesh) {
       instanced.count = target;
       instanced.instanceMatrix.needsUpdate = true;
       current = target;
-    }
+    },
   };
 }

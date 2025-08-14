@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import type * as THREE from 'three';
 
 export interface AdaptiveQualityBridge {
   loop: () => void;
@@ -7,7 +7,7 @@ export interface AdaptiveQualityBridge {
 
 export function createAdaptiveQualityBridge(
   renderer: THREE.WebGLRenderer,
-  sun: THREE.DirectionalLight
+  sun: THREE.DirectionalLight,
 ): AdaptiveQualityBridge {
   let frameCount = 0;
   let lastTime = performance.now();

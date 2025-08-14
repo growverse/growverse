@@ -1,6 +1,7 @@
-import { EngineHandles, applyPerformancePreset } from './applyPerformancePreset';
+import type { EngineHandles } from './applyPerformancePreset';
+import { applyPerformancePreset } from './applyPerformancePreset';
 import { userStore } from '@/state/userStore';
-import { PerformancePreset } from '@/types/preferences';
+import type { PerformancePreset } from '@/types/preferences';
 
 let handles: EngineHandles | null = null;
 

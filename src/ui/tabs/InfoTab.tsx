@@ -53,9 +53,7 @@ export function InfoTab(): JSX.Element {
   const timeStr = activeSession
     ? formatTimePref(activeSession.currentTime, local.preferences.timeFormat)
     : '';
-  const remainingMs = activeSession
-    ? clampToZero(activeSession.countdownEndAt - now)
-    : 0;
+  const remainingMs = activeSession ? clampToZero(activeSession.countdownEndAt - now) : 0;
   const finished = remainingMs === 0;
 
   function handleCopyUrl() {
@@ -119,14 +117,20 @@ export function InfoTab(): JSX.Element {
       )}
       <div className="info-section">
         <h3>Metrics</h3>
-        <div>Position: {utils.fmt(avatar.x)} / {utils.fmt(avatar.y)} / {utils.fmt(avatar.z)}</div>
+        <div>
+          Position: {utils.fmt(avatar.x)} / {utils.fmt(avatar.y)} / {utils.fmt(avatar.z)}
+        </div>
         <div>Rot Y: {heading.toFixed(1)}</div>
         <div>FPS: {fps.toFixed(1)}</div>
       </div>
       {activeSession && (
         <div className="info-actions">
-          <button className="btn" onClick={handleCopyUrl}>Copy session URL</button>
-          <button className="btn danger" onClick={handleLeaveSession}>Leave session</button>
+          <button className="btn" onClick={handleCopyUrl}>
+            Copy session URL
+          </button>
+          <button className="btn danger" onClick={handleLeaveSession}>
+            Leave session
+          </button>
         </div>
       )}
     </div>

@@ -1,4 +1,13 @@
-import { createContext, useContext, useEffect, useReducer, useRef } from 'react';
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useReducer,
+  useRef,
+  useMemo,
+  type Dispatch,
+  type ReactNode,
+} from 'react';
 import { tzAbbrev, formatTime } from '@/utils/time';
 import { useOnlineUsers, selectOnlineUsers } from '@/state/userStore';
 
@@ -55,9 +64,19 @@ const initialState: SessionState = {
   activeSessionId: initialSessions[0].id,
 };
 
-interface SetActiveAction { type: 'SET_ACTIVE'; id: string; }
-interface TickAction { type: 'TICK'; now: number; }
-interface SetLearnersAction { type: 'SET_LEARNERS'; id: string; count: number; }
+interface SetActiveAction {
+  type: 'SET_ACTIVE';
+  id: string;
+}
+interface TickAction {
+  type: 'TICK';
+  now: number;
+}
+interface SetLearnersAction {
+  type: 'SET_LEARNERS';
+  id: string;
+  count: number;
+}
 type Action = SetActiveAction | TickAction | SetLearnersAction;
 
 function reducer(state: SessionState, action: Action): SessionState {
@@ -65,7 +84,7 @@ function reducer(state: SessionState, action: Action): SessionState {
     case 'SET_ACTIVE':
       return { ...state, activeSessionId: action.id };
     case 'TICK': {
-      const sessions = state.sessions.map(s => {
+      const sessions = state.sessions.map((s) => {
         if (s.id !== state.activeSessionId) return s;
         const date = new Date(action.now);
         const currentTime = formatTime(date, '24h', s.timezone);
@@ -74,7 +93,9 @@ function reducer(state: SessionState, action: Action): SessionState {
       return { ...state, sessions };
     }
     case 'SET_LEARNERS': {
-      const sessions = state.sessions.map(s => (s.id === action.id ? { ...s, currentLearners: action.count } : s));
+      const sessions = state.sessions.map((s) =>
+        s.id === action.id ? { ...s, currentLearners: action.count } : s,
+      );
       return { ...state, sessions };
     }
     default:
@@ -84,12 +105,12 @@ function reducer(state: SessionState, action: Action): SessionState {
 
 interface SessionContextValue extends SessionState {
   activeSession?: Session;
-  dispatch: React.Dispatch<Action>;
+  dispatch: Dispatch<Action>;
 }
 
 const SessionContext = createContext<SessionContextValue | undefined>(undefined);
 
-export function SessionProvider({ children }: { children: React.ReactNode }): JSX.Element {
+export function SessionProvider({ children }: { children: ReactNode }): JSX.Element {
   const [state, dispatch] = useReducer(reducer, initialState);
   const stateRef = useRef(state);
   stateRef.current = state;
@@ -103,7 +124,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }): JS
     return () => clearInterval(timer);
   }, []);
 
-  const activeSession = state.sessions.find(s => s.id === state.activeSessionId);
+  const activeSession = state.sessions.find((s) => s.id === state.activeSessionId);
 
   useEffect(() => {
     sessionStore._dispatch = dispatch;
@@ -114,13 +135,12 @@ export function SessionProvider({ children }: { children: React.ReactNode }): JS
     if (!activeSession) return;
     const learners = onlineUsers.filter((u) => u.role === 'learner').length;
     dispatch({ type: 'SET_LEARNERS', id: activeSession.id, count: learners });
-  }, [onlineUsers, activeSession?.id]);
-
-  return (
-    <SessionContext.Provider value={{ ...state, activeSession, dispatch }}>
-      {children}
-    </SessionContext.Provider>
+  }, [onlineUsers, activeSession]);
+  const value = useMemo(
+    () => ({ ...state, activeSession, dispatch }),
+    [state, activeSession, dispatch],
   );
+  return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;
 }
 
 export function useSessionStore(): SessionContextValue {
@@ -131,7 +151,7 @@ export function useSessionStore(): SessionContextValue {
 
 // External helper for non-React modules
 export const sessionStore = {
-  _dispatch: null as React.Dispatch<Action> | null,
+  _dispatch: null as Dispatch<Action> | null,
   _getState: null as (() => SessionState) | null,
   setActiveSession(id: string) {
     this._dispatch?.({ type: 'SET_ACTIVE', id });

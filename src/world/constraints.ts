@@ -1,4 +1,4 @@
-import { Role } from '@/domain/roles';
+import type { Role } from '@/domain/roles';
 
 export function canEnterStage(role: Role): boolean {
   return role === 'instructor'; // future logic

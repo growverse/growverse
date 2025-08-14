@@ -6,19 +6,24 @@
   height: min(260px, 50vh);
   display: flex;
   flex-direction: column;
-  background: rgba(10,12,18,.85);
-  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(10, 12, 18, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 12px;
-  box-shadow: 0 20px 40px rgba(0,0,0,.5);
-  color: #E8F0FF;
-  font: 14px/1.45 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+  color: #e8f0ff;
+  font:
+    14px/1.45 system-ui,
+    -apple-system,
+    Segoe UI,
+    Roboto,
+    sans-serif;
   z-index: 11;
 }
 
 .dock .tabs {
   display: flex;
   height: 44px;
-  border-bottom: 1px solid rgba(255,255,255,.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .dock .tab {
@@ -31,7 +36,7 @@
 }
 
 .dock .tab.active {
-  background: rgba(130,180,255,.18);
+  background: rgba(130, 180, 255, 0.18);
 }
 
 .dock .content {
@@ -55,9 +60,9 @@
   width: 100%;
   padding: 4px 6px;
   margin-bottom: 8px;
-  border: 1px solid rgba(255,255,255,.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 4px;
-  background: rgba(0,0,0,.2);
+  background: rgba(0, 0, 0, 0.2);
   color: inherit;
 }
 
@@ -71,7 +76,7 @@
 }
 
 .users-list tr:hover {
-  background: rgba(255,255,255,.05);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .users-list tr:focus {
@@ -149,7 +154,7 @@
 }
 
 .teleport-item:hover {
-  background: rgba(255,255,255,.05);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .teleport-item:focus {
@@ -158,7 +163,7 @@
 
 .teleport-item .note {
   font-size: 12px;
-  opacity: .7;
+  opacity: 0.7;
 }
 
 /* Info tab */
@@ -170,7 +175,7 @@
   margin: 0 0 4px;
   font-size: 12px;
   text-transform: uppercase;
-  opacity: .7;
+  opacity: 0.7;
 }
 
 .info-tab .info-actions {

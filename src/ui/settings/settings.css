@@ -16,7 +16,7 @@
 }
 .settings-home-item:hover,
 .settings-home-item:focus {
-  background: rgba(130,180,255,.18);
+  background: rgba(130, 180, 255, 0.18);
 }
 .settings-home-item .icon {
   margin-right: 8px;
