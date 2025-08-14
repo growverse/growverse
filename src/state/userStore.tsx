@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useReducer, useRef } from 'react';
 import { Role, InstructorSubRole, LearnerSubRole, AvatarUser as BasicUser } from '@/domain/roles';
-import { useBots, botControls } from './bots';
+import { useBots, botControls } from '@/state/bots';
 
 export interface UserPreferences {
   timeFormat: '24h' | '12h';

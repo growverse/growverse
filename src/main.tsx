@@ -140,8 +140,17 @@ async function initializeThreeWorld() {
   // Bot avatars
   const botManager = new BotManager();
   botManager.init({ scene, glassRoomRef: { room: glassRoom, w: STAGE_W, d: STAGE_D }, avatarFactory });
-  botControls.setEnabled = (v: boolean) => botManager.setEnabled(v);
-  botControls.setCount = (n: number) => botManager.setCount(n);
+
+  const originalSetEnabled = botControls.setEnabled;
+  const originalSetCount = botControls.setCount;
+  botControls.setEnabled = (v: boolean) => {
+    originalSetEnabled(v);
+    botManager.setEnabled(v);
+  };
+  botControls.setCount = (n: number) => {
+    originalSetCount(n);
+    botManager.setCount(n);
+  };
   window.addEventListener('beforeunload', () => {
     botManager.dispose();
     sign.dispose();
