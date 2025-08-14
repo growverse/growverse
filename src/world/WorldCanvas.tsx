@@ -6,9 +6,18 @@ export function WorldCanvas(): JSX.Element {
 
   useEffect(() => {
     if (!ref.current) return;
-    const cleanup = bootstrapWorld(ref.current);
+    let cleanup: (() => void) | undefined;
+    const prevOverflow = document.body.style.overflow;
+    const prevBg = document.body.style.background;
+    document.body.style.overflow = 'hidden';
+    document.body.style.background = '#000';
+    void bootstrapWorld(ref.current).then((fn) => {
+      cleanup = fn;
+    });
     return () => {
-      cleanup();
+      cleanup?.();
+      document.body.style.overflow = prevOverflow;
+      document.body.style.background = prevBg;
     };
   }, []);
 

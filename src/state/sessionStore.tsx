@@ -134,7 +134,9 @@ export function SessionProvider({ children }: { children: ReactNode }): JSX.Elem
   useEffect(() => {
     if (!activeSession) return;
     const learners = onlineUsers.filter((u) => u.role === 'learner').length;
-    dispatch({ type: 'SET_LEARNERS', id: activeSession.id, count: learners });
+    if (learners !== activeSession.currentLearners) {
+      dispatch({ type: 'SET_LEARNERS', id: activeSession.id, count: learners });
+    }
   }, [onlineUsers, activeSession]);
   const value = useMemo(
     () => ({ ...state, activeSession, dispatch }),
