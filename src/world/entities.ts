@@ -1,5 +1,7 @@
 import * as THREE from 'three';
 import { Keys } from '@/core/input';
+import { userStore } from '@/state/userStore';
+import { canEnterStage } from '@/world/constraints';
 
 export interface AvatarHelpers {
   insideStageXZ: (x: number, z: number, half?: number) => boolean;
@@ -121,7 +123,7 @@ export function updateAvatar(
 ): void {
   if (!avatar) return;
   
-  const { groundYAt, planeSize, roomBlock, buildingBlock, boardBlock, stageBlock } = helpers;
+  const { insideStageXZ, groundYAt, planeSize, roomBlock, buildingBlock, boardBlock, stageBlock } = helpers;
   const AVATAR_SIZE = 2;
 
   const forward = new THREE.Vector3();
@@ -168,7 +170,11 @@ export function updateAvatar(
   avatar.position.x = Math.min(Math.max(avatar.position.x, minX), maxX);
   avatar.position.z = Math.min(Math.max(avatar.position.z, minZ), maxZ);
 
-  // TODO: apply role-based stage constraints from constraints.ts
+  // Prevent learners from entering the stage area
+  const role = userStore.getLocal()?.role ?? 'learner';
+  if (!canEnterStage(role) && insideStageXZ(avatar.position.x, avatar.position.z, AVATAR_SIZE / 2)) {
+    avatar.position.copy(prev);
+  }
 
   if (typeof stageBlock === 'function') stageBlock(avatar.position, prev, AVATAR_SIZE / 2);
   if (typeof roomBlock === 'function') roomBlock(avatar.position, prev, AVATAR_SIZE / 2);
