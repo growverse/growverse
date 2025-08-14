@@ -1,0 +1,9 @@
+node_modules
+dist
+build
+.vite
+coverage
+*.tsbuildinfo
+index.html
+src
+vite.config.ts
