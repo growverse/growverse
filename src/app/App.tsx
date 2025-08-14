@@ -5,16 +5,26 @@ import { Dock } from '@/ui/Dock';
 import { DesktopGate } from '@/components/DesktopGate/DesktopGate';
 import { SessionProvider } from '@/state/sessionStore';
 import { UserProvider } from '@/state/userStore';
+import { SystemProvider, useTeleportEnabled } from '@/state/systemStore';
 
-export function App(): JSX.Element {
+function InnerApp(): JSX.Element {
+  const teleportEnabled = useTeleportEnabled();
   return (
     <UserProvider>
       <SessionProvider>
         <DesktopGate />
         <NameTag name="macaris64" />
-        <PortalUI />
+        {teleportEnabled && <PortalUI />}
         <Dock />
       </SessionProvider>
     </UserProvider>
+  );
+}
+
+export function App(): JSX.Element {
+  return (
+    <SystemProvider>
+      <InnerApp />
+    </SystemProvider>
   );
 }

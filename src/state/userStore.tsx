@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useReducer, useRef } from 'react';
-import { Role, InstructorSubRole, LearnerSubRole } from '@/domain/roles';
+import { Role, InstructorSubRole, LearnerSubRole, AvatarUser as BasicUser } from '@/domain/roles';
+import { useBots, botControls } from '@/state/bots';
 
 export interface UserPreferences {
   timeFormat: '24h' | '12h';
@@ -91,6 +92,31 @@ export function useUserStore() {
 
 export function useLocalUser(): AvatarUser {
   return useUserStore().state.user;
+}
+
+export function useOnlineUsers(): BasicUser[] {
+  const bots = useBots();
+  const local = useLocalUser();
+  const localBasic: BasicUser = {
+    id: local.id,
+    name: local.name,
+    role: local.role,
+    subRole: local.subRole,
+    isAdmin: local.isAdmin,
+  };
+  return [localBasic, ...bots];
+}
+
+export function selectOnlineUsers(): BasicUser[] {
+  const local = userStore.getLocal();
+  const localBasic: BasicUser = {
+    id: local.id,
+    name: local.name,
+    role: local.role,
+    subRole: local.subRole,
+    isAdmin: local.isAdmin,
+  };
+  return [localBasic, ...botControls.getBots()];
 }
 
 export function updatePreferences(partial: Partial<UserPreferences>): void {

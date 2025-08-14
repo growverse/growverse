@@ -49,3 +49,114 @@
   display: block;
   margin-bottom: 6px;
 }
+
+/* Users tab */
+.users-tab .user-search {
+  width: 100%;
+  padding: 4px 6px;
+  margin-bottom: 8px;
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 4px;
+  background: rgba(0,0,0,.2);
+  color: inherit;
+}
+
+.users-list {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.users-list tr {
+  cursor: pointer;
+}
+
+.users-list tr:hover {
+  background: rgba(255,255,255,.05);
+}
+
+.users-list tr:focus {
+  outline: 1px solid #3b82f6;
+}
+
+.users-list td {
+  padding: 4px 6px;
+}
+
+.users-list .role {
+  width: 80px;
+}
+
+.users-list .dm-btn {
+  background: none;
+  border: none;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.users-list .dm-btn:hover {
+  color: #d0dcff;
+}
+
+.user-detail-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.user-detail-header .back-btn {
+  background: none;
+  border: none;
+  color: #d0dcff;
+  cursor: pointer;
+}
+
+.user-detail .admin-badge {
+  background: #f59e0b;
+  color: #000;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.user-detail .bot-hint {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.empty-state {
+  color: #9ca3af;
+}
+
+/* Teleport tab */
+.teleport-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.teleport-item {
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 4px 6px;
+  color: inherit;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+}
+
+.teleport-item:hover {
+  background: rgba(255,255,255,.05);
+}
+
+.teleport-item:focus {
+  outline: 1px solid #3b82f6;
+}
+
+.teleport-item .note {
+  font-size: 12px;
+  opacity: .7;
+}
