@@ -5,8 +5,6 @@ export function registerWorldCleanup(fn: () => void): void {
 }
 
 export function destroyWorld(): void {
-  if (cleanup) {
-    cleanup();
-    cleanup = null;
-  }
+  cleanup?.();
+  cleanup = null;
 }

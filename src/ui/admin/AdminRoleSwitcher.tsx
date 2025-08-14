@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import type { Role, SubRole } from '@/domain/roles';
 import { RoleSubRolesMap } from '@/domain/roles';
 import { useLocalUser, updateLocalRole } from '@/state/userStore';
-import { requestTeleportToRole } from '@/world/spawn';
 
 export function AdminRoleSwitcher(): JSX.Element {
   const local = useLocalUser();
@@ -18,7 +17,6 @@ export function AdminRoleSwitcher(): JSX.Element {
 
   const apply = () => {
     updateLocalRole(role, subRole);
-    requestTeleportToRole(role);
   };
 
   return (

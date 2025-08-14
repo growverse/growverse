@@ -1,11 +1,11 @@
 import { WorldCanvas } from '@/world/WorldCanvas';
-import { WorldApp } from '@/world/WorldApp';
+import { HUD } from '@/ui/HUD';
 
 export default function World(): JSX.Element {
   return (
     <>
-      <WorldApp />
       <WorldCanvas />
+      <HUD />
     </>
   );
 }
