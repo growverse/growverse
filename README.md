@@ -2,6 +2,15 @@
 
 A modular React + TypeScript project built with Vite, converted from a single-file Three.js application. Features a 3D garden environment with avatars, buildings, portals, and interactive systems.
 
+## Quickstart
+
+```bash
+ docker compose up -d --build
+```
+
+- API: http://localhost:8000/health
+- Web: http://localhost:8080
+
 ## Features
 
 - **3D Garden Environment**: Circular garden with stage, glass room, and NFT building
