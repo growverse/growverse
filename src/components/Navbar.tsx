@@ -10,6 +10,7 @@ export function Navbar(): JSX.Element {
       </Link>
       <div className="nav-right">
         <Link to="/about">About</Link>
+        {user && <Link to="/profile">Profile</Link>}
         {user ? (
           <button className="btn secondary" type="button" onClick={logout}>
             Logout

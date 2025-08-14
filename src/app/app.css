@@ -155,3 +155,21 @@ tbody tr:hover {
   gap: 1rem;
   max-width: 320px;
 }
+
+.session-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.session-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+}
+
+.session-card {
+  cursor: pointer;
+  text-align: left;
+}
