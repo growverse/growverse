@@ -128,3 +128,35 @@
 .empty-state {
   color: #9ca3af;
 }
+
+/* Teleport tab */
+.teleport-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.teleport-item {
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 4px 6px;
+  color: inherit;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+}
+
+.teleport-item:hover {
+  background: rgba(255,255,255,.05);
+}
+
+.teleport-item:focus {
+  outline: 1px solid #3b82f6;
+}
+
+.teleport-item .note {
+  font-size: 12px;
+  opacity: .7;
+}

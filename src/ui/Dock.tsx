@@ -4,15 +4,18 @@ import { InfoTab } from '@/ui/tabs/InfoTab';
 import { ChatTab } from '@/ui/tabs/ChatTab';
 import { SettingsTab } from '@/ui/tabs/SettingsTab';
 import { UsersTab } from '@/ui/users/UsersTab';
+import { TeleportTab } from '@/ui/teleport/TeleportTab';
 import AdminPanel from '@/ui/admin/AdminPanel';
+import { useTeleportEnabled } from '@/state/systemStore';
 import './dock.css';
 
-type Tab = 'info' | 'users' | 'chat' | 'settings' | 'admin';
+type Tab = 'info' | 'users' | 'chat' | 'teleport' | 'settings' | 'admin';
 
 export function Dock(): JSX.Element {
   const [active, setActive] = useState<Tab>('info');
   const local = useLocalUser();
   const isAdmin = local?.isAdmin;
+  const teleportEnabled = useTeleportEnabled();
 
   const handleKey = useCallback(
     (e: KeyboardEvent) => {
@@ -20,10 +23,17 @@ export function Dock(): JSX.Element {
       if (e.key === '1') setActive('info');
       if (e.key === '2') setActive('users');
       if (e.key === '3') setActive('chat');
-      if (e.key === '4') setActive('settings');
-      if (e.key === '5' && isAdmin) setActive('admin');
+      if (e.key === '4') {
+        if (teleportEnabled) setActive('teleport');
+        else setActive('settings');
+      }
+      if (e.key === '5') {
+        if (teleportEnabled) setActive('settings');
+        else if (isAdmin) setActive('admin');
+      }
+      if (e.key === '6' && teleportEnabled && isAdmin) setActive('admin');
     },
-    [isAdmin]
+    [isAdmin, teleportEnabled]
   );
 
   useEffect(() => {
@@ -33,7 +43,8 @@ export function Dock(): JSX.Element {
 
   useEffect(() => {
     if (!isAdmin && active === 'admin') setActive('info');
-  }, [isAdmin, active]);
+    if (!teleportEnabled && active === 'teleport') setActive('info');
+  }, [isAdmin, active, teleportEnabled]);
 
   return (
     <div className="dock" id="dock">
@@ -65,6 +76,17 @@ export function Dock(): JSX.Element {
         >
           💬
         </button>
+        {teleportEnabled && (
+          <button
+            className={active === 'teleport' ? 'tab active' : 'tab'}
+            onClick={() => setActive('teleport')}
+            aria-label="Teleport"
+            role="tab"
+            aria-selected={active === 'teleport'}
+          >
+            🚀
+          </button>
+        )}
         <button
           className={active === 'settings' ? 'tab active' : 'tab'}
           onClick={() => setActive('settings')}
@@ -90,6 +112,7 @@ export function Dock(): JSX.Element {
         {active === 'info' && <InfoTab />}
         {active === 'users' && <UsersTab />}
         {active === 'chat' && <ChatTab />}
+        {teleportEnabled && active === 'teleport' && <TeleportTab />}
         {active === 'settings' && <SettingsTab />}
         {isAdmin && active === 'admin' && <AdminPanel />}
       </div>

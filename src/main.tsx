@@ -20,6 +20,8 @@ import * as nameTags from '@/world/nameTags';
 import { setWorldRefs } from '@/world/spawn';
 import { onTeleportLocal } from '@/world/worldBus';
 import { createGrowverseSign } from '@/scene/signage/GrowverseSign';
+import { systemStore } from '@/state/systemStore';
+import { registerTeleport } from '@/systems/teleport';
 import '@/styles/global.css';
 
 // Bootstrap React
@@ -38,16 +40,28 @@ setTimeout(() => {
 
 async function initializeThreeWorld() {
   nameTags.mountNameTagsRoot();
+  const teleportEnabled = systemStore.getState().teleportEnabled;
   // Get DOM elements that React has rendered
   const nameTag = document.getElementById('nameTag');
-  const portalUI = document.getElementById('portalUI');
-  const portalList = document.getElementById('portalList');
-  const btnCancel = document.getElementById('btnCancel');
-  const btnTeleport = document.getElementById('btnTeleport');
-  const portalHint = document.getElementById('portalHint');
-  const fade = document.getElementById('fade');
+  let portalUI: HTMLElement | null = null;
+  let portalList: HTMLElement | null = null;
+  let btnCancel: HTMLElement | null = null;
+  let btnTeleport: HTMLElement | null = null;
+  let portalHint: HTMLElement | null = null;
+  let fade: HTMLElement | null = null;
+  if (teleportEnabled) {
+    portalUI = document.getElementById('portalUI');
+    portalList = document.getElementById('portalList');
+    btnCancel = document.getElementById('btnCancel');
+    btnTeleport = document.getElementById('btnTeleport');
+    portalHint = document.getElementById('portalHint');
+    fade = document.getElementById('fade');
+  }
 
-  if (!nameTag || !portalUI || !portalList || !btnCancel || !btnTeleport || !portalHint || !fade) {
+  if (
+    !nameTag ||
+    (teleportEnabled && (!portalUI || !portalList || !btnCancel || !btnTeleport || !portalHint || !fade))
+  ) {
     throw new Error('Required DOM elements not found');
   }
 
@@ -89,8 +103,11 @@ async function initializeThreeWorld() {
 
   // Portal (mor binanın karşısı)
   const portalPos = new THREE.Vector3(-5, 0, -135);
-  const portal = createPortalSystem(scene, { portalUI, portalList, btnCancel, btnTeleport, portalHint, fade });
-  portal.group.position.copy(portalPos);
+  let portal: ReturnType<typeof createPortalSystem> | null = null;
+  if (teleportEnabled && portalUI && portalList && btnCancel && btnTeleport && portalHint && fade) {
+    portal = createPortalSystem(scene, { portalUI, portalList, btnCancel, btnTeleport, portalHint, fade });
+    portal.group.position.copy(portalPos);
+  }
 
   const sign = await createGrowverseSign(THREE, scene, {
     text: 'Growverse',
@@ -162,55 +179,70 @@ async function initializeThreeWorld() {
     controls.target.copy(avatar.position);
     camera.position.set(avatar.position.x + 12, avatar.position.y + 8, avatar.position.z + 0);
   }
-  
-  btnTeleport.addEventListener('click', () => {
-    portal.closeUI();
-    const dst = portal.getSelected();
-    portal.teleportWith((id) => {
-      applyPreset(id);
-      spawnDefault();
-      setActiveSession(dst.id);
-      marquee.setText(currentSessionText());
+  let updatePortalProximityFn = () => {};
+  if (teleportEnabled && portal && btnTeleport) {
+    btnTeleport.addEventListener('click', () => {
+      portal!.closeUI();
+      const dst = portal!.getSelected();
+      portal!.teleportTo(dst.id, (id) => {
+        applyPreset(id);
+        spawnDefault();
+        setActiveSession(dst.id);
+        marquee.setText(currentSessionText());
+      });
     });
-  });
 
-  // Yakınlık tespiti (otomatik aç/kapat)
-  let uiOpen = false;
-  function updatePortalProximity() {
-    const dx = avatar.position.x - portal.group.position.x;
-    const dz = avatar.position.z - portal.group.position.z;
-    const dist2 = dx * dx + dz * dz;
-    const R = portal.radius * 1.1;
-    const inside = dist2 < (R * R);
-    if (inside && !uiOpen) {
-      portal.openUI();
-      uiOpen = true;
-    } else if (!inside && uiOpen) {
-      portal.closeUI();
-      uiOpen = false;
+    registerTeleport((id) => {
+      portal!.teleportTo(id, (pid) => {
+        applyPreset(pid);
+        spawnDefault();
+        setActiveSession(id);
+        marquee.setText(currentSessionText());
+      });
+    });
+
+    // Yakınlık tespiti (otomatik aç/kapat)
+    let uiOpen = false;
+    function updatePortalProximity() {
+      const dx = avatar.position.x - portal!.group.position.x;
+      const dz = avatar.position.z - portal!.group.position.z;
+      const dist2 = dx * dx + dz * dz;
+      const R = portal!.radius * 1.1;
+      const inside = dist2 < R * R;
+      if (inside && !uiOpen) {
+        portal!.openUI();
+        uiOpen = true;
+      } else if (!inside && uiOpen) {
+        portal!.closeUI();
+        uiOpen = false;
+      }
+      const t = performance.now() * 0.001;
+      portal!.group.rotation.y = 0.1 * Math.sin(t * 1.5);
     }
-    const t = performance.now() * 0.001;
-    portal.group.rotation.y = 0.1 * Math.sin(t * 1.5);
+
+    // Klavye: listede yukarı/aşağı + ESC/Enter
+    window.addEventListener('keydown', (e) => {
+      if (!portalUI!.classList.contains('visible')) return;
+      if (e.key === 'ArrowDown') {
+        portal!.moveSel(+1);
+        marquee.setText(currentSessionText());
+      }
+      if (e.key === 'ArrowUp') {
+        portal!.moveSel(-1);
+        marquee.setText(currentSessionText());
+      }
+      if (e.key === 'Escape') {
+        portal!.closeUI();
+      }
+      if (e.key === 'Enter') {
+        btnTeleport.click();
+      }
+    });
+
+    updatePortalProximityFn = updatePortalProximity;
+  } else {
+    registerTeleport(() => {});
   }
-
-  // Klavye: listede yukarı/aşağı + ESC/Enter
-  window.addEventListener('keydown', (e) => {
-    if (!portalUI.classList.contains('visible')) return;
-    if (e.key === 'ArrowDown') {
-      portal.moveSel(+1);
-      marquee.setText(currentSessionText());
-    }
-    if (e.key === 'ArrowUp') {
-      portal.moveSel(-1);
-      marquee.setText(currentSessionText());
-    }
-    if (e.key === 'Escape') {
-      portal.closeUI();
-    }
-    if (e.key === 'Enter') {
-      btnTeleport.click();
-    }
-  });
 
   function updateNameTag() {
     if (!nameTag) return;
@@ -247,7 +279,7 @@ async function initializeThreeWorld() {
     runtime.avatar.z = avatar.position.z;
     runtime.avatar.rotY = avatar.rotation.y;
       worldfx.update();
-      updatePortalProximity();
+      updatePortalProximityFn();
       marquee.update(dt);
       teleprompter.update(dt);
       sign.update(dt);
