@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { runtime } from '@/state/runtime';
 import * as utils from '@/core/utils';
-import { useLocalUser, useOnlineCount } from '@/state/userStore';
+import { useLocalUser } from '@/state/userStore';
 import { RoleLabels } from '@/domain/roles';
+import { useSessionStore } from '@/state/sessionStore';
+import { formatCountdown, clampToZero } from '@/utils/time';
 
 interface AvatarState {
   x: number;
@@ -11,28 +13,22 @@ interface AvatarState {
   rotY: number;
 }
 
-function pad(n: number): string {
-  return String(n).padStart(2, '0');
-}
-
-function fmtTime(ms: number): string {
-  const total = Math.floor(ms / 1000);
-  const h = pad(Math.floor(total / 3600));
-  const m = pad(Math.floor((total % 3600) / 60));
-  const s = pad(total % 60);
-  return `${h}:${m}:${s}`;
+function formatTimePref(str24: string, fmt: '24h' | '12h'): string {
+  if (fmt === '24h') return str24;
+  const [h, m, s] = str24.split(':').map(Number);
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  const h12 = h % 12 || 12;
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${pad(h12)}:${pad(m)}:${pad(s)} ${ampm}`;
 }
 
 export function InfoTab(): JSX.Element {
   const [avatar, setAvatar] = useState<AvatarState>({ x: 0, y: 0, z: 0, rotY: 0 });
-  const [clock, setClock] = useState(new Date());
-  const [remaining, setRemaining] = useState(20 * 60 * 1000);
-  const [finished, setFinished] = useState(false);
+  const [now, setNow] = useState(Date.now());
   const local = useLocalUser();
-  const online = useOnlineCount();
+  const { activeSession } = useSessionStore();
 
   useEffect(() => {
-    const sessionEnd = Date.now() + 20 * 60 * 1000;
     const posTimer = setInterval(() => {
       setAvatar({
         x: runtime.avatar.x,
@@ -41,21 +37,23 @@ export function InfoTab(): JSX.Element {
         rotY: runtime.avatar.rotY,
       });
     }, 100);
-    const timeTimer = setInterval(() => {
-      const now = new Date();
-      setClock(now);
-      const rem = Math.max(0, sessionEnd - now.getTime());
-      setRemaining(rem);
-      setFinished(rem === 0);
+    const clockTimer = setInterval(() => {
+      setNow(Date.now());
     }, 1000);
     return () => {
       clearInterval(posTimer);
-      clearInterval(timeTimer);
+      clearInterval(clockTimer);
     };
   }, []);
 
   const heading = ((utils.deg(avatar.rotY) % 360) + 360) % 360;
-  const clockStr = `${pad(clock.getHours())}:${pad(clock.getMinutes())}:${pad(clock.getSeconds())}`;
+  const timeStr = activeSession
+    ? formatTimePref(activeSession.currentTime, local.preferences.timeFormat)
+    : '';
+  const remainingMs = activeSession
+    ? clampToZero(activeSession.countdownEndAt - now)
+    : 0;
+  const finished = remainingMs === 0;
 
   return (
     <div className="info-tab">
@@ -75,15 +73,28 @@ export function InfoTab(): JSX.Element {
           </span>
         </div>
       )}
-      <div>Online: {online}</div>
+      {activeSession && (
+        <>
+          <div>
+            Session: {activeSession.name}
+            {activeSession.instanceTitle ? ` – ${activeSession.instanceTitle}` : ''}
+          </div>
+          <div>
+            {activeSession.currentLearners} / {activeSession.maxLearners} learners
+          </div>
+          <div>
+            Time: {timeStr} ({activeSession.currentTimezone})
+          </div>
+          <div>
+            Countdown: {formatCountdown(remainingMs)}{' '}
+            {finished && <span className="finished-badge pulse">Session finished</span>}
+          </div>
+        </>
+      )}
       <div>
         Position: {utils.fmt(avatar.x)} / {utils.fmt(avatar.y)} / {utils.fmt(avatar.z)}
       </div>
       <div>Rot Y: {heading.toFixed(1)}</div>
-      <div>System time: {clockStr}</div>
-      <div>
-        Time left: {fmtTime(remaining)}{finished ? ' • Session finished' : ''}
-      </div>
     </div>
   );
 }

@@ -2,13 +2,19 @@
 import { NameTag } from '@/ui/NameTag';
 import { PortalUI } from '@/ui/PortalUI';
 import { Dock } from '@/ui/Dock';
+import { DesktopGate } from '@/components/DesktopGate/DesktopGate';
+import { SessionProvider } from '@/state/sessionStore';
+import { UserProvider } from '@/state/userStore';
 
 export function App(): JSX.Element {
   return (
-    <>
-      <NameTag name="macaris64" />
-      <PortalUI />
-      <Dock />
-    </>
+    <UserProvider>
+      <SessionProvider>
+        <DesktopGate />
+        <NameTag name="macaris64" />
+        <PortalUI />
+        <Dock />
+      </SessionProvider>
+    </UserProvider>
   );
 }

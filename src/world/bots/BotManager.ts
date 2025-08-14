@@ -1,6 +1,5 @@
 import * as THREE from 'three';
 import { AvatarFactory } from '@/world/entities';
-import { userStore } from '@/state/userStore';
 import * as nameTags from '@/world/nameTags';
 
 export interface BotManagerInit {
@@ -79,14 +78,12 @@ export class BotManager {
       bot.position.set(x, 1, z);
       this.scene.add(bot);
       this.bots.push(bot);
-      userStore.addOrUpdate({ id, name, role: 'learner', subRole: 'basic', isBot: true });
       const tagId = nameTags.register(bot, name);
       bot.userData.tagId = tagId;
     }
     while (this.bots.length > this.count) {
       const bot = this.bots.pop();
       if (bot) {
-        if (bot.userData.userId) userStore.remove(bot.userData.userId);
         nameTags.unregisterByObject(bot);
         this.scene.remove(bot);
       }
@@ -97,7 +94,6 @@ export class BotManager {
     if (this.scene) {
       for (const bot of this.bots) {
         this.scene.remove(bot);
-        if (bot.userData.userId) userStore.remove(bot.userData.userId);
         nameTags.unregisterByObject(bot);
       }
     }
