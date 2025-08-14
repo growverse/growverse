@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useReducer, useRef } from 'react';
 import { tzAbbrev, formatTime } from '@/utils/time';
+import { useOnlineUsers, selectOnlineUsers } from '@/state/userStore';
 
 export interface Session {
   id: string;
@@ -21,19 +22,24 @@ interface SessionState {
 
 const initialCountdown = () => Date.now() + 20 * 60 * 1000;
 
+function getInitialLearnerCount(): number {
+  return selectOnlineUsers().filter((u) => u.role === 'learner').length;
+}
+
 function createDummySessions(): Session[] {
   const tz = 'Europe/Istanbul';
   const now = Date.now();
-  return [0,1,2,3,4].map(i => {
+  const learners = getInitialLearnerCount();
+  return [0, 1, 2, 3, 4].map((i) => {
     const date = new Date(now);
     const currentTime = formatTime(date, '24h', tz);
     return {
-      id: `session-${i+1}`,
-      name: `Garden ${i+1}`,
+      id: `session-${i + 1}`,
+      name: `Garden ${i + 1}`,
       description: 'Default session',
-      instanceTitle: `Instance ${i+1}`,
+      instanceTitle: `Instance ${i + 1}`,
       maxLearners: 40,
-      currentLearners: 5 + i,
+      currentLearners: learners,
       timezone: tz,
       currentTime,
       currentTimezone: tzAbbrev(tz, date),
@@ -88,6 +94,8 @@ export function SessionProvider({ children }: { children: React.ReactNode }): JS
   const stateRef = useRef(state);
   stateRef.current = state;
 
+  const onlineUsers = useOnlineUsers();
+
   useEffect(() => {
     const timer = setInterval(() => {
       dispatch({ type: 'TICK', now: Date.now() });
@@ -101,6 +109,12 @@ export function SessionProvider({ children }: { children: React.ReactNode }): JS
     sessionStore._dispatch = dispatch;
     sessionStore._getState = () => stateRef.current;
   }, [dispatch]);
+
+  useEffect(() => {
+    if (!activeSession) return;
+    const learners = onlineUsers.filter((u) => u.role === 'learner').length;
+    dispatch({ type: 'SET_LEARNERS', id: activeSession.id, count: learners });
+  }, [onlineUsers, activeSession?.id]);
 
   return (
     <SessionContext.Provider value={{ ...state, activeSession, dispatch }}>
