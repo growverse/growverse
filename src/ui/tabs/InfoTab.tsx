@@ -63,8 +63,18 @@ export function InfoTab(): JSX.Element {
   }
 
   function handleLeaveSession() {
+    const params = new URLSearchParams();
+    if (activeSession) {
+      params.set('name', activeSession.name);
+      params.set('currentLearners', String(activeSession.currentLearners));
+      params.set('maxLearners', String(activeSession.maxLearners));
+      params.set('currentTime', activeSession.currentTime);
+      params.set('currentTimezone', activeSession.currentTimezone);
+    }
     destroyWorld();
-    window.location.href = '/session/leave';
+    const query = params.toString();
+    const url = query ? `/session/leave?${query}` : '/session/leave';
+    window.location.href = url;
   }
 
   return (
