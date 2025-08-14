@@ -1,4 +1,4 @@
-import type * as THREEType from 'three';
+import * as THREE from 'three';
 // @ts-ignore - FontLoader is provided via three examples
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
 // @ts-ignore - TextGeometry is provided via three examples
@@ -6,7 +6,7 @@ import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
 
 export type GrowverseSignOptions = {
   text?: string;
-  anchor?: THREEType.Vector3;
+  anchor?: THREE.Vector3;
   size?: number;
   height?: number;
   bevelEnabled?: boolean;
@@ -14,7 +14,7 @@ export type GrowverseSignOptions = {
   bevelSize?: number;
   curveSegments?: number;
   letterSpacing?: number;
-  lookAtTarget?: THREEType.Vector3 | THREEType.Object3D;
+  lookAtTarget?: THREE.Vector3 | THREE.Object3D;
   outline?: { enabled: boolean; color?: number; opacity?: number };
   neon?: {
     enabled: boolean;
@@ -29,14 +29,13 @@ export type GrowverseSignOptions = {
 };
 
 export type GrowverseSignHandle = {
-  group: THREEType.Group;
+  group: THREE.Group;
   update: (dt: number) => void;
   dispose: () => void;
 };
 
 export async function createGrowverseSign(
-  THREE: typeof import('three'),
-  scene: THREEType.Scene,
+  scene: THREE.Scene,
   options?: Partial<GrowverseSignOptions>,
 ): Promise<GrowverseSignHandle> {
   const defaultAnchor = new THREE.Vector3(-106, 1, 0);

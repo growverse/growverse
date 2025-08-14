@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Role, SubRole, RoleSubRolesMap } from '@/domain/roles';
+import type { Role, SubRole } from '@/domain/roles';
+import { RoleSubRolesMap } from '@/domain/roles';
 import { useLocalUser, updateLocalRole } from '@/state/userStore';
 import { requestTeleportToRole } from '@/world/spawn';
 

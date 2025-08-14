@@ -22,7 +22,8 @@ import { onTeleportLocal } from '@/world/worldBus';
 import { createGrowverseSign } from '@/scene/signage/GrowverseSign';
 import { systemStore } from '@/state/systemStore';
 import { registerTeleport } from '@/systems/teleport';
-import { applyPerformancePreset, EngineHandles } from '@/engine/perf/applyPerformancePreset';
+import type { EngineHandles } from '@/engine/perf/applyPerformancePreset';
+import { applyPerformancePreset } from '@/engine/perf/applyPerformancePreset';
 import { setEngineHandles } from '@/engine/perf/presets';
 import { registerWorldCleanup } from '@/world/lifecycle';
 import './styles/global.css';
@@ -151,7 +152,7 @@ async function initializeThreeWorld() {
     portal.group.position.copy(portalPos);
   }
 
-  const sign = await createGrowverseSign(THREE, scene, {
+  const sign = await createGrowverseSign(scene, {
     text: 'Growverse',
     anchor: new THREE.Vector3(-106, 1, 0),
     size: 6,
@@ -200,7 +201,7 @@ async function initializeThreeWorld() {
   });
 
   // Instructor teleprompter + timer display
-  const teleprompter = createTeleprompterRig(THREE, scene);
+  const teleprompter = createTeleprompterRig(scene);
 
   // Bot avatars
   const botManager = new BotManager();
@@ -210,8 +211,8 @@ async function initializeThreeWorld() {
     avatarFactory,
   });
 
-  const originalSetEnabled = botControls.setEnabled;
-  const originalSetCount = botControls.setCount;
+  const originalSetEnabled = botControls.setEnabled.bind(botControls);
+  const originalSetCount = botControls.setCount.bind(botControls);
   botControls.setEnabled = (v: boolean) => {
     originalSetEnabled(v);
     botManager.setEnabled(v);
@@ -234,9 +235,9 @@ async function initializeThreeWorld() {
   let updatePortalProximityFn = () => {};
   if (teleportEnabled && portal && btnTeleport) {
     btnTeleport.addEventListener('click', () => {
-      portal!.closeUI();
-      const dst = portal!.getSelected();
-      portal!.teleportTo(dst.id, (id) => {
+      portal.closeUI();
+      const dst = portal.getSelected();
+      void portal.teleportTo(dst.id, (id) => {
         applyPreset(id);
         spawnDefault();
         setActiveSession(dst.id);
@@ -245,7 +246,7 @@ async function initializeThreeWorld() {
     });
 
     registerTeleport((id) => {
-      portal!.teleportTo(id, (pid) => {
+      void portal.teleportTo(id, (pid) => {
         applyPreset(pid);
         spawnDefault();
         setActiveSession(id);
@@ -255,36 +256,36 @@ async function initializeThreeWorld() {
 
     // Yakınlık tespiti (otomatik aç/kapat)
     let uiOpen = false;
-    function updatePortalProximity() {
-      const dx = avatar.position.x - portal!.group.position.x;
-      const dz = avatar.position.z - portal!.group.position.z;
+    const updatePortalProximity = () => {
+      const dx = avatar.position.x - portal.group.position.x;
+      const dz = avatar.position.z - portal.group.position.z;
       const dist2 = dx * dx + dz * dz;
-      const R = portal!.radius * 1.1;
+      const R = portal.radius * 1.1;
       const inside = dist2 < R * R;
       if (inside && !uiOpen) {
-        portal!.openUI();
+        portal.openUI();
         uiOpen = true;
       } else if (!inside && uiOpen) {
-        portal!.closeUI();
+        portal.closeUI();
         uiOpen = false;
       }
       const t = performance.now() * 0.001;
-      portal!.group.rotation.y = 0.1 * Math.sin(t * 1.5);
-    }
+      portal.group.rotation.y = 0.1 * Math.sin(t * 1.5);
+    };
 
     // Klavye: listede yukarı/aşağı + ESC/Enter
     window.addEventListener('keydown', (e) => {
-      if (!portalUI!.classList.contains('visible')) return;
+      if (!portalUI || !portalUI.classList.contains('visible')) return;
       if (e.key === 'ArrowDown') {
-        portal!.moveSel(+1);
+        portal.moveSel(+1);
         marquee.setText(currentSessionText());
       }
       if (e.key === 'ArrowUp') {
-        portal!.moveSel(-1);
+        portal.moveSel(-1);
         marquee.setText(currentSessionText());
       }
       if (e.key === 'Escape') {
-        portal!.closeUI();
+        portal.closeUI();
       }
       if (e.key === 'Enter') {
         btnTeleport.click();

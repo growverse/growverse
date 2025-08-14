@@ -1,4 +1,4 @@
-import { AvatarUser } from '@/domain/roles';
+import type { AvatarUser } from '@/domain/roles';
 import { displayRole } from './types';
 
 type Props = {

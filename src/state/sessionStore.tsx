@@ -1,4 +1,13 @@
-import { createContext, useContext, useEffect, useReducer, useRef } from 'react';
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useReducer,
+  useRef,
+  useMemo,
+  type Dispatch,
+  type ReactNode,
+} from 'react';
 import { tzAbbrev, formatTime } from '@/utils/time';
 import { useOnlineUsers, selectOnlineUsers } from '@/state/userStore';
 
@@ -96,12 +105,12 @@ function reducer(state: SessionState, action: Action): SessionState {
 
 interface SessionContextValue extends SessionState {
   activeSession?: Session;
-  dispatch: React.Dispatch<Action>;
+  dispatch: Dispatch<Action>;
 }
 
 const SessionContext = createContext<SessionContextValue | undefined>(undefined);
 
-export function SessionProvider({ children }: { children: React.ReactNode }): JSX.Element {
+export function SessionProvider({ children }: { children: ReactNode }): JSX.Element {
   const [state, dispatch] = useReducer(reducer, initialState);
   const stateRef = useRef(state);
   stateRef.current = state;
@@ -126,13 +135,12 @@ export function SessionProvider({ children }: { children: React.ReactNode }): JS
     if (!activeSession) return;
     const learners = onlineUsers.filter((u) => u.role === 'learner').length;
     dispatch({ type: 'SET_LEARNERS', id: activeSession.id, count: learners });
-  }, [onlineUsers, activeSession?.id]);
-
-  return (
-    <SessionContext.Provider value={{ ...state, activeSession, dispatch }}>
-      {children}
-    </SessionContext.Provider>
+  }, [onlineUsers, activeSession]);
+  const value = useMemo(
+    () => ({ ...state, activeSession, dispatch }),
+    [state, activeSession, dispatch],
   );
+  return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;
 }
 
 export function useSessionStore(): SessionContextValue {
@@ -143,7 +151,7 @@ export function useSessionStore(): SessionContextValue {
 
 // External helper for non-React modules
 export const sessionStore = {
-  _dispatch: null as React.Dispatch<Action> | null,
+  _dispatch: null as Dispatch<Action> | null,
   _getState: null as (() => SessionState) | null,
   setActiveSession(id: string) {
     this._dispatch?.({ type: 'SET_ACTIVE', id });

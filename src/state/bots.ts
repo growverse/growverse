@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from 'react';
-import { AvatarUser } from '@/domain/roles';
+import type { AvatarUser } from '@/domain/roles';
 
 interface BotState {
   enabled: boolean;

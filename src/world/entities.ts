@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import type { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { Keys } from '@/core/input';
+import type { Keys } from '@/core/input';
 import { userStore } from '@/state/userStore';
 import { canEnterStage } from '@/world/constraints';
 
@@ -13,6 +13,18 @@ export interface AvatarHelpers {
   buildingBlock?: (pos: THREE.Vector3, prev: THREE.Vector3, half?: number) => void;
   boardBlock?: (pos: THREE.Vector3, prev: THREE.Vector3, half?: number) => void;
   stageBlock?: (pos: THREE.Vector3, prev: THREE.Vector3, half?: number) => void;
+}
+
+interface AvatarUserData {
+  vel: THREE.Vector3;
+  animBlend?: number;
+  swingTime?: number;
+  limbs: {
+    aL: THREE.Group;
+    aR: THREE.Group;
+    lL: THREE.Group;
+    lR: THREE.Group;
+  };
 }
 
 export interface AvatarMaterials {
@@ -91,7 +103,7 @@ export function createAvatarMesh(materials: AvatarMaterials): THREE.Group {
 
   root.add(aL, aR, lL, lR);
 
-  root.userData.limbs = { aL, aR, lL, lR };
+  (root.userData as Partial<AvatarUserData>).limbs = { aL, aR, lL, lR };
   return root;
 }
 
@@ -140,10 +152,11 @@ export function updateAvatar(
   const move = new THREE.Vector3().addScaledVector(forward, -moveZ).addScaledVector(right, moveX);
   if (move.lengthSq() > 0) move.normalize();
 
-  if (!avatar.userData.vel) {
-    avatar.userData.vel = new THREE.Vector3(0, 0, 0);
+  const data = avatar.userData as Partial<AvatarUserData>;
+  if (!data.vel) {
+    data.vel = new THREE.Vector3(0, 0, 0);
   }
-  const vel = avatar.userData.vel;
+  const vel = data.vel;
 
   const speed = 18,
     gravity = 22,
@@ -200,20 +213,20 @@ export function updateAvatar(
     if (!Number.isNaN(dirY)) avatar.rotation.y = dirY;
   }
 
-  if (!avatar.userData.animBlend) avatar.userData.animBlend = 0;
-  if (!avatar.userData.swingTime) avatar.userData.swingTime = 0;
+  if (!data.animBlend) data.animBlend = 0;
+  if (!data.swingTime) data.swingTime = 0;
 
   const speed2D = Math.hypot(vel.x, vel.z);
   const targetRun = Math.min(1, speed2D / speed);
   const blendK = 12;
-  avatar.userData.animBlend += (targetRun - avatar.userData.animBlend) * Math.min(1, dt * blendK);
-  if (avatar.userData.animBlend < 0.05) avatar.userData.swingTime = 0;
+  data.animBlend += (targetRun - data.animBlend) * Math.min(1, dt * blendK);
+  if (data.animBlend < 0.05) data.swingTime = 0;
 
-  const freq = THREE.MathUtils.lerp(2.0, 6.0, avatar.userData.animBlend);
-  avatar.userData.swingTime += dt * freq;
-  const amp = THREE.MathUtils.lerp(0.1, 0.6, avatar.userData.animBlend);
-  const s = Math.sin(avatar.userData.swingTime);
-  const { aL, aR, lL, lR } = avatar.userData.limbs;
+  const freq = THREE.MathUtils.lerp(2.0, 6.0, data.animBlend);
+  data.swingTime += dt * freq;
+  const amp = THREE.MathUtils.lerp(0.1, 0.6, data.animBlend);
+  const s = Math.sin(data.swingTime);
+  const { aL, aR, lL, lR } = data.limbs!;
   aL.rotation.x = s * amp;
   aR.rotation.x = -s * amp;
   lL.rotation.x = -s * amp;

@@ -28,10 +28,10 @@ export function createWorldFX(
   scene.add(group);
 
   // --- Phase 1: Fog + Gradient Sky ---
-  let skyTopDay = new THREE.Color(0x87b7ff);
-  let skyBotDay = new THREE.Color(0xcfe8ff);
-  let skyTopNight = new THREE.Color(0x0a0d1a);
-  let skyBotNight = new THREE.Color(0x182033);
+  const skyTopDay = new THREE.Color(0x87b7ff);
+  const skyBotDay = new THREE.Color(0xcfe8ff);
+  const skyTopNight = new THREE.Color(0x0a0d1a);
+  const skyBotNight = new THREE.Color(0x182033);
 
   scene.fog = new THREE.FogExp2(skyBotDay.clone(), 0.0012);
 
@@ -133,8 +133,8 @@ export function createWorldFX(
   function updateLights(t: number) {
     const colTop = skyTopNight.clone().lerp(skyTopDay, t);
     const colBot = skyBotNight.clone().lerp(skyBotDay, t);
-    sky.material.uniforms.topColor.value.copy(colTop);
-    sky.material.uniforms.bottomColor.value.copy(colBot);
+    (skyMat.uniforms.topColor.value as THREE.Color).copy(colTop);
+    (skyMat.uniforms.bottomColor.value as THREE.Color).copy(colBot);
     if (scene.fog && scene.fog instanceof THREE.FogExp2) {
       scene.fog.color.copy(colBot.clone());
     }

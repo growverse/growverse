@@ -1,4 +1,4 @@
-import { Session } from './types';
+import type { Session } from './types';
 
 export const sessions: Session[] = [
   { id: 's1', name: 'Intro to Gardening', instructorName: 'Alice', startTime: '2024-01-01 10:00' },

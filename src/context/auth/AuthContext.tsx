@@ -1,5 +1,6 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
-import { AuthUser } from './types';
+import type { ReactNode } from 'react';
+import { createContext, useContext, useState, useMemo } from 'react';
+import type { AuthUser } from './types';
 
 interface AuthContextValue {
   user: AuthUser | null;
@@ -20,7 +21,8 @@ export function AuthProvider({ children }: { children: ReactNode }): JSX.Element
   const [user, setUser] = useState<AuthUser | null>(defaultUser);
   const login = () => setUser(defaultUser);
   const logout = () => setUser(null);
-  return <AuthContext.Provider value={{ user, login, logout }}>{children}</AuthContext.Provider>;
+  const value = useMemo(() => ({ user, login, logout }), [user]);
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth(): AuthContextValue {
