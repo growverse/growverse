@@ -7,7 +7,7 @@ export function AdminRoleSwitcher(): JSX.Element {
   const local = useLocalUser();
   const [role, setRole] = useState<Role>(local?.role ?? 'learner');
   const [subRole, setSubRole] = useState<SubRole>(
-    (local?.subRole as SubRole) ?? RoleSubRolesMap[role][0]
+    (local?.subRole as SubRole) ?? RoleSubRolesMap[role][0],
   );
 
   useEffect(() => {
@@ -43,4 +43,3 @@ export function AdminRoleSwitcher(): JSX.Element {
     </div>
   );
 }
-

@@ -10,7 +10,10 @@ export default function UserPreferencesView({ onNavigate }: Props): JSX.Element 
       <h2>User Preferences</h2>
       <ul className="settings-home-list">
         <li>
-          <button className="settings-home-item" onClick={() => onNavigate(SettingsRoute.TimeFormat)}>
+          <button
+            className="settings-home-item"
+            onClick={() => onNavigate(SettingsRoute.TimeFormat)}
+          >
             <span className="icon">🕒</span>
             <div className="text">
               <div className="title">Time Format</div>
@@ -20,7 +23,10 @@ export default function UserPreferencesView({ onNavigate }: Props): JSX.Element 
           </button>
         </li>
         <li>
-          <button className="settings-home-item" onClick={() => onNavigate(SettingsRoute.Notifications)}>
+          <button
+            className="settings-home-item"
+            onClick={() => onNavigate(SettingsRoute.Notifications)}
+          >
             <span className="icon">🔔</span>
             <div className="text">
               <div className="title">Notifications</div>
@@ -40,7 +46,10 @@ export default function UserPreferencesView({ onNavigate }: Props): JSX.Element 
           </button>
         </li>
         <li>
-          <button className="settings-home-item" onClick={() => onNavigate(SettingsRoute.Performance)}>
+          <button
+            className="settings-home-item"
+            onClick={() => onNavigate(SettingsRoute.Performance)}
+          >
             <span className="icon">⚙️</span>
             <div className="text">
               <div className="title">Performance / Quality</div>

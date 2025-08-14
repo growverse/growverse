@@ -58,7 +58,9 @@ const initialUser: AvatarUser = {
   },
 };
 
-const UserContext = createContext<{ state: UserState; dispatch: React.Dispatch<Action> } | undefined>(undefined);
+const UserContext = createContext<
+  { state: UserState; dispatch: React.Dispatch<Action> } | undefined
+>(undefined);
 
 export function UserProvider({ children }: { children: React.ReactNode }): JSX.Element {
   const [state, dispatch] = useReducer(reducer, { user: initialUser });
@@ -75,9 +77,7 @@ export function UserProvider({ children }: { children: React.ReactNode }): JSX.E
     else document.body.classList.remove('dark');
   }, [state.user.preferences.enableDarkMode]);
 
-  return (
-    <UserContext.Provider value={{ state, dispatch }}>{children}</UserContext.Provider>
-  );
+  return <UserContext.Provider value={{ state, dispatch }}>{children}</UserContext.Provider>;
 }
 
 export function useUserStore() {

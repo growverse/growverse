@@ -26,7 +26,7 @@ export type TeleprompterRig = {
 export function createTeleprompterRig(
   THREE: typeof import('three'),
   scene: THREE.Scene,
-  opts: TeleprompterRigOptions = {}
+  opts: TeleprompterRigOptions = {},
 ): TeleprompterRig {
   const { position = { x: -120, y: 20, z: 23 }, scale = 6 } = opts;
   const group = new THREE.Group();

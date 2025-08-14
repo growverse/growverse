@@ -21,7 +21,10 @@ export function createSceneSetup(): SceneSetup {
   const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 8000);
   camera.position.set(0, 10, 16);
 
-  const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+  const renderer = new THREE.WebGLRenderer({
+    antialias: true,
+    powerPreference: 'high-performance',
+  });
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -39,7 +42,7 @@ export function createSceneSetup(): SceneSetup {
 
   const amb = new THREE.AmbientLight(0xffffff, 0.5);
   scene.add(amb);
-  
+
   const sun = new THREE.DirectionalLight(0xffffff, 0.9);
   sun.position.set(60, 100, 40);
   sun.castShadow = true;

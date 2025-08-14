@@ -29,7 +29,9 @@ export default function SessionCreate(): JSX.Element {
             <option value="instructor">Instructor</option>
           </select>
         </label>
-        <button className="btn" type="submit" disabled={disabled}>Create</button>
+        <button className="btn" type="submit" disabled={disabled}>
+          Create
+        </button>
       </div>
     </form>
   );

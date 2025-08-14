@@ -11,6 +11,6 @@ export function createTreesController(instanced: THREE.InstancedMesh) {
       instanced.count = target;
       instanced.instanceMatrix.needsUpdate = true;
       current = target;
-    }
+    },
   };
 }

@@ -55,9 +55,19 @@ const initialState: SessionState = {
   activeSessionId: initialSessions[0].id,
 };
 
-interface SetActiveAction { type: 'SET_ACTIVE'; id: string; }
-interface TickAction { type: 'TICK'; now: number; }
-interface SetLearnersAction { type: 'SET_LEARNERS'; id: string; count: number; }
+interface SetActiveAction {
+  type: 'SET_ACTIVE';
+  id: string;
+}
+interface TickAction {
+  type: 'TICK';
+  now: number;
+}
+interface SetLearnersAction {
+  type: 'SET_LEARNERS';
+  id: string;
+  count: number;
+}
 type Action = SetActiveAction | TickAction | SetLearnersAction;
 
 function reducer(state: SessionState, action: Action): SessionState {
@@ -65,7 +75,7 @@ function reducer(state: SessionState, action: Action): SessionState {
     case 'SET_ACTIVE':
       return { ...state, activeSessionId: action.id };
     case 'TICK': {
-      const sessions = state.sessions.map(s => {
+      const sessions = state.sessions.map((s) => {
         if (s.id !== state.activeSessionId) return s;
         const date = new Date(action.now);
         const currentTime = formatTime(date, '24h', s.timezone);
@@ -74,7 +84,9 @@ function reducer(state: SessionState, action: Action): SessionState {
       return { ...state, sessions };
     }
     case 'SET_LEARNERS': {
-      const sessions = state.sessions.map(s => (s.id === action.id ? { ...s, currentLearners: action.count } : s));
+      const sessions = state.sessions.map((s) =>
+        s.id === action.id ? { ...s, currentLearners: action.count } : s,
+      );
       return { ...state, sessions };
     }
     default:
@@ -103,7 +115,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }): JS
     return () => clearInterval(timer);
   }, []);
 
-  const activeSession = state.sessions.find(s => s.id === state.activeSessionId);
+  const activeSession = state.sessions.find((s) => s.id === state.activeSessionId);
 
   useEffect(() => {
     sessionStore._dispatch = dispatch;

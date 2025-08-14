@@ -16,10 +16,14 @@ export interface WorldFXLights {
   sun: THREE.DirectionalLight;
 }
 
-export function createWorldFX(scene: THREE.Scene, config: WorldFXConfig, lights: WorldFXLights): WorldFXSetup {
+export function createWorldFX(
+  scene: THREE.Scene,
+  config: WorldFXConfig,
+  lights: WorldFXLights,
+): WorldFXSetup {
   const { planeSize } = config;
   const { amb, sun } = lights;
-  
+
   const group = new THREE.Group();
   scene.add(group);
 
@@ -38,7 +42,7 @@ export function createWorldFX(scene: THREE.Scene, config: WorldFXConfig, lights:
       topColor: { value: skyTopDay.clone() },
       bottomColor: { value: skyBotDay.clone() },
       offset: { value: 33 },
-      exponent: { value: 0.6 }
+      exponent: { value: 0.6 },
     },
     vertexShader: `
       varying vec3 vWorldPosition;
@@ -59,7 +63,7 @@ export function createWorldFX(scene: THREE.Scene, config: WorldFXConfig, lights:
         float f = max(pow(max(h, 0.0), exponent), 0.0);
         gl_FragColor = vec4(mix(bottomColor, topColor, f), 1.0);
       }
-    `
+    `,
   });
   const sky = new THREE.Mesh(skyGeo, skyMat);
   group.add(sky);
@@ -74,8 +78,8 @@ export function createWorldFX(scene: THREE.Scene, config: WorldFXConfig, lights:
       roughness: 1.0,
       side: THREE.BackSide,
       transparent: true,
-      opacity: 0.85
-    })
+      opacity: 0.85,
+    }),
   );
   curtain.position.y = 100;
   group.add(curtain);
@@ -86,7 +90,7 @@ export function createWorldFX(scene: THREE.Scene, config: WorldFXConfig, lights:
   const ringR = planeSize * 0.6 + 40;
   const count = 64;
   const dummy = new THREE.Object3D();
-  
+
   // Trunks
   const trunkGeom = new THREE.CylinderGeometry(0.4, 0.6, 4, 6);
   const trunkMat = new THREE.MeshStandardMaterial({ color: 0x6e4b2a, roughness: 0.9 });
@@ -95,7 +99,7 @@ export function createWorldFX(scene: THREE.Scene, config: WorldFXConfig, lights:
   trunks.castShadow = false;
   trunks.receiveShadow = false;
   props.add(trunks);
-  
+
   // Cones
   const coneGeom = new THREE.ConeGeometry(2.5, 6, 8);
   const coneMat = new THREE.MeshStandardMaterial({ color: 0x2b7a2b, roughness: 0.8 });
@@ -105,7 +109,7 @@ export function createWorldFX(scene: THREE.Scene, config: WorldFXConfig, lights:
   props.add(cones);
 
   for (let i = 0; i < count; i++) {
-    const a = i / count * Math.PI * 2;
+    const a = (i / count) * Math.PI * 2;
     const px = Math.cos(a) * ringR;
     const pz = Math.sin(a) * ringR;
     dummy.position.set(px, 2, pz);
@@ -122,10 +126,10 @@ export function createWorldFX(scene: THREE.Scene, config: WorldFXConfig, lights:
   // --- Phase 2: Day/Night blending ---
   function dayNightFactor(date: Date): number {
     const h = date.getHours() + date.getMinutes() / 60;
-    const t = Math.cos((h - 12) / 12 * Math.PI);
+    const t = Math.cos(((h - 12) / 12) * Math.PI);
     return (t + 1) / 2;
   }
-  
+
   function updateLights(t: number) {
     const colTop = skyTopNight.clone().lerp(skyTopDay, t);
     const colBot = skyBotNight.clone().lerp(skyBotDay, t);
@@ -139,7 +143,7 @@ export function createWorldFX(scene: THREE.Scene, config: WorldFXConfig, lights:
     sun.color.copy(new THREE.Color(0xffe7b0).lerp(new THREE.Color(0xffffff), t));
     curtain.material.color.copy(colBot.clone().lerp(colTop, 0.3));
   }
-  
+
   updateLights(dayNightFactor(new Date()));
 
   const trunkCtl = createTreesController(trunks);
@@ -148,7 +152,7 @@ export function createWorldFX(scene: THREE.Scene, config: WorldFXConfig, lights:
     setDensity(r: number) {
       trunkCtl.setDensity(r);
       coneCtl.setDensity(r);
-    }
+    },
   };
 
   let throttleHz = 0;

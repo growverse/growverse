@@ -14,8 +14,7 @@ export function UserDetail({ user, onBack }: Props): JSX.Element {
           ← Back
         </button>
         <h3>
-          {user.name}{' '}
-          {user.isAdmin && <span className="admin-badge">Admin</span>}
+          {user.name} {user.isAdmin && <span className="admin-badge">Admin</span>}
         </h3>
       </div>
       <div className="user-detail-content">

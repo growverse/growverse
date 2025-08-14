@@ -65,26 +65,50 @@ async function initializeThreeWorld() {
 
   if (
     !nameTag ||
-    (teleportEnabled && (!portalUI || !portalList || !btnCancel || !btnTeleport || !portalHint || !fade))
+    (teleportEnabled &&
+      (!portalUI || !portalList || !btnCancel || !btnTeleport || !portalHint || !fade))
   ) {
     throw new Error('Required DOM elements not found');
   }
 
-  const { scene, camera, renderer, controls, amb, sun, adaptiveQuality, adaptiveQualityCtrl } = createSceneSetup();
+  const { scene, camera, renderer, controls, amb, sun, adaptiveQuality, adaptiveQualityCtrl } =
+    createSceneSetup();
   const keys = createInput();
 
-  const { planeSize, stage, STAGE_W, STAGE_D, STAGE_H, insideStageXZ, groundYAt, boardBlock, stageBlock, boardZCenter, boardYCenter } = createGarden(scene);
+  const {
+    planeSize,
+    stage,
+    STAGE_W,
+    STAGE_D,
+    STAGE_H,
+    insideStageXZ,
+    groundYAt,
+    boardBlock,
+    stageBlock,
+    boardZCenter,
+    boardYCenter,
+  } = createGarden(scene);
   const stageTopY = stage.position.y + STAGE_H / 2;
 
   // Camlı oda: sahne ile aynı boyut; haritanın en sağ kenarı (varsayılan)
   const roomPos = new THREE.Vector3(planeSize / 2 - STAGE_W / 2, 0, 0);
-  const { room: glassRoom, block: roomBlock } = createGlassRoom(scene, { w: STAGE_W, d: STAGE_D, position: roomPos });
+  const { room: glassRoom, block: roomBlock } = createGlassRoom(scene, {
+    w: STAGE_W,
+    d: STAGE_D,
+    position: roomPos,
+  });
 
   setWorldRefs({ stage, glassRoom, dims: { STAGE_W, STAGE_D, STAGE_H, planeSize } });
 
   // NFT Bina: garden sol-orta; merkez (5,0,135)
   const nftPos = new THREE.Vector3(5, 0, 135);
-  const { building: nftBuilding, block: buildingBlock } = createNftBuilding(scene, { w: 60, d: 40, h: 22, position: nftPos, doorRatio: 0.35 });
+  const { building: nftBuilding, block: buildingBlock } = createNftBuilding(scene, {
+    w: 60,
+    d: 40,
+    h: 22,
+    position: nftPos,
+    doorRatio: 0.35,
+  });
   let activeBuildingBlock: typeof buildingBlock | undefined = buildingBlock;
   function setNftEnabled(v: boolean) {
     nftBuilding.visible = v;
@@ -116,7 +140,14 @@ async function initializeThreeWorld() {
   const portalPos = new THREE.Vector3(-5, 0, -135);
   let portal: ReturnType<typeof createPortalSystem> | null = null;
   if (teleportEnabled && portalUI && portalList && btnCancel && btnTeleport && portalHint && fade) {
-    portal = createPortalSystem(scene, { portalUI, portalList, btnCancel, btnTeleport, portalHint, fade });
+    portal = createPortalSystem(scene, {
+      portalUI,
+      portalList,
+      btnCancel,
+      btnTeleport,
+      portalHint,
+      fade,
+    });
     portal.group.position.copy(portalPos);
   }
 
@@ -132,7 +163,13 @@ async function initializeThreeWorld() {
     letterSpacing: 0.2,
     lookAtTarget: glassRoom,
     outline: { enabled: true, color: 0x92b6ff, opacity: 0.6 },
-    neon: { enabled: true, baseEmissive: 0.05, nightEmissive: 0.7, color: 0x66ccff, fakeBloom: true },
+    neon: {
+      enabled: true,
+      baseEmissive: 0.05,
+      nightEmissive: 0.7,
+      color: 0x66ccff,
+      fakeBloom: true,
+    },
     castShadow: true,
     receiveShadow: false,
   });
@@ -159,7 +196,7 @@ async function initializeThreeWorld() {
     boardYCenter,
     text: currentSessionText(),
     panelW: 30,
-    panelH: 3
+    panelH: 3,
   });
 
   // Instructor teleprompter + timer display
@@ -167,7 +204,11 @@ async function initializeThreeWorld() {
 
   // Bot avatars
   const botManager = new BotManager();
-  botManager.init({ scene, glassRoomRef: { room: glassRoom, w: STAGE_W, d: STAGE_D }, avatarFactory });
+  botManager.init({
+    scene,
+    glassRoomRef: { room: glassRoom, w: STAGE_W, d: STAGE_D },
+    avatarFactory,
+  });
 
   const originalSetEnabled = botControls.setEnabled;
   const originalSetCount = botControls.setCount;
@@ -260,7 +301,7 @@ async function initializeThreeWorld() {
     const pos = avatar.position.clone();
     pos.y += 3.2;
     pos.project(camera);
-    const out = (Math.abs(pos.x) > 1 || Math.abs(pos.y) > 1 || pos.z > 1);
+    const out = Math.abs(pos.x) > 1 || Math.abs(pos.y) > 1 || pos.z > 1;
     if (out) {
       nameTag.classList.add('hidden');
       return;
@@ -287,23 +328,23 @@ async function initializeThreeWorld() {
       roomBlock,
       buildingBlock: activeBuildingBlock,
       boardBlock,
-      stageBlock
+      stageBlock,
     });
     runtime.avatar.x = avatar.position.x;
     runtime.avatar.y = avatar.position.y;
     runtime.avatar.z = avatar.position.z;
     runtime.avatar.rotY = avatar.rotation.y;
-      worldfx.update(dt);
-      updatePortalProximityFn();
-      marquee.update(dt);
-      teleprompter.update(dt);
-      sign.update(dt);
-      botManager.update(dt);
-      adaptiveQuality();
-      controls.update();
-      renderer.render(scene, camera);
-      updateNameTag();
-      nameTags.update(camera);
+    worldfx.update(dt);
+    updatePortalProximityFn();
+    marquee.update(dt);
+    teleprompter.update(dt);
+    sign.update(dt);
+    botManager.update(dt);
+    adaptiveQuality();
+    controls.update();
+    renderer.render(scene, camera);
+    updateNameTag();
+    nameTags.update(camera);
   }
   const handles: EngineHandles = {
     renderer,

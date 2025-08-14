@@ -5,5 +5,4 @@ build
 coverage
 *.tsbuildinfo
 index.html
-src
 vite.config.ts

@@ -16,7 +16,9 @@ export default function Signup(): JSX.Element {
       <div className="form-grid">
         <input placeholder="Username" required />
         <input type="password" placeholder="Password" required />
-        <button className="btn" type="submit">Create Account</button>
+        <button className="btn" type="submit">
+          Create Account
+        </button>
       </div>
     </form>
   );

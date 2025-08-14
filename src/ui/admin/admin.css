@@ -16,7 +16,7 @@
 }
 .admin-home-item:hover,
 .admin-home-item:focus {
-  background: rgba(130,180,255,.18);
+  background: rgba(130, 180, 255, 0.18);
 }
 .admin-home-item .icon {
   margin-right: 8px;

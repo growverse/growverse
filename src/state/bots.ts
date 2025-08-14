@@ -45,6 +45,6 @@ export function useBots(): AvatarUser[] {
       listeners.add(listener);
       return () => listeners.delete(listener);
     },
-    () => state.bots
+    () => state.bots,
   );
 }
