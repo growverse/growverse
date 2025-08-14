@@ -43,7 +43,7 @@ export async function createGrowverseSign(
   const defaultOutline = { enabled: false, color: 0xffffff, opacity: 1 };
   const defaultNeon = { enabled: false, baseEmissive: 0.05, nightEmissive: 0.7, color: 0x66ccff, fakeBloom: false };
   const opts: GrowverseSignOptions = {
-    text: 'growverse',
+    text: 'Growverse',
     anchor: defaultAnchor,
     size: 6,
     height: 1.1,
@@ -72,6 +72,20 @@ export async function createGrowverseSign(
   const fontUrl = new URL('./fonts/helvetiker_regular.typeface.json', import.meta.url).href;
   const font = await new FontLoader().loadAsync(fontUrl);
 
+  // baseline height derived from lowercase reference
+  const refGeom = new TextGeometry('x', {
+    font,
+    size: opts.size,
+    height: opts.height,
+    bevelEnabled: opts.bevelEnabled,
+    bevelThickness: opts.bevelThickness,
+    bevelSize: opts.bevelSize,
+    curveSegments: opts.curveSegments,
+  });
+  refGeom.computeBoundingBox();
+  const baseHeight = refGeom.boundingBox!.max.y - refGeom.boundingBox!.min.y;
+  refGeom.dispose();
+
   const letterMaterials: THREE.MeshStandardMaterial[] = [];
   const glowMaterials: THREE.MeshBasicMaterial[] = [];
   const geometries: THREE.BufferGeometry[] = [];
@@ -88,9 +102,15 @@ export async function createGrowverseSign(
       bevelEnabled: opts.bevelEnabled,
       bevelThickness: opts.bevelThickness,
       bevelSize: opts.bevelSize,
-      curveSegments: opts.curveSegments
+      curveSegments: opts.curveSegments,
     });
     geom.computeBoundingBox();
+    if (ch === ch.toUpperCase() && ch.toLowerCase() !== ch.toUpperCase()) {
+      const letterHeight = geom.boundingBox!.max.y - geom.boundingBox!.min.y;
+      const scale = baseHeight / letterHeight;
+      geom.scale(scale, scale, scale);
+      geom.computeBoundingBox();
+    }
     const bbox = geom.boundingBox!;
     const letterWidth = bbox.max.x - bbox.min.x;
 

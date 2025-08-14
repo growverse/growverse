@@ -92,7 +92,7 @@ async function initializeThreeWorld() {
   portal.group.position.copy(portalPos);
 
   const sign = await createGrowverseSign(THREE, scene, {
-    text: 'growverse',
+    text: 'Growverse',
     anchor: new THREE.Vector3(-106, 1, 0),
     size: 6,
     height: 1.1,

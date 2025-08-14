@@ -7,7 +7,7 @@ Utilities for creating modular 3D text signs within the scene.
 ```ts
 import { createGrowverseSign } from '@/scene/signage/GrowverseSign';
 
-const sign = await createGrowverseSign(THREE, scene, { text: 'growverse' });
+const sign = await createGrowverseSign(THREE, scene, { text: 'Growverse' });
 // in your render loop:
 // sign.update(dt);
 // on cleanup:
