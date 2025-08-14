@@ -1,12 +1,7 @@
 import { createContext, useContext, useEffect, useReducer, useRef } from 'react';
 import { Role, InstructorSubRole, LearnerSubRole, AvatarUser as BasicUser } from '@/domain/roles';
 import { useBots, botControls } from '@/state/bots';
-
-export interface UserPreferences {
-  timeFormat: '24h' | '12h';
-  enableNotifications: boolean;
-  enableDarkMode: boolean;
-}
+import { AvatarUserPreferences, PerformancePreset } from '@/types/preferences';
 
 export interface AvatarUser {
   id: string;
@@ -14,7 +9,7 @@ export interface AvatarUser {
   role: Role;
   subRole?: InstructorSubRole | LearnerSubRole;
   isAdmin: boolean;
-  preferences: UserPreferences;
+  preferences: AvatarUserPreferences;
 }
 
 interface UserState {
@@ -23,7 +18,7 @@ interface UserState {
 
 interface UpdatePrefsAction {
   type: 'UPDATE_PREFS';
-  payload: Partial<UserPreferences>;
+  payload: Partial<AvatarUserPreferences>;
 }
 interface UpdateRoleAction {
   type: 'UPDATE_ROLE';
@@ -56,6 +51,7 @@ const initialUser: AvatarUser = {
   role: 'learner',
   isAdmin: true,
   preferences: {
+    performancePreset: 'high',
     timeFormat: '24h',
     enableNotifications: false,
     enableDarkMode: false,
@@ -119,12 +115,16 @@ export function selectOnlineUsers(): BasicUser[] {
   return [localBasic, ...botControls.getBots()];
 }
 
-export function updatePreferences(partial: Partial<UserPreferences>): void {
+export function updatePreferences(partial: Partial<AvatarUserPreferences>): void {
   userStore._dispatch?.({ type: 'UPDATE_PREFS', payload: partial });
 }
 
 export function updateLocalRole(role: Role, subRole?: InstructorSubRole | LearnerSubRole): void {
   userStore._dispatch?.({ type: 'UPDATE_ROLE', role, subRole });
+}
+
+export function setPerformancePreset(preset: PerformancePreset): void {
+  userStore._dispatch?.({ type: 'UPDATE_PREFS', payload: { performancePreset: preset } });
 }
 
 export const userStore = {

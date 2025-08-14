@@ -26,6 +26,7 @@ export interface MarqueeSystem {
   group: THREE.Group;
   setText: (text: string) => void;
   update: (dt: number) => void;
+  setResolution: (w: number, h: number) => void;
 }
 
 export function createMarquee(scene: THREE.Scene, config: MarqueeConfig): MarqueeSystem {
@@ -158,5 +159,12 @@ export function createMarquee(scene: THREE.Scene, config: MarqueeConfig): Marque
     }
   }
 
-  return { group, setText, update };
+  function setResolution(w: number, h: number) {
+    if (w <= 0 || h <= 0) return;
+    canvas.width = w;
+    canvas.height = h;
+    redraw();
+  }
+
+  return { group, setText, update, setResolution };
 }

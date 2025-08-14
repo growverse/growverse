@@ -22,6 +22,8 @@ import { onTeleportLocal } from '@/world/worldBus';
 import { createGrowverseSign } from '@/scene/signage/GrowverseSign';
 import { systemStore } from '@/state/systemStore';
 import { registerTeleport } from '@/systems/teleport';
+import { applyPerformancePreset, EngineHandles } from '@/engine/perf/applyPerformancePreset';
+import { setEngineHandles } from '@/engine/perf/presets';
 import '@/styles/global.css';
 
 // Bootstrap React
@@ -65,7 +67,7 @@ async function initializeThreeWorld() {
     throw new Error('Required DOM elements not found');
   }
 
-  const { scene, camera, renderer, controls, amb, sun, adaptiveQuality } = createSceneSetup();
+  const { scene, camera, renderer, controls, amb, sun, adaptiveQuality, adaptiveQualityCtrl } = createSceneSetup();
   const keys = createInput();
 
   const { planeSize, stage, STAGE_W, STAGE_D, STAGE_H, insideStageXZ, groundYAt, boardBlock, stageBlock, boardZCenter, boardYCenter } = createGarden(scene);
@@ -80,6 +82,12 @@ async function initializeThreeWorld() {
   // NFT Bina: garden sol-orta; merkez (5,0,135)
   const nftPos = new THREE.Vector3(5, 0, 135);
   const { building: nftBuilding, block: buildingBlock } = createNftBuilding(scene, { w: 60, d: 40, h: 22, position: nftPos, doorRatio: 0.35 });
+  let activeBuildingBlock: typeof buildingBlock | undefined = buildingBlock;
+  function setNftEnabled(v: boolean) {
+    nftBuilding.visible = v;
+    activeBuildingBlock = v ? buildingBlock : undefined;
+  }
+  setNftEnabled(true);
 
   // WORLD FX (Phases 1-3)
   const worldfx = createWorldFX(scene, { planeSize }, { amb, sun });
@@ -263,14 +271,17 @@ async function initializeThreeWorld() {
   const clock = new THREE.Clock();
   function animate() {
     requestAnimationFrame(animate);
-    const dt = Math.min(0.033, clock.getDelta());
+    const dtRaw = clock.getDelta();
+    const fps = 1 / (dtRaw || 1);
+    runtime.fps = runtime.fps * 0.9 + fps * 0.1;
+    const dt = Math.min(0.033, dtRaw);
     updateAvatar(dt, avatar, keys, camera, controls, {
       insideStageXZ,
       groundYAt,
       planeSize,
       stageTopY,
       roomBlock,
-      buildingBlock,
+      buildingBlock: activeBuildingBlock,
       boardBlock,
       stageBlock
     });
@@ -278,7 +289,7 @@ async function initializeThreeWorld() {
     runtime.avatar.y = avatar.position.y;
     runtime.avatar.z = avatar.position.z;
     runtime.avatar.rotY = avatar.rotation.y;
-      worldfx.update();
+      worldfx.update(dt);
       updatePortalProximityFn();
       marquee.update(dt);
       teleprompter.update(dt);
@@ -290,5 +301,17 @@ async function initializeThreeWorld() {
       updateNameTag();
       nameTags.update(camera);
   }
+  const handles: EngineHandles = {
+    renderer,
+    sun,
+    worldfx,
+    trees: worldfx.trees,
+    marquee,
+    adaptiveQuality: adaptiveQualityCtrl,
+    nft: { object: nftBuilding, setEnabled: setNftEnabled },
+  };
+  setEngineHandles(handles);
+  applyPerformancePreset('high', handles);
+
   animate();
 }

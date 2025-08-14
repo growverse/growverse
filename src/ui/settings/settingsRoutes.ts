@@ -3,4 +3,5 @@ export enum SettingsRoute {
   TimeFormat = 'time_format',
   Notifications = 'notifications',
   Theme = 'theme',
+  Performance = 'performance',
 }
