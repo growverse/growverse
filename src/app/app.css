@@ -163,6 +163,11 @@ tbody tr:hover {
   margin-bottom: 1.5rem;
 }
 
+.join-card {
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
 .session-grid {
   display: grid;
   gap: 1rem;
@@ -172,4 +177,15 @@ tbody tr:hover {
 .session-card {
   cursor: pointer;
   text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.session-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
 }

@@ -15,7 +15,13 @@ export default function Landing(): JSX.Element {
             <Link className="btn" to="/session/create">
               Create Session
             </Link>
-            <Link to="/session/login">Session Login</Link>
+          </div>
+          <div className="card join-card">
+            <h2>Join with URL</h2>
+            <div className="join-section">
+              <input placeholder="Session URL" />
+              <button className="btn">Join</button>
+            </div>
           </div>
           <div className="session-grid">
             {sessions.map((s) => (
