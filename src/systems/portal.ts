@@ -24,6 +24,7 @@ export interface PortalSystem {
   moveSel: (direction: number) => void;
   getSelected: () => Destination;
   teleportWith: (applyPreset: (id: string) => void) => Promise<void>;
+  teleportTo: (id: string, applyPreset: (id: string) => void) => Promise<void>;
 }
 
 export function createPortalSystem(scene: THREE.Scene, dom: PortalDOMElements): PortalSystem {
@@ -96,6 +97,14 @@ export function createPortalSystem(scene: THREE.Scene, dom: PortalDOMElements): 
     fade.classList.remove('on');
   }
 
+  async function runTeleport(id: string, applyPreset: (id: string) => void) {
+    fadeOn();
+    await new Promise((r) => setTimeout(r, 420));
+    applyPreset(id);
+    await new Promise((r) => setTimeout(r, 120));
+    fadeOff();
+  }
+
   return {
     group,
     radius,
@@ -105,12 +114,11 @@ export function createPortalSystem(scene: THREE.Scene, dom: PortalDOMElements): 
     getSelected: () => destinations[selected],
     async teleportWith(applyPreset: (id: string) => void) {
       const dst = destinations[selected];
-      fadeOn();
-      await new Promise(r => setTimeout(r, 420));
-      applyPreset(dst.id);
-      await new Promise(r => setTimeout(r, 120));
-      fadeOff();
-    }
+      await runTeleport(dst.id, applyPreset);
+    },
+    teleportTo(id: string, applyPreset: (id: string) => void) {
+      return runTeleport(id, applyPreset);
+    },
   };
 }
 
