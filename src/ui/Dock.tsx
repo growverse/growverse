@@ -33,7 +33,7 @@ export function Dock(): JSX.Element {
       }
       if (e.key === '6' && teleportEnabled && isAdmin) setActive('admin');
     },
-    [isAdmin, teleportEnabled]
+    [isAdmin, teleportEnabled],
   );
 
   useEffect(() => {
@@ -119,4 +119,3 @@ export function Dock(): JSX.Element {
     </div>
   );
 }
-

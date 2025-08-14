@@ -12,16 +12,20 @@ export function PortalUI(): JSX.Element {
         <header>Teleport — başka bir garden seç</header>
         <div className="list" id="portalList"></div>
         <footer>
-          <button className="btn" id="btnCancel">İptal (ESC)</button>
-          <button className="btn primary" id="btnTeleport">Git</button>
+          <button className="btn" id="btnCancel">
+            İptal (ESC)
+          </button>
+          <button className="btn primary" id="btnTeleport">
+            Git
+          </button>
         </footer>
       </div>
-      
+
       {/* Portal hint */}
       <div className="hint" id="portalHint">
         Portala yaklaştın. Seçim paneli açıldı. Uzaklaşınca kapanır.
       </div>
-      
+
       {/* Fade overlay for teleport */}
       <div className="fade" id="fade"></div>
     </>

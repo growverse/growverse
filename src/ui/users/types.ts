@@ -1,4 +1,4 @@
-import { AvatarUser, Role } from '@/domain/roles';
+import type { AvatarUser, Role } from '@/domain/roles';
 
 export function displayRole(user: AvatarUser): string {
   switch (user.role) {
@@ -6,8 +6,12 @@ export function displayRole(user: AvatarUser): string {
       return 'Instructor';
     case 'learner':
       return 'Learner';
-    default:
+    case 'bot':
       return 'Bot';
+    default: {
+      const _exhaustiveCheck: never = user.role;
+      return _exhaustiveCheck;
+    }
   }
 }
 

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Role, SubRole, RoleSubRolesMap } from '@/domain/roles';
+import type { Role, SubRole } from '@/domain/roles';
+import { RoleSubRolesMap } from '@/domain/roles';
 import { useLocalUser, updateLocalRole } from '@/state/userStore';
 import { requestTeleportToRole } from '@/world/spawn';
 
@@ -7,7 +8,7 @@ export function AdminRoleSwitcher(): JSX.Element {
   const local = useLocalUser();
   const [role, setRole] = useState<Role>(local?.role ?? 'learner');
   const [subRole, setSubRole] = useState<SubRole>(
-    (local?.subRole as SubRole) ?? RoleSubRolesMap[role][0]
+    (local?.subRole as SubRole) ?? RoleSubRolesMap[role][0],
   );
 
   useEffect(() => {
@@ -43,4 +44,3 @@ export function AdminRoleSwitcher(): JSX.Element {
     </div>
   );
 }
-

@@ -22,7 +22,8 @@ import { onTeleportLocal } from '@/world/worldBus';
 import { createGrowverseSign } from '@/scene/signage/GrowverseSign';
 import { systemStore } from '@/state/systemStore';
 import { registerTeleport } from '@/systems/teleport';
-import { applyPerformancePreset, EngineHandles } from '@/engine/perf/applyPerformancePreset';
+import type { EngineHandles } from '@/engine/perf/applyPerformancePreset';
+import { applyPerformancePreset } from '@/engine/perf/applyPerformancePreset';
 import { setEngineHandles } from '@/engine/perf/presets';
 import { registerWorldCleanup } from '@/world/lifecycle';
 import './styles/global.css';
@@ -65,26 +66,50 @@ async function initializeThreeWorld() {
 
   if (
     !nameTag ||
-    (teleportEnabled && (!portalUI || !portalList || !btnCancel || !btnTeleport || !portalHint || !fade))
+    (teleportEnabled &&
+      (!portalUI || !portalList || !btnCancel || !btnTeleport || !portalHint || !fade))
   ) {
     throw new Error('Required DOM elements not found');
   }
 
-  const { scene, camera, renderer, controls, amb, sun, adaptiveQuality, adaptiveQualityCtrl } = createSceneSetup();
+  const { scene, camera, renderer, controls, amb, sun, adaptiveQuality, adaptiveQualityCtrl } =
+    createSceneSetup();
   const keys = createInput();
 
-  const { planeSize, stage, STAGE_W, STAGE_D, STAGE_H, insideStageXZ, groundYAt, boardBlock, stageBlock, boardZCenter, boardYCenter } = createGarden(scene);
+  const {
+    planeSize,
+    stage,
+    STAGE_W,
+    STAGE_D,
+    STAGE_H,
+    insideStageXZ,
+    groundYAt,
+    boardBlock,
+    stageBlock,
+    boardZCenter,
+    boardYCenter,
+  } = createGarden(scene);
   const stageTopY = stage.position.y + STAGE_H / 2;
 
   // Camlı oda: sahne ile aynı boyut; haritanın en sağ kenarı (varsayılan)
   const roomPos = new THREE.Vector3(planeSize / 2 - STAGE_W / 2, 0, 0);
-  const { room: glassRoom, block: roomBlock } = createGlassRoom(scene, { w: STAGE_W, d: STAGE_D, position: roomPos });
+  const { room: glassRoom, block: roomBlock } = createGlassRoom(scene, {
+    w: STAGE_W,
+    d: STAGE_D,
+    position: roomPos,
+  });
 
   setWorldRefs({ stage, glassRoom, dims: { STAGE_W, STAGE_D, STAGE_H, planeSize } });
 
   // NFT Bina: garden sol-orta; merkez (5,0,135)
   const nftPos = new THREE.Vector3(5, 0, 135);
-  const { building: nftBuilding, block: buildingBlock } = createNftBuilding(scene, { w: 60, d: 40, h: 22, position: nftPos, doorRatio: 0.35 });
+  const { building: nftBuilding, block: buildingBlock } = createNftBuilding(scene, {
+    w: 60,
+    d: 40,
+    h: 22,
+    position: nftPos,
+    doorRatio: 0.35,
+  });
   let activeBuildingBlock: typeof buildingBlock | undefined = buildingBlock;
   function setNftEnabled(v: boolean) {
     nftBuilding.visible = v;
@@ -116,11 +141,18 @@ async function initializeThreeWorld() {
   const portalPos = new THREE.Vector3(-5, 0, -135);
   let portal: ReturnType<typeof createPortalSystem> | null = null;
   if (teleportEnabled && portalUI && portalList && btnCancel && btnTeleport && portalHint && fade) {
-    portal = createPortalSystem(scene, { portalUI, portalList, btnCancel, btnTeleport, portalHint, fade });
+    portal = createPortalSystem(scene, {
+      portalUI,
+      portalList,
+      btnCancel,
+      btnTeleport,
+      portalHint,
+      fade,
+    });
     portal.group.position.copy(portalPos);
   }
 
-  const sign = await createGrowverseSign(THREE, scene, {
+  const sign = await createGrowverseSign(scene, {
     text: 'Growverse',
     anchor: new THREE.Vector3(-106, 1, 0),
     size: 6,
@@ -132,7 +164,13 @@ async function initializeThreeWorld() {
     letterSpacing: 0.2,
     lookAtTarget: glassRoom,
     outline: { enabled: true, color: 0x92b6ff, opacity: 0.6 },
-    neon: { enabled: true, baseEmissive: 0.05, nightEmissive: 0.7, color: 0x66ccff, fakeBloom: true },
+    neon: {
+      enabled: true,
+      baseEmissive: 0.05,
+      nightEmissive: 0.7,
+      color: 0x66ccff,
+      fakeBloom: true,
+    },
     castShadow: true,
     receiveShadow: false,
   });
@@ -159,18 +197,22 @@ async function initializeThreeWorld() {
     boardYCenter,
     text: currentSessionText(),
     panelW: 30,
-    panelH: 3
+    panelH: 3,
   });
 
   // Instructor teleprompter + timer display
-  const teleprompter = createTeleprompterRig(THREE, scene);
+  const teleprompter = createTeleprompterRig(scene);
 
   // Bot avatars
   const botManager = new BotManager();
-  botManager.init({ scene, glassRoomRef: { room: glassRoom, w: STAGE_W, d: STAGE_D }, avatarFactory });
+  botManager.init({
+    scene,
+    glassRoomRef: { room: glassRoom, w: STAGE_W, d: STAGE_D },
+    avatarFactory,
+  });
 
-  const originalSetEnabled = botControls.setEnabled;
-  const originalSetCount = botControls.setCount;
+  const originalSetEnabled = botControls.setEnabled.bind(botControls);
+  const originalSetCount = botControls.setCount.bind(botControls);
   botControls.setEnabled = (v: boolean) => {
     originalSetEnabled(v);
     botManager.setEnabled(v);
@@ -193,9 +235,9 @@ async function initializeThreeWorld() {
   let updatePortalProximityFn = () => {};
   if (teleportEnabled && portal && btnTeleport) {
     btnTeleport.addEventListener('click', () => {
-      portal!.closeUI();
-      const dst = portal!.getSelected();
-      portal!.teleportTo(dst.id, (id) => {
+      portal.closeUI();
+      const dst = portal.getSelected();
+      void portal.teleportTo(dst.id, (id) => {
         applyPreset(id);
         spawnDefault();
         setActiveSession(dst.id);
@@ -204,7 +246,7 @@ async function initializeThreeWorld() {
     });
 
     registerTeleport((id) => {
-      portal!.teleportTo(id, (pid) => {
+      void portal.teleportTo(id, (pid) => {
         applyPreset(pid);
         spawnDefault();
         setActiveSession(id);
@@ -214,36 +256,36 @@ async function initializeThreeWorld() {
 
     // Yakınlık tespiti (otomatik aç/kapat)
     let uiOpen = false;
-    function updatePortalProximity() {
-      const dx = avatar.position.x - portal!.group.position.x;
-      const dz = avatar.position.z - portal!.group.position.z;
+    const updatePortalProximity = () => {
+      const dx = avatar.position.x - portal.group.position.x;
+      const dz = avatar.position.z - portal.group.position.z;
       const dist2 = dx * dx + dz * dz;
-      const R = portal!.radius * 1.1;
+      const R = portal.radius * 1.1;
       const inside = dist2 < R * R;
       if (inside && !uiOpen) {
-        portal!.openUI();
+        portal.openUI();
         uiOpen = true;
       } else if (!inside && uiOpen) {
-        portal!.closeUI();
+        portal.closeUI();
         uiOpen = false;
       }
       const t = performance.now() * 0.001;
-      portal!.group.rotation.y = 0.1 * Math.sin(t * 1.5);
-    }
+      portal.group.rotation.y = 0.1 * Math.sin(t * 1.5);
+    };
 
     // Klavye: listede yukarı/aşağı + ESC/Enter
     window.addEventListener('keydown', (e) => {
-      if (!portalUI!.classList.contains('visible')) return;
+      if (!portalUI || !portalUI.classList.contains('visible')) return;
       if (e.key === 'ArrowDown') {
-        portal!.moveSel(+1);
+        portal.moveSel(+1);
         marquee.setText(currentSessionText());
       }
       if (e.key === 'ArrowUp') {
-        portal!.moveSel(-1);
+        portal.moveSel(-1);
         marquee.setText(currentSessionText());
       }
       if (e.key === 'Escape') {
-        portal!.closeUI();
+        portal.closeUI();
       }
       if (e.key === 'Enter') {
         btnTeleport.click();
@@ -260,7 +302,7 @@ async function initializeThreeWorld() {
     const pos = avatar.position.clone();
     pos.y += 3.2;
     pos.project(camera);
-    const out = (Math.abs(pos.x) > 1 || Math.abs(pos.y) > 1 || pos.z > 1);
+    const out = Math.abs(pos.x) > 1 || Math.abs(pos.y) > 1 || pos.z > 1;
     if (out) {
       nameTag.classList.add('hidden');
       return;
@@ -287,23 +329,23 @@ async function initializeThreeWorld() {
       roomBlock,
       buildingBlock: activeBuildingBlock,
       boardBlock,
-      stageBlock
+      stageBlock,
     });
     runtime.avatar.x = avatar.position.x;
     runtime.avatar.y = avatar.position.y;
     runtime.avatar.z = avatar.position.z;
     runtime.avatar.rotY = avatar.rotation.y;
-      worldfx.update(dt);
-      updatePortalProximityFn();
-      marquee.update(dt);
-      teleprompter.update(dt);
-      sign.update(dt);
-      botManager.update(dt);
-      adaptiveQuality();
-      controls.update();
-      renderer.render(scene, camera);
-      updateNameTag();
-      nameTags.update(camera);
+    worldfx.update(dt);
+    updatePortalProximityFn();
+    marquee.update(dt);
+    teleprompter.update(dt);
+    sign.update(dt);
+    botManager.update(dt);
+    adaptiveQuality();
+    controls.update();
+    renderer.render(scene, camera);
+    updateNameTag();
+    nameTags.update(camera);
   }
   const handles: EngineHandles = {
     renderer,

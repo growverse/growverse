@@ -1,5 +1,5 @@
-import * as THREE from 'three';
-import { AvatarFactory } from '@/world/entities';
+import type * as THREE from 'three';
+import type { AvatarFactory } from '@/world/entities';
 import * as nameTags from '@/world/nameTags';
 
 export interface BotManagerInit {

@@ -1,5 +1,5 @@
-import * as THREE from 'three';
-import { Role } from '@/domain/roles';
+import type * as THREE from 'three';
+import type { Role } from '@/domain/roles';
 import { emitTeleportLocal } from './worldBus';
 
 interface WorldRefs {

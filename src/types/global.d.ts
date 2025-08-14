@@ -22,7 +22,7 @@ export interface AvatarUserData {
 // Extend THREE.Object3D to include our custom userData
 declare module 'three' {
   interface Object3D {
-    userData: AvatarUserData & { [key: string]: any };
+    userData: AvatarUserData & { [key: string]: unknown };
   }
 }
 

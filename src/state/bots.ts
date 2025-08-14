@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from 'react';
-import { AvatarUser } from '@/domain/roles';
+import type { AvatarUser } from '@/domain/roles';
 
 interface BotState {
   enabled: boolean;
@@ -45,6 +45,6 @@ export function useBots(): AvatarUser[] {
       listeners.add(listener);
       return () => listeners.delete(listener);
     },
-    () => state.bots
+    () => state.bots,
   );
 }

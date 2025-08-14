@@ -32,7 +32,9 @@ export function DesktopGate(): JSX.Element | null {
       <div className="gate-box">
         <p>Growverse is desktop-only for now.</p>
         <p>
-          <a href="#" className="learn-more">Learn more</a>
+          <a href="/about" className="learn-more">
+            Learn more
+          </a>
         </p>
         <button ref={btnRef} className="dismiss" onClick={() => setBlocked(false)}>
           Dismiss

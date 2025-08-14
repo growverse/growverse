@@ -18,6 +18,13 @@ A modular React + TypeScript project built with Vite, converted from a single-fi
 - **Vite** for development and building
 - **CSS3** for UI styling
 
+## Routes (Planned)
+
+- `/` : Landing page (Navbar: left "Growverse" → `/`; right "About" and "Login/Sign Up". If authenticated, show "Logout".)
+- `/about` : Simple About page
+- `/auth` : Login / Sign Up (UI only for now)
+- `/world` : 3D scene mounts only on this route
+
 ## Project Structure
 
 ```
@@ -90,6 +97,8 @@ npm run preview
 - **Enter**: Teleport to selected destination
 
 ## Migration Strategy
+
+Note: During development the app currently loads via `demo.html`; the original `index.html` is preserved.
 
 This project represents Phase 1 of migrating from the single-file `index.html` to a modular architecture:
 

@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { PerformancePreset } from '@/types/preferences';
+import type { PerformancePreset } from '@/types/preferences';
 
 export interface EngineHandles {
   renderer: THREE.WebGLRenderer;

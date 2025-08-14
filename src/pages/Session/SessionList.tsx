@@ -6,7 +6,9 @@ export default function SessionList(): JSX.Element {
   return (
     <div className="card">
       <h1>Sessions</h1>
-      <Link className="btn" to="/session/create">Create Session</Link>
+      <Link className="btn" to="/session/create">
+        Create Session
+      </Link>
       <table>
         <thead>
           <tr>

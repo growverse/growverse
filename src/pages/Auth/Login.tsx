@@ -1,4 +1,4 @@
-import { FormEvent } from 'react';
+import type { FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/auth/AuthContext';
 
@@ -16,7 +16,9 @@ export default function Login(): JSX.Element {
       <div className="form-grid">
         <input placeholder="Username" required />
         <input type="password" placeholder="Password" required />
-        <button className="btn" type="submit">Login</button>
+        <button className="btn" type="submit">
+          Login
+        </button>
       </div>
     </form>
   );
