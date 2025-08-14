@@ -9,11 +9,11 @@ export function Navbar(): JSX.Element {
       <div className="nav-right">
         <Link to="/about">About</Link>
         {user ? (
-          <button onClick={logout}>Logout</button>
+          <button className="btn secondary" onClick={logout}>Logout</button>
         ) : (
           <>
-            <Link to="/login">Login</Link>
-            <Link to="/signup">Sign Up</Link>
+            <Link className="btn secondary" to="/login">Login</Link>
+            <Link className="btn" to="/signup">Sign Up</Link>
           </>
         )}
       </div>

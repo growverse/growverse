@@ -24,7 +24,7 @@ import { systemStore } from '@/state/systemStore';
 import { registerTeleport } from '@/systems/teleport';
 import { applyPerformancePreset, EngineHandles } from '@/engine/perf/applyPerformancePreset';
 import { setEngineHandles } from '@/engine/perf/presets';
-import '@/styles/global.css';
+import './styles/global.css';
 
 // Bootstrap React
 const appElement = document.getElementById('app');

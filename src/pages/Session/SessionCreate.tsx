@@ -14,15 +14,13 @@ export default function SessionCreate(): JSX.Element {
   const disabled = !name || !role;
 
   return (
-    <form onSubmit={onSubmit}>
+    <form className="card" onSubmit={onSubmit} style={{ maxWidth: '400px', margin: '0 auto' }}>
       <h1>Create Session</h1>
-      <div>
+      <div className="form-grid">
         <label>
           Session Name
           <input value={name} onChange={(e) => setName(e.target.value)} required />
         </label>
-      </div>
-      <div>
         <label>
           Role
           <select value={role} onChange={(e) => setRole(e.target.value)} required>
@@ -31,8 +29,8 @@ export default function SessionCreate(): JSX.Element {
             <option value="instructor">Instructor</option>
           </select>
         </label>
+        <button className="btn" type="submit" disabled={disabled}>Create</button>
       </div>
-      <button type="submit" disabled={disabled}>Create</button>
     </form>
   );
 }

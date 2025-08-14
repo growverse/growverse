@@ -11,15 +11,13 @@ export default function Login(): JSX.Element {
     navigate('/');
   }
   return (
-    <form onSubmit={onSubmit}>
+    <form className="card" onSubmit={onSubmit} style={{ maxWidth: '320px', margin: '0 auto' }}>
       <h1>Login</h1>
-      <div>
+      <div className="form-grid">
         <input placeholder="Username" required />
-      </div>
-      <div>
         <input type="password" placeholder="Password" required />
+        <button className="btn" type="submit">Login</button>
       </div>
-      <button type="submit">Login</button>
     </form>
   );
 }
