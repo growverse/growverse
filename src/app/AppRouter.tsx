@@ -9,6 +9,7 @@ import Signup from '@/pages/Auth/Signup';
 import Profile from '@/pages/Profile/Profile';
 import SessionList from '@/pages/Session/SessionList';
 import SessionCreate from '@/pages/Session/SessionCreate';
+import SessionLeave from '@/pages/Session/SessionLeave';
 
 export function AppRouter(): JSX.Element {
   return (
@@ -24,6 +25,7 @@ export function AppRouter(): JSX.Element {
             <Route path="/profile" element={<Profile />} />
             <Route path="/session" element={<SessionList />} />
             <Route path="/session/create" element={<SessionCreate />} />
+            <Route path="/session/leave" element={<SessionLeave />} />
           </Route>
         </Routes>
       </BrowserRouter>

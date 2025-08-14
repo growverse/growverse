@@ -24,6 +24,7 @@ import { systemStore } from '@/state/systemStore';
 import { registerTeleport } from '@/systems/teleport';
 import { applyPerformancePreset, EngineHandles } from '@/engine/perf/applyPerformancePreset';
 import { setEngineHandles } from '@/engine/perf/presets';
+import { registerWorldCleanup } from '@/world/lifecycle';
 import './styles/global.css';
 
 // Bootstrap React
@@ -271,8 +272,9 @@ async function initializeThreeWorld() {
   }
 
   const clock = new THREE.Clock();
+  let frameId = 0;
   function animate() {
-    requestAnimationFrame(animate);
+    frameId = requestAnimationFrame(animate);
     const dtRaw = clock.getDelta();
     const fps = 1 / (dtRaw || 1);
     runtime.fps = runtime.fps * 0.9 + fps * 0.1;
@@ -316,4 +318,13 @@ async function initializeThreeWorld() {
   applyPerformancePreset('high', handles);
 
   animate();
+
+  registerWorldCleanup(() => {
+    cancelAnimationFrame(frameId);
+    renderer.dispose();
+    botManager.dispose();
+    sign.dispose();
+    nameTags.unmountNameTagsRoot();
+    renderer.domElement.remove();
+  });
 }

@@ -22,6 +22,14 @@ export function mountNameTagsRoot(): void {
   document.body.appendChild(root);
 }
 
+export function unmountNameTagsRoot(): void {
+  if (root && root.parentNode) {
+    root.parentNode.removeChild(root);
+  }
+  root = null;
+  tags.clear();
+}
+
 export function register(obj: THREE.Object3D, label: string): string {
   if (!root) mountNameTagsRoot();
   const el = document.createElement('div');
