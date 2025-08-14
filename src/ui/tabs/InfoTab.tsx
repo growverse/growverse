@@ -24,6 +24,7 @@ function formatTimePref(str24: string, fmt: '24h' | '12h'): string {
 
 export function InfoTab(): JSX.Element {
   const [avatar, setAvatar] = useState<AvatarState>({ x: 0, y: 0, z: 0, rotY: 0 });
+  const [fps, setFps] = useState(0);
   const [now, setNow] = useState(Date.now());
   const local = useLocalUser();
   const { activeSession } = useSessionStore();
@@ -36,6 +37,7 @@ export function InfoTab(): JSX.Element {
         z: runtime.avatar.z,
         rotY: runtime.avatar.rotY,
       });
+      setFps(runtime.fps);
     }, 100);
     const clockTimer = setInterval(() => {
       setNow(Date.now());
@@ -95,6 +97,7 @@ export function InfoTab(): JSX.Element {
         Position: {utils.fmt(avatar.x)} / {utils.fmt(avatar.y)} / {utils.fmt(avatar.z)}
       </div>
       <div>Rot Y: {heading.toFixed(1)}</div>
+      <div>FPS: {fps.toFixed(1)}</div>
     </div>
   );
 }

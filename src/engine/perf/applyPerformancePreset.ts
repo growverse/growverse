@@ -7,8 +7,9 @@ export interface EngineHandles {
   worldfx?: { setThrottleHz?: (hz: number) => void };
   trees?: { setDensity?: (ratio: number) => void };
   avatars?: { setLOD?: (mode: 'low' | 'medium' | 'high') => void };
-  marquee?: { setResolution?: (w: number, h: number) => void };
+  marquee?: { setResolution?: (w: number, h: number) => void; group?: THREE.Object3D };
   adaptiveQuality?: { setBounds?: (min: number, max: number) => void };
+  nft?: { object?: THREE.Object3D; setEnabled?: (v: boolean) => void };
 }
 
 export function applyPerformancePreset(preset: PerformancePreset, handles: EngineHandles): void {
@@ -22,6 +23,8 @@ export function applyPerformancePreset(preset: PerformancePreset, handles: Engin
         handles.trees?.setDensity?.(0.0);
         handles.avatars?.setLOD?.('low');
         handles.marquee?.setResolution?.(512, 128);
+        if (handles.marquee?.group) handles.marquee.group.visible = false;
+        handles.nft?.setEnabled?.(false);
         break;
       case 'medium':
         handles.adaptiveQuality?.setBounds?.(0.9, 1.25);
@@ -33,9 +36,11 @@ export function applyPerformancePreset(preset: PerformancePreset, handles: Engin
           handles.sun.shadow.needsUpdate = true;
         }
         handles.worldfx?.setThrottleHz?.(12);
-        handles.trees?.setDensity?.(0.5);
+        handles.trees?.setDensity?.(0.0);
         handles.avatars?.setLOD?.('medium');
         handles.marquee?.setResolution?.(1024, 256);
+        if (handles.marquee?.group) handles.marquee.group.visible = true;
+        handles.nft?.setEnabled?.(true);
         break;
       case 'high':
       default:
@@ -51,6 +56,8 @@ export function applyPerformancePreset(preset: PerformancePreset, handles: Engin
         handles.trees?.setDensity?.(1.0);
         handles.avatars?.setLOD?.('high');
         handles.marquee?.setResolution?.(1024, 256);
+        if (handles.marquee?.group) handles.marquee.group.visible = true;
+        handles.nft?.setEnabled?.(true);
         break;
     }
   } catch {

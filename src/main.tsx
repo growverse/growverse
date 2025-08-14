@@ -82,6 +82,12 @@ async function initializeThreeWorld() {
   // NFT Bina: garden sol-orta; merkez (5,0,135)
   const nftPos = new THREE.Vector3(5, 0, 135);
   const { building: nftBuilding, block: buildingBlock } = createNftBuilding(scene, { w: 60, d: 40, h: 22, position: nftPos, doorRatio: 0.35 });
+  let activeBuildingBlock: typeof buildingBlock | undefined = buildingBlock;
+  function setNftEnabled(v: boolean) {
+    nftBuilding.visible = v;
+    activeBuildingBlock = v ? buildingBlock : undefined;
+  }
+  setNftEnabled(true);
 
   // WORLD FX (Phases 1-3)
   const worldfx = createWorldFX(scene, { planeSize }, { amb, sun });
@@ -266,13 +272,15 @@ async function initializeThreeWorld() {
   function animate() {
     requestAnimationFrame(animate);
     const dt = Math.min(0.033, clock.getDelta());
+    const fps = 1 / (dt || 1);
+    runtime.fps = runtime.fps * 0.9 + fps * 0.1;
     updateAvatar(dt, avatar, keys, camera, controls, {
       insideStageXZ,
       groundYAt,
       planeSize,
       stageTopY,
       roomBlock,
-      buildingBlock,
+      buildingBlock: activeBuildingBlock,
       boardBlock,
       stageBlock
     });
@@ -299,6 +307,7 @@ async function initializeThreeWorld() {
     trees: worldfx.trees,
     marquee,
     adaptiveQuality: adaptiveQualityCtrl,
+    nft: { object: nftBuilding, setEnabled: setNftEnabled },
   };
   setEngineHandles(handles);
   applyPerformancePreset('high', handles);
