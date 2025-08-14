@@ -12,7 +12,7 @@ export default function PerformanceView({ onBack }: Props): JSX.Element {
 
   function onChange(preset: PerformancePreset) {
     setPerformancePreset(preset);
-    applyCurrentPreset();
+    applyCurrentPreset(preset);
   }
 
   return (

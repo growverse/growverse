@@ -271,9 +271,10 @@ async function initializeThreeWorld() {
   const clock = new THREE.Clock();
   function animate() {
     requestAnimationFrame(animate);
-    const dt = Math.min(0.033, clock.getDelta());
-    const fps = 1 / (dt || 1);
+    const dtRaw = clock.getDelta();
+    const fps = 1 / (dtRaw || 1);
     runtime.fps = runtime.fps * 0.9 + fps * 0.1;
+    const dt = Math.min(0.033, dtRaw);
     updateAvatar(dt, avatar, keys, camera, controls, {
       insideStageXZ,
       groundYAt,

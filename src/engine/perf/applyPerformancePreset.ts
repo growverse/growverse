@@ -36,7 +36,7 @@ export function applyPerformancePreset(preset: PerformancePreset, handles: Engin
           handles.sun.shadow.needsUpdate = true;
         }
         handles.worldfx?.setThrottleHz?.(12);
-        handles.trees?.setDensity?.(0.0);
+        handles.trees?.setDensity?.(0.5);
         handles.avatars?.setLOD?.('medium');
         handles.marquee?.setResolution?.(1024, 256);
         if (handles.marquee?.group) handles.marquee.group.visible = true;
