@@ -24,10 +24,14 @@ export function createHttpClient(baseURL: string): HttpClient {
     if (hasBody) headers['Content-Type'] = 'application/json';
     if (token) headers['Authorization'] = `Bearer ${token}`;
 
-    const res = await fetch(new URL(path, baseURL).toString(), {
+    const url = baseURL.startsWith('http')
+      ? new URL(path, baseURL).toString()
+      : `${baseURL.replace(/\/$/, '')}${path}`;
+    const res = await fetch(url, {
       method,
       headers,
       body: hasBody ? JSON.stringify(body) : undefined,
+      mode: 'cors',
       ...init,
     });
 
@@ -54,4 +58,4 @@ export function createHttpClient(baseURL: string): HttpClient {
 }
 
 const env = (import.meta as unknown as { env: Record<string, string | undefined> }).env;
-export const http = createHttpClient(env.VITE_API_URL ?? 'http://localhost:8000');
+export const http = createHttpClient(env.VITE_API_URL ?? '/api');
