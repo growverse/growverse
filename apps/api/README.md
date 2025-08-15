@@ -117,6 +117,21 @@ docker compose exec mongo mongosh
 mongosh mongodb://localhost:27017/growverse
 ```
 
+**Open an interactive shell inside the Mongo container:**
+
+```bash
+# Open a shell in the Mongo container
+docker compose exec -it mongo bash
+
+# mongosh is available inside the container
+mongosh
+
+# then interact with the database
+use growverse
+show collections
+db.getCollection('users').find().limit(5)
+```
+
 **Using MongoDB Compass:**
 
 - Connection String: `mongodb://localhost:27017`
@@ -361,4 +376,27 @@ curl -X PATCH http://localhost:8000/users/<id> \
 
 # delete
 curl -X DELETE http://localhost:8000/users/<id>
+```
+
+## Auth Module
+
+Endpoints under **Auth** tag issue and rotate JWT tokens and expose the current user profile.
+
+Quickstart:
+
+```bash
+# generate tokens for a user
+curl -X POST http://localhost:8000/auth/generate-token \
+  -H 'Content-Type: application/json' \
+  -d '{"userId":"<id>"}'
+
+# refresh using the issued refresh token
+curl -X POST http://localhost:8000/auth/refresh-token \
+  -H 'Content-Type: application/json' \
+  -d '{"refreshToken":"<token>"}'
+
+# fetch current user profile
+curl -X POST http://localhost:8000/auth/me \
+  -H 'Content-Type: application/json' \
+  -d '{"token":"<accessToken>"}'
 ```

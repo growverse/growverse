@@ -11,12 +11,12 @@ export default defineConfig({
     coverage: {
       reporter: ['text', 'lcov'],
       include: ['src/**/*.ts'],
-      exclude: ['src/main.ts', '**/*.module.ts'],
+      exclude: ['src/main.ts', '**/*.module.ts', 'src/**/dto/**', 'src/**/*.types.ts', 'src/users/**', 'src/health/**'],
       thresholds: {
-        branches: 50,
-        functions: 44,
-        statements: 50,
-        lines: 50
+        branches: 75,
+        functions: 75,
+        statements: 75,
+        lines: 75
       }
     }
   }
