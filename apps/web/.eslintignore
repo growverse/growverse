@@ -4,3 +4,4 @@ build
 .vite
 coverage
 *.tsbuildinfo
+vitest.config.ts

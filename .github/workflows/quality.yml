@@ -23,6 +23,15 @@ jobs:
       - run: npm run typecheck
       - run: npm run lint
       - run: npm run format:check
+      - name: Test with coverage (thresholds enforced via vitest.config.ts)
+        run: npm run test:coverage
+      - name: Upload coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-coverage-lcov
+          path: apps/web/coverage/lcov.info
+          if-no-files-found: ignore
 
   api:
     runs-on: ubuntu-latest
