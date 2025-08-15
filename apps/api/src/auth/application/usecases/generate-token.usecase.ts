@@ -6,7 +6,7 @@ import { TokenPair } from '../../domain/value-objects/token.types.js';
 import { validateClaims, assertUserActive } from '../../domain/policies/token.policy.js';
 import { ApiError } from '../../../core/errors/api-error.js';
 import { ErrorCode } from '../../../core/errors/error-codes.js';
-import { compare } from 'bcryptjs';
+import bcrypt from 'bcryptjs';
 
 interface Input { username: string; password: string }
 
@@ -22,7 +22,7 @@ export class GenerateTokenUseCase {
     const user = await this.users.findByUsername(username);
     if (!user) throw ApiError.notFound(ErrorCode.USER_NOT_FOUND);
 
-    const ok = await compare(password, user.snapshot.passwordHash);
+    const ok = await bcrypt.compare(password, user.snapshot.passwordHash);
     if (!ok) throw ApiError.unauthorized(ErrorCode.UNAUTHORIZED, 'Invalid credentials');
 
     assertUserActive(user);
