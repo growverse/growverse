@@ -39,6 +39,9 @@
     "eslint": "^9.9.0",
     "supertest": "^7.0.0",
     "typescript": "^5.5.4",
-    "vitest": "^2.0.4"
+    "vitest": "^2.0.4",
+    "mongodb-memory-server": "^10.1.4",
+    "@typescript-eslint/parser": "^8.7.0",
+    "@typescript-eslint/eslint-plugin": "^8.7.0"
   }
 }
