@@ -338,3 +338,27 @@ Once the API is running, visit the Swagger documentation at [http://localhost:80
 
 **Version**: 0.2.0
 **Tech Stack**: NestJS, Fastify, MongoDB, Redis, TypeScript, Vitest
+
+## Users Module
+
+Endpoints under the **Users** tag manage profiles, roles and preferences.
+
+Quick start:
+
+```bash
+# create a user
+curl -s -X POST http://localhost:8000/users \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"a@a.com","username":"u1","role":"learner","subRole":"basic"}'
+
+# fetch
+curl http://localhost:8000/users/<id>
+
+# update
+curl -X PATCH http://localhost:8000/users/<id> \
+  -H 'Content-Type: application/json' \
+  -d '{"role":"admin","subRole":"global"}'
+
+# delete
+curl -X DELETE http://localhost:8000/users/<id>
+```
