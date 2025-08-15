@@ -40,9 +40,23 @@ export function createHttpClient(baseURL: string): HttpClient {
     const data: unknown = isJson ? await res.json().catch(() => undefined) : undefined;
 
     if (!res.ok) {
-      const messageData = data as { message?: string; error?: string } | undefined;
-      const msg = messageData?.message ?? messageData?.error ?? `HTTP ${res.status}`;
-      throw new ApiError(msg, res.status, data);
+      const messageData = data as
+        | {
+            message?: string;
+            error?: string | { message?: string };
+          }
+        | undefined;
+      let msg: string | undefined;
+      if (typeof messageData?.message === 'string') msg = messageData.message;
+      else if (typeof messageData?.error === 'string') msg = messageData.error;
+      else if (
+        messageData &&
+        typeof messageData.error === 'object' &&
+        messageData.error !== null &&
+        'message' in messageData.error
+      )
+        msg = (messageData.error as { message?: string }).message;
+      throw new ApiError(msg ?? `HTTP ${res.status}`, res.status, data);
     }
     return data as T;
   }

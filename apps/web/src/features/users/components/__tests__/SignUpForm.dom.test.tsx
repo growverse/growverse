@@ -1,9 +1,11 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SignUpForm } from '../SignUpForm';
 import { usersApi } from '../../api/users.client';
+import { ApiError } from '@/lib/api/errors';
 
 vi.mock('../../api/users.client', () => ({
   usersApi: {
@@ -60,9 +62,16 @@ describe('SignUpForm', () => {
     await screen.findByText('Account created!');
   });
 
-  it('shows error message on failure', async () => {
+  it('shows alert banner on failure', async () => {
     const createMock = usersApi.create as unknown as ReturnType<typeof vi.fn>;
-    createMock.mockRejectedValueOnce(new Error('bad'));
+    createMock.mockRejectedValueOnce(
+      new ApiError('Email address is already registered', 409, {
+        error: {
+          code: 'USER_EMAIL_ALREADY_EXISTS',
+          message: 'Email address is already registered',
+        },
+      }),
+    );
     setup();
     const user = userEvent.setup();
     await user.type(screen.getByLabelText('Email'), 'a@b.c');
@@ -70,6 +79,7 @@ describe('SignUpForm', () => {
     await user.selectOptions(screen.getByLabelText('Role'), 'learner');
     await user.selectOptions(screen.getByLabelText('Sub Role'), 'pro');
     await user.click(screen.getByRole('button', { name: /sign up/i }));
-    await screen.findByText('bad');
+    const modal = await screen.findByRole('alertdialog');
+    expect(modal.textContent).toContain('Email address is already registered');
   });
 });

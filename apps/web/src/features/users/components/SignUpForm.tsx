@@ -3,6 +3,7 @@ import type { GraphicsQuality, UserPreferences } from '@/world/types';
 import { useSignUp } from '../hooks/useSignUp';
 import { ROLE_CATALOG, type Role } from '../constants/roles';
 import type { CreateUserPayload } from '../api/users.client';
+import { AlertBanner } from '@/components/AlertBanner';
 
 export function SignUpForm(): JSX.Element {
   const [email, setEmail] = useState('');
@@ -18,7 +19,7 @@ export function SignUpForm(): JSX.Element {
   const [micEnabled, setMicEnabled] = useState(false);
   const [chatEnabled, setChatEnabled] = useState(true);
 
-  const { mutate, isSuccess, isError, error, isPending } = useSignUp();
+  const { mutate, isSuccess, isError, error, isPending, reset } = useSignUp();
 
   const handleRoleChange = (e: ChangeEvent<HTMLSelectElement>) => {
     const nextRole = e.target.value as Role;
@@ -161,7 +162,7 @@ export function SignUpForm(): JSX.Element {
         Sign Up
       </button>
       {isSuccess && <p role="alert">Account created!</p>}
-      {isError && <p role="alert">{(error as Error)?.message ?? 'Error'}</p>}
+      {isError && <AlertBanner message={(error as Error)?.message ?? 'Error'} onDismiss={reset} />}
     </form>
   );
 }
