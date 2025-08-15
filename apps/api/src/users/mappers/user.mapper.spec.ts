@@ -5,6 +5,7 @@ describe('UserMapper', () => {
   const mockUser = User.create('test-id', {
     email: 'test@test.com',
     username: 'testuser',
+    passwordHash: 'hash',
     role: 'learner',
     subRole: 'basic',
   } as any);
@@ -13,6 +14,7 @@ describe('UserMapper', () => {
     _id: 'test-id',
     email: 'test@test.com',
     username: 'testuser',
+    passwordHash: 'hash',
     role: 'learner',
     subRole: 'basic',
     preferences: {
@@ -29,6 +31,7 @@ describe('UserMapper', () => {
       _id: 'test-id',
       email: 'test@test.com',
       username: 'testuser',
+      passwordHash: 'hash',
       role: 'learner',
       subRole: 'basic',
       preferences: {

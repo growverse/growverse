@@ -7,6 +7,7 @@ describe('CreateUserDto', () => {
       username: 'testuser',
       role: 'learner',
       subRole: 'basic',
+      password: 'secret',
     };
 
     expect(dto.email).toBe('test@test.com');
@@ -21,6 +22,7 @@ describe('CreateUserDto', () => {
       username: 'testuser',
       role: 'learner',
       subRole: 'basic',
+      password: 'secret',
       preferences: {
         audioVolume: 80,
         language: 'es',

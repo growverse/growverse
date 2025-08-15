@@ -7,6 +7,7 @@ function user() {
   return User.create('1', {
     email: 'a@a.com',
     username: 'u1',
+    passwordHash: 'hash',
     role: 'learner',
     subRole: 'basic',
     status: 'active',

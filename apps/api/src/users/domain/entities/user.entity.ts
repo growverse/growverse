@@ -8,6 +8,7 @@ export type UserStatus = 'active' | 'inactive' | 'banned';
 interface UserProps {
   email: string;
   username: string;
+  passwordHash: string;
   displayName?: string;
   avatarUrl?: string;
   role: Role;
@@ -21,6 +22,7 @@ export class User {
     id: string;
     email: string;
     username: string;
+    passwordHash: string;
     displayName?: string;
     avatarUrl?: string;
     role: Role;
@@ -37,6 +39,7 @@ export class User {
       id,
       email: props.email,
       username: props.username,
+      passwordHash: props.passwordHash,
       displayName: props.displayName,
       avatarUrl: props.avatarUrl,
       role: props.role,

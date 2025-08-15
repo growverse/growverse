@@ -6,8 +6,9 @@ import { TokenPair } from '../../domain/value-objects/token.types.js';
 import { validateClaims, assertUserActive } from '../../domain/policies/token.policy.js';
 import { ApiError } from '../../../core/errors/api-error.js';
 import { ErrorCode } from '../../../core/errors/error-codes.js';
+import { compare } from 'bcryptjs';
 
-interface Input { userId: string }
+interface Input { username: string; password: string }
 
 @Injectable()
 export class GenerateTokenUseCase {
@@ -17,9 +18,12 @@ export class GenerateTokenUseCase {
     @Inject(RefreshTokenStore) private readonly store: RefreshTokenStore,
   ) {}
 
-  async execute({ userId }: Input): Promise<TokenPair> {
-    const user = await this.users.findById(userId);
+  async execute({ username, password }: Input): Promise<TokenPair> {
+    const user = await this.users.findByUsername(username);
     if (!user) throw ApiError.notFound(ErrorCode.USER_NOT_FOUND);
+
+    const ok = await compare(password, user.snapshot.passwordHash);
+    if (!ok) throw ApiError.unauthorized(ErrorCode.UNAUTHORIZED, 'Invalid credentials');
 
     assertUserActive(user);
 

@@ -6,6 +6,7 @@ export interface UserDocument extends Document {
   _id: string;
   email: string;
   username: string;
+  passwordHash: string;
   displayName?: string;
   avatarUrl?: string;
   role: string;
@@ -27,6 +28,7 @@ export const UserSchema = new Schema<UserDocument>({
   _id: { type: String },
   email: { type: String, required: true, unique: true, index: true },
   username: { type: String, required: true, unique: true, index: true },
+  passwordHash: { type: String, required: true },
   displayName: { type: String },
   avatarUrl: { type: String },
   role: { type: String, enum: Object.keys(ROLE_CATALOG), required: true },

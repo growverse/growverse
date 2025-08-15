@@ -10,6 +10,7 @@ import { AuthModule } from './auth.module.js';
 import { UserRepository } from '../users/infrastructure/mongo/user.repository.js';
 import { User } from '../users/domain/entities/user.entity.js';
 import { randomUUID } from 'crypto';
+import { hashSync } from 'bcryptjs';
 import { RedisModule } from '../core/redis/redis.module.js';
 
 describe('Auth Me API', () => {
@@ -39,6 +40,7 @@ describe('Auth Me API', () => {
     const user = User.create(randomUUID(), {
       email: 'a@a.com',
       username: 'u1',
+      passwordHash: hashSync('pw', 10),
       role: 'learner',
       subRole: 'basic',
     });
@@ -50,7 +52,7 @@ describe('Auth Me API', () => {
 
     const genRes = await request(app.getHttpServer())
       .post('/auth/generate-token')
-      .send({ userId })
+      .send({ username: 'u1', password: 'pw' })
       .expect(201);
     accessToken = genRes.body.accessToken;
   });
