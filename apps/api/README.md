@@ -362,3 +362,21 @@ curl -X PATCH http://localhost:8000/users/<id> \
 # delete
 curl -X DELETE http://localhost:8000/users/<id>
 ```
+
+## Auth Module
+
+Endpoints under **Auth** tag issue and rotate JWT tokens.
+
+Quickstart:
+
+```bash
+# generate tokens for a user
+curl -X POST http://localhost:8000/auth/generate-token \
+  -H 'Content-Type: application/json' \
+  -d '{"userId":"<id>"}'
+
+# refresh using the issued refresh token
+curl -X POST http://localhost:8000/auth/refresh-token \
+  -H 'Content-Type: application/json' \
+  -d '{"refreshToken":"<token>"}'
+```
