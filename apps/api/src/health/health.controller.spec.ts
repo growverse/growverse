@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 import { Test } from '@nestjs/testing';
-import { HealthController } from './health.controller';
-import { HealthService } from './health.service';
+import { HealthController } from './health.controller.js';
+import { HealthService } from './health.service.js';
 
 describe('HealthController', () => {
   it('GET /health should return ok', async () => {

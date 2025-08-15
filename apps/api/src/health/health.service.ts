@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
-import type Redis from 'ioredis';
+import type { Redis } from 'ioredis';
 import { Inject, Injectable } from '@nestjs/common';
-import { REDIS } from '../core/redis/redis.constants';
+import { REDIS } from '../core/redis/redis.constants.js';
 
 @Injectable()
 export class HealthService {
