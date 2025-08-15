@@ -33,7 +33,12 @@ describe('usersApi', () => {
         updatedAt: '',
       }),
     );
-    const res = await usersApi.create({ email: 'a@b.c', username: 'alice', role: 'learner', subRole: 'pro' });
+    const res = await usersApi.create({
+      email: 'a@b.c',
+      username: 'alice',
+      role: 'learner',
+      subRole: 'pro',
+    });
     expect(res.id).toBe('u1');
   });
 });

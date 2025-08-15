@@ -13,7 +13,12 @@ export interface HttpClient {
 
 export function createHttpClient(baseURL: string): HttpClient {
   let token: string | undefined;
-  async function request<T>(method: Method, path: string, body?: Json, init?: RequestInit): Promise<T> {
+  async function request<T>(
+    method: Method,
+    path: string,
+    body?: Json,
+    init?: RequestInit,
+  ): Promise<T> {
     const headers: Record<string, string> = { Accept: 'application/json' };
     const hasBody = body !== undefined;
     if (hasBody) headers['Content-Type'] = 'application/json';
@@ -26,9 +31,9 @@ export function createHttpClient(baseURL: string): HttpClient {
       ...init,
     });
 
-      const ct = res.headers.get('content-type') || '';
-      const isJson = ct.includes('application/json');
-      const data: unknown = isJson ? await res.json().catch(() => undefined) : undefined;
+    const ct = res.headers.get('content-type') || '';
+    const isJson = ct.includes('application/json');
+    const data: unknown = isJson ? await res.json().catch(() => undefined) : undefined;
 
     if (!res.ok) {
       const messageData = data as { message?: string; error?: string } | undefined;
