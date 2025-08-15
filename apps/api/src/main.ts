@@ -15,6 +15,7 @@ async function bootstrap() {
     .setTitle('Growverse API')
     .setDescription('Growverse service API')
     .setVersion('0.2.0')
+    .addTag('Auth', 'Authentication endpoints')
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, document);
