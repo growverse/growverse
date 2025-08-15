@@ -7,6 +7,7 @@ describe('user-to-me mapper', () => {
     const user = User.create('1', {
       email: 'a@a.com',
       username: 'u1',
+      passwordHash: 'hash',
       role: 'learner',
       subRole: 'basic',
     });

@@ -7,6 +7,7 @@ function createUser(status: 'active' | 'inactive') {
   return User.create('1', {
     email: 'a@a.com',
     username: 'u1',
+    passwordHash: 'hash',
     role: 'learner',
     subRole: 'basic',
     status,

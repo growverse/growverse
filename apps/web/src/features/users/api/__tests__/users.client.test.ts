@@ -36,6 +36,8 @@ describe('usersApi', () => {
     const res = await usersApi.create({
       email: 'a@b.c',
       username: 'alice',
+      password: 'pw',
+      passwordConfirmation: 'pw',
       role: 'learner',
       subRole: 'pro',
     });

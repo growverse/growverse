@@ -25,6 +25,11 @@ export class UserRepository implements IUserRepository {
     return doc ? mapper.toDomain(doc) : null;
   }
 
+  async findByUsername(username: string): Promise<User | null> {
+    const doc = await this.model.findOne({ username }).exec();
+    return doc ? mapper.toDomain(doc) : null;
+  }
+
   async update(user: User): Promise<User> {
     const persistence = mapper.toPersistence(user);
     const doc = await this.model.findByIdAndUpdate(user.snapshot.id, persistence, { new: true }).exec();

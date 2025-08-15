@@ -9,6 +9,8 @@ export function SignUpForm(): JSX.Element {
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
   const [displayName, setDisplayName] = useState('');
+  const [password, setPassword] = useState('');
+  const [passwordConfirmation, setPasswordConfirmation] = useState('');
   const [role, setRole] = useState<Role>('learner');
   const [subRole, setSubRole] = useState<string>(ROLE_CATALOG['learner'].subRoles[0]);
 
@@ -32,6 +34,8 @@ export function SignUpForm(): JSX.Element {
     const payload: CreateUserPayload = {
       email,
       username,
+      password,
+      passwordConfirmation,
       role,
       subRole,
     };
@@ -85,6 +89,24 @@ export function SignUpForm(): JSX.Element {
           id="displayName"
           value={displayName}
           onChange={(e) => setDisplayName(e.target.value)}
+        />
+
+        <label htmlFor="password">Password</label>
+        <input
+          id="password"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+
+        <label htmlFor="passwordConfirmation">Confirm Password</label>
+        <input
+          id="passwordConfirmation"
+          type="password"
+          value={passwordConfirmation}
+          onChange={(e) => setPasswordConfirmation(e.target.value)}
+          required
         />
 
         <label htmlFor="role">Role</label>

@@ -10,13 +10,13 @@ import { AuthModule } from './auth.module.js';
 import { UserRepository } from '../users/infrastructure/mongo/user.repository.js';
 import { User } from '../users/domain/entities/user.entity.js';
 import { randomUUID } from 'crypto';
+import { hashSync } from 'bcryptjs';
 import { RedisModule } from '../core/redis/redis.module.js';
 
 describe('Auth API', () => {
   let app: INestApplication;
   let moduleRef: TestingModule;
   let mongo: MongoMemoryServer;
-  let userId: string;
 
   beforeAll(async () => {
     mongo = await MongoMemoryServer.create();
@@ -38,11 +38,11 @@ describe('Auth API', () => {
     const user = User.create(randomUUID(), {
       email: 'a@a.com',
       username: 'u1',
+      passwordHash: hashSync('pw', 10),
       role: 'learner',
       subRole: 'basic',
     });
     await repo.create(user);
-    userId = user.snapshot.id;
 
     app = moduleRef.createNestApplication();
     await app.init();
@@ -57,7 +57,7 @@ describe('Auth API', () => {
   it('generate and refresh token flow', async () => {
     const genRes = await request(app.getHttpServer())
       .post('/auth/generate-token')
-      .send({ userId })
+      .send({ username: 'u1', password: 'pw' })
       .expect(201);
     const { refreshToken } = genRes.body;
     const refRes = await request(app.getHttpServer())

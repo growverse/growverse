@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { useAuth } from '@/context/auth/AuthContext';
+import { useAuth } from '@/features/auth/hooks/useAuth';
 
 export function Navbar(): JSX.Element {
   const { user, logout } = useAuth();
@@ -17,9 +17,9 @@ export function Navbar(): JSX.Element {
           </button>
         ) : (
           <>
-            <button className="btn secondary" type="button">
+            <Link className="btn secondary" to="/login">
               Login
-            </button>
+            </Link>
             <Link className="btn" to="/sign-up">
               Sign Up
             </Link>

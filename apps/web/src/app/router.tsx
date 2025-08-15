@@ -7,6 +7,7 @@ import Profile from '@/pages/Profile/Profile';
 import SessionCreate from '@/pages/Session/SessionCreate';
 import SessionDetail from '@/pages/Session/SessionDetail';
 import SignUpPage from '@/features/users/pages/SignUpPage';
+import LoginPage from '@/features/auth/pages/LoginPage';
 
 export function AppRoutes(): JSX.Element {
   return (
@@ -19,6 +20,7 @@ export function AppRoutes(): JSX.Element {
       <Route path="/session/leave" element={<SessionLeave />} />
       <Route path="/session/:sessionId" element={<SessionDetail />} />
       <Route path="/sign-up" element={<SignUpPage />} />
+      <Route path="/login" element={<LoginPage />} />
     </Routes>
   );
 }

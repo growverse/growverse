@@ -8,6 +8,9 @@ export class CreateUserDto {
   @ApiProperty()
   username!: string;
 
+  @ApiProperty()
+  password!: string;
+
   @ApiProperty({ required: false })
   displayName?: string;
 

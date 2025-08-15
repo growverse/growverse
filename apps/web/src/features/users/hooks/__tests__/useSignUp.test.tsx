@@ -20,6 +20,8 @@ describe('useSignUp', () => {
     const payload: CreateUserPayload = {
       email: 'a@b.c',
       username: 'alice',
+      password: 'pw',
+      passwordConfirmation: 'pw',
       role: 'learner',
       subRole: 'pro',
     };
