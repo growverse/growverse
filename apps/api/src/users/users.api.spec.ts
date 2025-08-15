@@ -1,7 +1,6 @@
 import { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
-import { AppModule } from '../app.module.js';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 
 describe('Users API (e2e)', () => {
@@ -9,9 +8,11 @@ describe('Users API (e2e)', () => {
   let mongo: MongoMemoryServer;
 
   beforeAll(async () => {
-    mongo = await MongoMemoryServer.create({ binary: { version: '6.0.5' } });
+    mongo = await MongoMemoryServer.create();
     process.env.MONGO_URL = mongo.getUri();
     process.env.REDIS_URL = 'redis://localhost:6379';
+
+    const { AppModule } = await import('../app.module.js');
     const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).compile();
     app = moduleRef.createNestApplication();
     await app.init();

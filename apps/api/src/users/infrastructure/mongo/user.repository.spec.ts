@@ -9,7 +9,7 @@ describe('UserRepository (integration)', () => {
   let repo: UserRepository;
 
   beforeAll(async () => {
-    mongo = await MongoMemoryServer.create({ binary: { version: '6.0.5' } });
+    mongo = await MongoMemoryServer.create();
     await connect(mongo.getUri());
     const model: Model<UserDocument> = connection.model('User', UserSchema);
     repo = new UserRepository(model);
