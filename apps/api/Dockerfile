@@ -15,7 +15,7 @@ COPY . .
 RUN npm run build || yarn build || pnpm build
 
 # Production stage
-FROM node:20 AS runner
+FROM node:20 AS prod
 WORKDIR /app
 COPY --from=builder /app .
 EXPOSE 8000
