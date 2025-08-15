@@ -25,4 +25,15 @@ describe('http client', () => {
     const http = createHttpClient(base);
     await expect(http.post('/users', { a: 1 })).rejects.toMatchObject({ status: 400 });
   });
+
+  it('extracts nested error message', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
+      json({ error: { message: 'Email exists' } }, 409),
+    );
+    const http = createHttpClient(base);
+    await expect(http.post('/users', {})).rejects.toMatchObject({
+      status: 409,
+      message: 'Email exists',
+    });
+  });
 });

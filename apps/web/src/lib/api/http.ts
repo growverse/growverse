@@ -24,10 +24,14 @@ export function createHttpClient(baseURL: string): HttpClient {
     if (hasBody) headers['Content-Type'] = 'application/json';
     if (token) headers['Authorization'] = `Bearer ${token}`;
 
-    const res = await fetch(new URL(path, baseURL).toString(), {
+    const url = baseURL.startsWith('http')
+      ? new URL(path, baseURL).toString()
+      : `${baseURL.replace(/\/$/, '')}${path}`;
+    const res = await fetch(url, {
       method,
       headers,
       body: hasBody ? JSON.stringify(body) : undefined,
+      mode: 'cors',
       ...init,
     });
 
@@ -36,9 +40,23 @@ export function createHttpClient(baseURL: string): HttpClient {
     const data: unknown = isJson ? await res.json().catch(() => undefined) : undefined;
 
     if (!res.ok) {
-      const messageData = data as { message?: string; error?: string } | undefined;
-      const msg = messageData?.message ?? messageData?.error ?? `HTTP ${res.status}`;
-      throw new ApiError(msg, res.status, data);
+      const messageData = data as
+        | {
+            message?: string;
+            error?: string | { message?: string };
+          }
+        | undefined;
+      let msg: string | undefined;
+      if (typeof messageData?.message === 'string') msg = messageData.message;
+      else if (typeof messageData?.error === 'string') msg = messageData.error;
+      else if (
+        messageData &&
+        typeof messageData.error === 'object' &&
+        messageData.error !== null &&
+        'message' in messageData.error
+      )
+        msg = (messageData.error as { message?: string }).message;
+      throw new ApiError(msg ?? `HTTP ${res.status}`, res.status, data);
     }
     return data as T;
   }
@@ -54,4 +72,4 @@ export function createHttpClient(baseURL: string): HttpClient {
 }
 
 const env = (import.meta as unknown as { env: Record<string, string | undefined> }).env;
-export const http = createHttpClient(env.VITE_API_URL ?? 'http://localhost:8000');
+export const http = createHttpClient(env.VITE_API_URL ?? '/api');
