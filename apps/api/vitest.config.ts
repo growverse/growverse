@@ -6,11 +6,13 @@ export default defineConfig({
     environment: 'node',
     coverage: {
       reporter: ['text', 'lcov'],
-      branches: 75,
-      functions: 75,
-      statements: 75,
-      lines: 75,
-      include: ['src/health/health.controller.ts']
+      include: ['src/health/health.controller.ts'],
+      thresholds: {
+        branches: 75,
+        functions: 75,
+        statements: 75,
+        lines: 75
+      }
     }
   }
 });
