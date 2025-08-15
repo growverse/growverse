@@ -22,7 +22,7 @@ services:
     build:
       context: ./apps/api
       target: prod
-    env_file: ./apps/api/.env
+    env_file: ./apps/api/.env.example
     environment:
       - MONGO_URL=${MONGO_URL:-mongodb://mongo:27017/growverse}
       - REDIS_URL=${REDIS_URL:-redis://redis:6379}
