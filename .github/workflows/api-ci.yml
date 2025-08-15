@@ -1,0 +1,44 @@
+name: API CI
+on:
+  push:
+    paths: ["apps/api/**", ".github/workflows/api-ci.yml"]
+  pull_request:
+    paths: ["apps/api/**", ".github/workflows/api-ci.yml"]
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Setup pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@latest --activate
+      - name: Install deps
+        working-directory: apps/api
+        run: |
+          if [ -f pnpm-lock.yaml ]; then pnpm install --frozen-lockfile; \
+          elif [ -f yarn.lock ]; then yarn install --frozen-lockfile; \
+          elif [ -f package-lock.json ]; then npm ci; \
+          else npm install; fi
+      - name: Build
+        working-directory: apps/api
+        run: |
+          if [ -f pnpm-lock.yaml ]; then pnpm build; \
+          elif [ -f yarn.lock ]; then yarn build; \
+          else npm run build; fi
+      - name: Test with coverage (thresholds enforced via vitest.config.ts)
+        working-directory: apps/api
+        run: |
+          if [ -f pnpm-lock.yaml ]; then pnpm test:ci; \
+          elif [ -f yarn.lock ]; then yarn test:ci; \
+          else npm run test:ci; fi
+      - name: Upload coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-coverage-lcov
+          path: apps/api/coverage/lcov.info
+          if-no-files-found: ignore
