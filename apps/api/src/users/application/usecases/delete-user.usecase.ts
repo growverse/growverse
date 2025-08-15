@@ -1,10 +1,9 @@
-import { Injectable, Inject } from '@nestjs/common';
-import { IUserRepository } from '../../domain/repositories/user.repository.js';
+import { Injectable } from '@nestjs/common';
 import { UserRepository } from '../../infrastructure/mongo/user.repository.js';
 
 @Injectable()
 export class DeleteUserUseCase {
-  constructor(@Inject(UserRepository) private readonly repo: IUserRepository) {}
+  constructor(private readonly repo: UserRepository) {}
 
   async execute(id: string): Promise<void> {
     await this.repo.delete(id);

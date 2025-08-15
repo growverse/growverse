@@ -1,11 +1,10 @@
-import { Injectable, Inject } from '@nestjs/common';
-import { IUserRepository } from '../../domain/repositories/user.repository.js';
+import { Injectable } from '@nestjs/common';
 import { UpdateUserPreferencesDto } from '../../dto/update-user-preferences.dto.js';
 import { UserRepository } from '../../infrastructure/mongo/user.repository.js';
 
 @Injectable()
 export class UpdateUserPreferencesUseCase {
-  constructor(@Inject(UserRepository) private readonly repo: IUserRepository) {}
+  constructor(private readonly repo: UserRepository) {}
 
   async execute(id: string, dto: UpdateUserPreferencesDto) {
     const user = await this.repo.findById(id);
