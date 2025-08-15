@@ -12,14 +12,17 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Enable corepack
-        run: corepack enable
+      - name: Setup pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@latest --activate
       - name: Install deps
         working-directory: apps/api
         run: |
-          if [ -f pnpm-lock.yaml ]; then pnpm i --frozen-lockfile; \
-          elif [ -f yarn.lock ]; then yarn --frozen-lockfile; \
-          else npm ci; fi
+          if [ -f pnpm-lock.yaml ]; then pnpm install --frozen-lockfile; \
+          elif [ -f yarn.lock ]; then yarn install --frozen-lockfile; \
+          elif [ -f package-lock.json ]; then npm ci; \
+          else npm install; fi
       - name: Build
         working-directory: apps/api
         run: |
