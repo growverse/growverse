@@ -9,9 +9,7 @@ export function SignUpForm(): JSX.Element {
   const [username, setUsername] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [role, setRole] = useState<Role>('learner');
-  const [subRole, setSubRole] = useState<string>(
-    ROLE_CATALOG['learner'].subRoles[0],
-  );
+  const [subRole, setSubRole] = useState<string>(ROLE_CATALOG['learner'].subRoles[0]);
 
   const [language, setLanguage] = useState('');
   const [timezone, setTimezone] = useState('');
@@ -65,31 +63,19 @@ export function SignUpForm(): JSX.Element {
       <div>
         <label>
           Email
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
+          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
         </label>
       </div>
       <div>
         <label>
           Username
-          <input
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-          />
+          <input value={username} onChange={(e) => setUsername(e.target.value)} required />
         </label>
       </div>
       <div>
         <label>
           Display Name
-          <input
-            value={displayName}
-            onChange={(e) => setDisplayName(e.target.value)}
-          />
+          <input value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
         </label>
       </div>
       <div>
@@ -107,11 +93,7 @@ export function SignUpForm(): JSX.Element {
       <div>
         <label>
           Sub Role
-          <select
-            value={subRole}
-            onChange={(e) => setSubRole(e.target.value)}
-            required
-          >
+          <select value={subRole} onChange={(e) => setSubRole(e.target.value)} required>
             {ROLE_CATALOG[role].subRoles.map((sr) => (
               <option key={sr} value={sr}>
                 {sr}
@@ -125,19 +107,13 @@ export function SignUpForm(): JSX.Element {
         <div>
           <label>
             Language
-            <input
-              value={language}
-              onChange={(e) => setLanguage(e.target.value)}
-            />
+            <input value={language} onChange={(e) => setLanguage(e.target.value)} />
           </label>
         </div>
         <div>
           <label>
             Timezone
-            <input
-              value={timezone}
-              onChange={(e) => setTimezone(e.target.value)}
-            />
+            <input value={timezone} onChange={(e) => setTimezone(e.target.value)} />
           </label>
         </div>
         <div>

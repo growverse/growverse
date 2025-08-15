@@ -30,13 +30,7 @@ describe('useSignUp', () => {
       mutateAsync = m.mutateAsync;
       return null;
     }
-    renderToString(
-      createElement(
-        QueryClientProvider,
-        { client: qc },
-        createElement(Test),
-      ),
-    );
+    renderToString(createElement(QueryClientProvider, { client: qc }, createElement(Test)));
     await mutateAsync!(payload);
     expect(usersApi.create).toHaveBeenCalledWith(payload);
   });

@@ -18,10 +18,7 @@ export default defineConfig({
       branches: 75,
       functions: 75,
       lines: 75,
-      include: [
-        'src/features/**/*.{ts,tsx}',
-        'src/lib/**/*.{ts,tsx}',
-      ],
+      include: ['src/features/**/*.{ts,tsx}', 'src/lib/**/*.{ts,tsx}'],
       exclude: [
         'src/**/openapi-types.d.ts',
         'src/features/users/api/users.client.ts',
