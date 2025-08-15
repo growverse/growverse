@@ -1,5 +1,6 @@
-import { Body, Controller, Delete, Get, NotFoundException, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { ApiBadRequestResponse, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiError, ErrorCode } from '../core/errors/index.js';
 import { CreateUserDto } from './dto/create-user.dto.js';
 import { UpdateUserDto } from './dto/update-user.dto.js';
 import { UpdateUserPreferencesDto } from './dto/update-user-preferences.dto.js';
@@ -36,7 +37,7 @@ export class UsersController {
   @ApiNotFoundResponse({ description: 'User not found' })
   async getById(@Param('id') id: string) {
     const user = await this.getUser.execute(id);
-    if (!user) throw new NotFoundException();
+    if (!user) throw ApiError.notFound(ErrorCode.USER_NOT_FOUND);
     return toResponse(user);
   }
 
@@ -46,7 +47,7 @@ export class UsersController {
   @ApiNotFoundResponse({ description: 'User not found' })
   async update(@Param('id') id: string, @Body() dto: UpdateUserDto) {
     const user = await this.updateUser.execute(id, dto);
-    if (!user) throw new NotFoundException();
+    if (!user) throw ApiError.notFound(ErrorCode.USER_NOT_FOUND);
     return toResponse(user);
   }
 
@@ -64,7 +65,7 @@ export class UsersController {
   @ApiNotFoundResponse({ description: 'User not found' })
   async getPreferences(@Param('id') id: string) {
     const user = await this.getUser.execute(id);
-    if (!user) throw new NotFoundException();
+    if (!user) throw ApiError.notFound(ErrorCode.USER_NOT_FOUND);
     return user.snapshot.preferences;
   }
 
@@ -77,7 +78,7 @@ export class UsersController {
     @Body() dto: UpdateUserPreferencesDto,
   ) {
     const user = await this.updatePrefs.execute(id, dto);
-    if (!user) throw new NotFoundException();
+    if (!user) throw ApiError.notFound(ErrorCode.USER_NOT_FOUND);
     return user.snapshot.preferences;
   }
 }
