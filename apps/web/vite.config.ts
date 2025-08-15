@@ -4,6 +4,7 @@ import react from '@vitejs/plugin-react';
 
 const srcPath = new URL('./src', import.meta.url).pathname;
 const indexPath = new URL('./index.html', import.meta.url).pathname;
+const apiTarget = process.env.VITE_API_PROXY_TARGET ?? 'http://api:8000';
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -17,7 +18,17 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:8000',
+        target: apiTarget,
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+      },
+    },
+  },
+  preview: {
+    proxy: {
+      '/api': {
+        target: apiTarget,
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(/^\/api/, ''),
