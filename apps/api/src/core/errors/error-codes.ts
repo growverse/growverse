@@ -15,6 +15,7 @@ export enum ErrorCode {
   USER_NOT_FOUND = 'USER_NOT_FOUND',
   USER_EMAIL_ALREADY_EXISTS = 'USER_EMAIL_ALREADY_EXISTS',
   USER_USERNAME_ALREADY_EXISTS = 'USER_USERNAME_ALREADY_EXISTS',
+  USER_INACTIVE = 'USER_INACTIVE',
   INVALID_USER_ROLE = 'INVALID_USER_ROLE',
   INVALID_USER_PREFERENCES = 'INVALID_USER_PREFERENCES',
 
@@ -33,6 +34,7 @@ export const ErrorMessages = {
   [ErrorCode.USER_NOT_FOUND]: 'User not found',
   [ErrorCode.USER_EMAIL_ALREADY_EXISTS]: 'Email address is already registered',
   [ErrorCode.USER_USERNAME_ALREADY_EXISTS]: 'Username is already taken',
+  [ErrorCode.USER_INACTIVE]: 'User is inactive',
   [ErrorCode.INVALID_USER_ROLE]: 'Invalid user role or sub-role',
   [ErrorCode.INVALID_USER_PREFERENCES]: 'Invalid user preferences',
   [ErrorCode.DATABASE_CONNECTION_ERROR]: 'Database connection error',

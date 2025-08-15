@@ -23,6 +23,14 @@ export class DomainErrorMapper {
       );
     }
 
+    if (message.includes('not active') || message.includes('inactive')) {
+      return ApiError.conflict(
+        ErrorCode.USER_INACTIVE,
+        'User is inactive',
+        error.message,
+      );
+    }
+
     // Default to validation error for other domain errors
     return ApiError.badRequest(
       ErrorCode.VALIDATION_ERROR,

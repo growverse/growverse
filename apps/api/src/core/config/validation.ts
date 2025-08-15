@@ -9,6 +9,11 @@ export const validationSchema = Joi.object({
     then: Joi.optional(),
     otherwise: Joi.required()
   }),
+  JWT_SECRET: Joi.string().default('test-secret'),
+  JWT_ISSUER: Joi.string().default('growverse.api'),
+  JWT_AUDIENCE: Joi.string().default('growverse.web'),
+  ACCESS_TOKEN_TTL: Joi.string().default('15m'),
+  REFRESH_TOKEN_TTL: Joi.string().default('30d'),
   NODE_ENV: Joi.string().valid('development', 'production', 'test').default('development'),
   VITEST: Joi.string().optional()
 });

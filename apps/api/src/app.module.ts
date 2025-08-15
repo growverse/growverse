@@ -6,6 +6,7 @@ import { DbModule } from './core/db/db.module.js';
 import { RedisModule } from './core/redis/redis.module.js';
 import { HealthModule } from './health/health.module.js';
 import { UsersModule } from './users/users.module.js';
+import { AuthModule } from './auth/auth.module.js';
 import { GlobalExceptionFilter } from './core/errors/index.js';
 import { AppController } from './app.controller.js';
 
@@ -15,7 +16,8 @@ import { AppController } from './app.controller.js';
     DbModule,
     RedisModule,
     HealthModule,
-    UsersModule
+    UsersModule,
+    AuthModule
   ],
   controllers: [AppController],
   providers: [
