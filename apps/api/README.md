@@ -117,6 +117,21 @@ docker compose exec mongo mongosh
 mongosh mongodb://localhost:27017/growverse
 ```
 
+**Open an interactive shell inside the Mongo container:**
+
+```bash
+# Open a shell in the Mongo container
+docker compose exec -it mongo bash
+
+# mongosh is available inside the container
+mongosh
+
+# then interact with the database
+use growverse
+show collections
+db.getCollection('users').find().limit(5)
+```
+
 **Using MongoDB Compass:**
 
 - Connection String: `mongodb://localhost:27017`
