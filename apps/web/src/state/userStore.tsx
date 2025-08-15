@@ -16,6 +16,8 @@ import type {
 } from '@/domain/roles';
 import { useBots, botControls } from '@/state/bots';
 import type { AvatarUserPreferences, PerformancePreset } from '@/types/preferences';
+import { worldBridge } from '@/world/bridge/worldBridge';
+import type { UserSnapshot } from '@/world/types';
 
 export interface AvatarUser {
   id: string;
@@ -39,7 +41,11 @@ interface UpdateRoleAction {
   role: Role;
   subRole?: InstructorSubRole | LearnerSubRole;
 }
-type Action = UpdatePrefsAction | UpdateRoleAction;
+interface SetUserAction {
+  type: 'SET_USER';
+  user: AvatarUser;
+}
+type Action = UpdatePrefsAction | UpdateRoleAction | SetUserAction;
 
 function reducer(state: UserState, action: Action): UserState {
   switch (action.type) {
@@ -54,12 +60,30 @@ function reducer(state: UserState, action: Action): UserState {
       return {
         user: { ...state.user, role: action.role, subRole: action.subRole },
       };
+    case 'SET_USER':
+      return { user: action.user };
     default:
       return state;
   }
 }
 
-const initialUser: AvatarUser = {
+function snapshotToAvatarUser(snapshot: UserSnapshot): AvatarUser {
+  return {
+    id: snapshot.id,
+    name: snapshot.displayName ?? 'Player',
+    role: (snapshot.role === 'admin' ? 'instructor' : snapshot.role) as Role,
+    subRole: snapshot.subRole as InstructorSubRole | LearnerSubRole | undefined,
+    isAdmin: snapshot.role === 'admin',
+    preferences: {
+      performancePreset: snapshot.preferences.graphics as PerformancePreset,
+      timeFormat: '24h',
+      enableNotifications: false,
+      enableDarkMode: false,
+    },
+  };
+}
+
+const fallbackUser: AvatarUser = {
   id: 'local-1',
   name: 'macaris64',
   role: 'learner',
@@ -77,7 +101,10 @@ const UserContext = createContext<{ state: UserState; dispatch: Dispatch<Action>
 );
 
 export function UserProvider({ children }: { children: ReactNode }): JSX.Element {
-  const [state, dispatch] = useReducer(reducer, { user: initialUser });
+  const [state, dispatch] = useReducer(reducer, undefined, () => {
+    const snap = worldBridge.user.get();
+    return { user: snap ? snapshotToAvatarUser(snap) : fallbackUser };
+  });
   const stateRef = useRef(state);
   stateRef.current = state;
 
@@ -85,6 +112,18 @@ export function UserProvider({ children }: { children: ReactNode }): JSX.Element
     userStore._dispatch = dispatch;
     userStore._getLocal = () => stateRef.current.user;
   }, [dispatch]);
+
+  useEffect(() => {
+    const unsub = worldBridge.user.subscribe(() => {
+      const snap = worldBridge.user.get();
+      if (snap) {
+        dispatch({ type: 'SET_USER', user: snapshotToAvatarUser(snap) });
+      }
+    });
+    return () => {
+      unsub();
+    };
+  }, []);
 
   useEffect(() => {
     if (state.user.preferences.enableDarkMode) document.body.classList.add('dark');
@@ -144,7 +183,7 @@ export function setPerformancePreset(preset: PerformancePreset): void {
 
 export const userStore = {
   _dispatch: null as Dispatch<Action> | null,
-  _getLocal: () => initialUser,
+  _getLocal: () => fallbackUser,
   getLocal(): AvatarUser {
     return this._getLocal();
   },
