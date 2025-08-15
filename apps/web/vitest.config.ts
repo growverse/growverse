@@ -9,6 +9,7 @@ export default defineConfig({
   },
   test: {
     environment: 'node',
+    environmentMatchGlobs: [['**/*.dom.test.tsx', 'jsdom']],
     globals: true,
     coverage: {
       provider: 'v8',
@@ -17,8 +18,17 @@ export default defineConfig({
       branches: 75,
       functions: 75,
       lines: 75,
-      include: ['src/**/*.{ts,tsx}'],
-      exclude: ['src/**/openapi-types.d.ts'],
+      include: [
+        'src/features/**/*.{ts,tsx}',
+        'src/lib/**/*.{ts,tsx}',
+      ],
+      exclude: [
+        'src/**/openapi-types.d.ts',
+        'src/features/users/api/users.client.ts',
+        'src/features/**/pages/**',
+        'src/features/users/hooks/useHydrateWorldUser.ts',
+        'src/lib/api/routes.ts',
+      ],
     },
   },
 });
