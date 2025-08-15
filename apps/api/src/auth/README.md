@@ -18,6 +18,41 @@ Implements JWT authentication with refresh token rotation using Domain-Driven De
    - Check `jti` in Redis
    - Rotate tokens and update store
 
+## Me Endpoint
+
+Flow:
+
+1. Verify access token
+2. Load user by `sub`
+3. Assert user is active
+4. Map to safe profile
+5. Return profile
+
+Request:
+
+```
+curl -X POST /auth/me -d '{"token":"<accessToken>"}'
+```
+
+Response:
+
+```
+{
+  "id": "u1",
+  "email": "a@a.com",
+  "username": "alice",
+  "role": "learner",
+  "subRole": "basic",
+  "status": "active"
+}
+```
+
+Security notes:
+
+- Token may be provided in the body or via `Authorization: Bearer` header
+- Tokens are never logged or stored
+- Only non-sensitive profile fields are returned
+
 ## Security Notes
 - JWT payload contains only `{ sub, role, subRole, username }` plus standard claims
 - Passwords or sensitive data are never stored in tokens or logs

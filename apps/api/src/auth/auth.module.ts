@@ -7,6 +7,7 @@ import { JwtService } from './infrastructure/jwt/jwt.service.js';
 import { RefreshTokenStore } from './infrastructure/redis/refresh-token.store.js';
 import { GenerateTokenUseCase } from './application/usecases/generate-token.usecase.js';
 import { RefreshTokenUseCase } from './application/usecases/refresh-token.usecase.js';
+import { MeUseCase } from './application/usecases/me.usecase.js';
 import { AuthController } from './infrastructure/http/auth.controller.js';
 
 @Module({
@@ -21,6 +22,7 @@ import { AuthController } from './infrastructure/http/auth.controller.js';
     RefreshTokenStore,
     GenerateTokenUseCase,
     RefreshTokenUseCase,
+    MeUseCase,
   ],
 })
 export class AuthModule {}

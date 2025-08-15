@@ -380,7 +380,7 @@ curl -X DELETE http://localhost:8000/users/<id>
 
 ## Auth Module
 
-Endpoints under **Auth** tag issue and rotate JWT tokens.
+Endpoints under **Auth** tag issue and rotate JWT tokens and expose the current user profile.
 
 Quickstart:
 
@@ -394,4 +394,9 @@ curl -X POST http://localhost:8000/auth/generate-token \
 curl -X POST http://localhost:8000/auth/refresh-token \
   -H 'Content-Type: application/json' \
   -d '{"refreshToken":"<token>"}'
+
+# fetch current user profile
+curl -X POST http://localhost:8000/auth/me \
+  -H 'Content-Type: application/json' \
+  -d '{"token":"<accessToken>"}'
 ```
