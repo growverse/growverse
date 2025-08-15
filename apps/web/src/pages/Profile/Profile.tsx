@@ -1,4 +1,4 @@
-import { useAuth } from '@/context/auth/AuthContext';
+import { useAuth } from '@/features/auth/hooks/useAuth';
 
 export default function Profile(): JSX.Element {
   const { user } = useAuth();
