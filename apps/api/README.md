@@ -214,6 +214,16 @@ npm run build
 npm start
 ```
 
+### CI/CD Notes
+
+The Dockerfile is configured to work with pnpm, yarn, or npm:
+
+1. **pnpm** (preferred): Uses `corepack` to enable pnpm, with fallback to global installation
+2. **yarn**: Uses yarn with frozen lockfile
+3. **npm**: Uses `npm ci` with package-lock.json
+
+For CI environments that don't support `corepack`, the Dockerfile includes a fallback to install pnpm globally.
+
 ### Linting
 
 ```bash
