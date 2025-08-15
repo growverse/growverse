@@ -33,4 +33,3 @@ export function useHydrateAuthToWorld(): void {
     }
   }, [status, user]);
 }
-

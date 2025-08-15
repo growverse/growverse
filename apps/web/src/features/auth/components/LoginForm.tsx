@@ -3,7 +3,8 @@ import { useAuth } from '../hooks/useAuth';
 
 export function LoginForm(): JSX.Element {
   const { login } = useAuth();
-  const [userId, setUserId] = useState('');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
@@ -12,7 +13,7 @@ export function LoginForm(): JSX.Element {
     setError(null);
     setSuccess(false);
     try {
-      await login({ userId });
+      await login({ username, password });
       setSuccess(true);
     } catch (err) {
       setError((err as Error).message || 'Login failed');
@@ -29,15 +30,21 @@ export function LoginForm(): JSX.Element {
     >
       <h1>Login</h1>
       <div className="form-grid">
-        <label>
-          User ID
-          <input
-            value={userId}
-            onChange={(e) => setUserId(e.target.value)}
-            required
-            aria-label="User ID"
-          />
-        </label>
+        <label htmlFor="username">Username</label>
+        <input
+          id="username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          required
+        />
+        <label htmlFor="password">Password</label>
+        <input
+          id="password"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
       </div>
       <button className="btn" type="submit">
         Login
@@ -53,4 +60,3 @@ export function LoginForm(): JSX.Element {
 }
 
 export default LoginForm;
-

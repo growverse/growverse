@@ -69,4 +69,3 @@ describe('tokenManager', () => {
     expect(tokenManager.getRefreshToken()).toBeUndefined();
   });
 });
-

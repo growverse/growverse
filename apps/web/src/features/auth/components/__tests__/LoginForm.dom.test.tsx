@@ -41,10 +41,14 @@ describe('LoginForm', () => {
     (authClient.me as unknown as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ id: '1' });
     setup();
     const user = userEvent.setup();
-    await user.type(screen.getByLabelText('User ID'), '42');
+    await user.type(screen.getByLabelText('Username'), 'alice');
+    await user.type(screen.getByLabelText('Password'), 'pw');
     await user.click(screen.getByRole('button', { name: /login/i }));
     await waitFor(() => {
-      expect(authClient.generateToken).toHaveBeenCalledWith('42');
+      expect(authClient.generateToken).toHaveBeenCalledWith({
+        username: 'alice',
+        password: 'pw',
+      });
     });
     await screen.findByText('Logged in!');
   });
@@ -54,9 +58,9 @@ describe('LoginForm', () => {
     genMock.mockRejectedValueOnce(new Error('bad'));
     setup();
     const user = userEvent.setup();
-    await user.type(screen.getByLabelText('User ID'), '42');
+    await user.type(screen.getByLabelText('Username'), 'alice');
+    await user.type(screen.getByLabelText('Password'), 'pw');
     await user.click(screen.getByRole('button', { name: /login/i }));
     await screen.findByRole('alert');
   });
 });
-

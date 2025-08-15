@@ -1,11 +1,4 @@
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-  type ReactNode,
-} from 'react';
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { authClient, type SafeUser } from '../api/auth.client';
 import { tokenManager } from '@/lib/auth/tokenManager';
 
@@ -15,7 +8,7 @@ interface AuthContextValue {
   user: SafeUser | null;
   status: AuthStatus;
   ready: boolean;
-  login: (opts: { userId: string }) => Promise<void>;
+  login: (opts: { username: string; password: string }) => Promise<void>;
   logout: () => void;
 }
 
@@ -25,9 +18,9 @@ export function AuthProvider({ children }: { children: ReactNode }): JSX.Element
   const [user, setUser] = useState<SafeUser | null>(null);
   const [status, setStatus] = useState<AuthStatus>('idle');
 
-  const login = async ({ userId }: { userId: string }) => {
+  const login = async ({ username, password }: { username: string; password: string }) => {
     setStatus('authenticating');
-    const tokens = await authClient.generateToken(userId);
+    const tokens = await authClient.generateToken({ username, password });
     tokenManager.setAccessToken(tokens.accessToken);
     tokenManager.setRefreshToken(tokens.refreshToken);
     const me = await authClient.me(tokens.accessToken);
@@ -75,4 +68,3 @@ export function useAuth(): AuthContextValue {
   if (!ctx) throw new Error('useAuth must be used within AuthProvider');
   return ctx;
 }
-

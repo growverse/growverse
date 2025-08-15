@@ -12,11 +12,15 @@ export interface SafeUser {
   preferences: UserPreferences;
 }
 
+export interface LoginCredentials {
+  username: string;
+  password: string;
+}
+
 export const authClient = {
-  generateToken: (userId: string) =>
-    http.post<TokenPair>('/auth/generate-token', { userId }),
+  generateToken: (creds: LoginCredentials) =>
+    http.post<TokenPair>('/auth/generate-token', creds as unknown as Record<string, unknown>),
   refreshToken: (refreshToken: string) =>
     http.post<TokenPair>('/auth/refresh-token', { refreshToken }),
   me: (token: string) => http.post<SafeUser>('/auth/me', { token }),
 };
-

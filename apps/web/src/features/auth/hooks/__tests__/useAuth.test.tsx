@@ -60,7 +60,7 @@ describe('useAuth', () => {
     (authClient.me as unknown as ReturnType<typeof vi.fn>).mockResolvedValueOnce(user);
     const { result } = renderHook(() => useAuth(), { wrapper });
     await act(async () => {
-      await result.current.login({ userId: '1' });
+      await result.current.login({ username: 'alice', password: 'pw' });
     });
     expect(result.current.status).toBe('authenticated');
     expect(result.current.user).toEqual(user);
@@ -108,4 +108,3 @@ describe('useAuth', () => {
     expect(tokenManager.getAccessToken()).toBe('a1');
   });
 });
-

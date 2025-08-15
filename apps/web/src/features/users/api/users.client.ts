@@ -21,6 +21,8 @@ export interface User {
 export interface CreateUserPayload {
   email: string;
   username: string;
+  password: string;
+  passwordConfirmation: string;
   displayName?: string;
   avatarUrl?: string;
   role: Role;

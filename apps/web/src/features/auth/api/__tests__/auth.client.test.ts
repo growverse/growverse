@@ -16,7 +16,10 @@ describe('authClient', () => {
     vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
       json({ accessToken: 'a', refreshToken: 'r' }),
     );
-    const res = await authClient.generateToken('u1');
+    const res = await authClient.generateToken({
+      username: 'alice',
+      password: 'secret',
+    });
     expect(res).toEqual({ accessToken: 'a', refreshToken: 'r' });
   });
 
@@ -34,4 +37,3 @@ describe('authClient', () => {
     expect(res).toEqual({ id: '1' });
   });
 });
-

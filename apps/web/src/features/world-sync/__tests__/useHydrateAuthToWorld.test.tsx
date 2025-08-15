@@ -49,4 +49,3 @@ describe('useHydrateAuthToWorld', () => {
     expect(u?.displayName).toMatch(/^Guest\d{6}$/);
   });
 });
-
