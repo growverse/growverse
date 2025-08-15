@@ -59,101 +59,95 @@ export function SignUpForm(): JSX.Element {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div>
-        <label>
-          Email
-          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-        </label>
+    <form className="card" style={{ maxWidth: '480px', margin: '0 auto' }} onSubmit={handleSubmit}>
+      <h1>Sign Up</h1>
+      <div className="form-grid">
+        <label htmlFor="email">Email</label>
+        <input
+          id="email"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
+
+        <label htmlFor="username">Username</label>
+        <input
+          id="username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          required
+        />
+
+        <label htmlFor="displayName">Display Name</label>
+        <input
+          id="displayName"
+          value={displayName}
+          onChange={(e) => setDisplayName(e.target.value)}
+        />
+
+        <label htmlFor="role">Role</label>
+        <select id="role" value={role} onChange={handleRoleChange} required>
+          {Object.keys(ROLE_CATALOG).map((r) => (
+            <option key={r} value={r}>
+              {r}
+            </option>
+          ))}
+        </select>
+
+        <label htmlFor="subRole">Sub Role</label>
+        <select id="subRole" value={subRole} onChange={(e) => setSubRole(e.target.value)} required>
+          {ROLE_CATALOG[role].subRoles.map((sr) => (
+            <option key={sr} value={sr}>
+              {sr}
+            </option>
+          ))}
+        </select>
       </div>
-      <div>
-        <label>
-          Username
-          <input value={username} onChange={(e) => setUsername(e.target.value)} required />
-        </label>
-      </div>
-      <div>
-        <label>
-          Display Name
-          <input value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
-        </label>
-      </div>
-      <div>
-        <label>
-          Role
-          <select value={role} onChange={handleRoleChange} required>
-            {Object.keys(ROLE_CATALOG).map((r) => (
-              <option key={r} value={r}>
-                {ROLE_CATALOG[r as Role].label}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
-      <div>
-        <label>
-          Sub Role
-          <select value={subRole} onChange={(e) => setSubRole(e.target.value)} required>
-            {ROLE_CATALOG[role].subRoles.map((sr) => (
-              <option key={sr} value={sr}>
-                {sr}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
+
       <fieldset>
         <legend>Preferences (optional)</legend>
-        <div>
-          <label>
-            Language
-            <input value={language} onChange={(e) => setLanguage(e.target.value)} />
-          </label>
-        </div>
-        <div>
-          <label>
-            Timezone
-            <input value={timezone} onChange={(e) => setTimezone(e.target.value)} />
-          </label>
-        </div>
-        <div>
-          <label>
-            Graphics
-            <select
-              value={graphics}
-              onChange={(e) => setGraphics(e.target.value as GraphicsQuality)}
-            >
-              <option value="low">low</option>
-              <option value="medium">medium</option>
-              <option value="high">high</option>
-            </select>
-          </label>
-        </div>
-        <div>
-          <label>
-            Audio Volume
+        <div className="form-grid">
+          <label htmlFor="language">Language</label>
+          <input id="language" value={language} onChange={(e) => setLanguage(e.target.value)} />
+
+          <label htmlFor="timezone">Timezone</label>
+          <input id="timezone" value={timezone} onChange={(e) => setTimezone(e.target.value)} />
+
+          <label htmlFor="graphics">Graphics</label>
+          <select
+            id="graphics"
+            value={graphics}
+            onChange={(e) => setGraphics(e.target.value as GraphicsQuality)}
+          >
+            <option value="low">low</option>
+            <option value="medium">medium</option>
+            <option value="high">high</option>
+          </select>
+
+          <label htmlFor="audioVolume">Audio Volume</label>
+          <input
+            id="audioVolume"
+            type="number"
+            min="0"
+            max="100"
+            value={audioVolume}
+            onChange={(e) => setAudioVolume(e.target.value)}
+          />
+
+          <label htmlFor="micEnabled" className="checkbox">
             <input
-              type="number"
-              min="0"
-              max="100"
-              value={audioVolume}
-              onChange={(e) => setAudioVolume(e.target.value)}
-            />
-          </label>
-        </div>
-        <div>
-          <label>
-            <input
+              id="micEnabled"
               type="checkbox"
               checked={micEnabled}
               onChange={(e) => setMicEnabled(e.target.checked)}
             />
             Mic Enabled
           </label>
-        </div>
-        <div>
-          <label>
+
+          <label htmlFor="chatEnabled" className="checkbox">
             <input
+              id="chatEnabled"
               type="checkbox"
               checked={chatEnabled}
               onChange={(e) => setChatEnabled(e.target.checked)}
@@ -162,7 +156,8 @@ export function SignUpForm(): JSX.Element {
           </label>
         </div>
       </fieldset>
-      <button type="submit" disabled={isPending}>
+
+      <button className="btn" type="submit" disabled={isPending}>
         Sign Up
       </button>
       {isSuccess && <p role="alert">Account created!</p>}

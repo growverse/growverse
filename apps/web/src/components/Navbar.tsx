@@ -16,9 +16,14 @@ export function Navbar(): JSX.Element {
             Logout
           </button>
         ) : (
-          <Link className="btn" to="/auth">
-            Login / Sign Up
-          </Link>
+          <>
+            <button className="btn secondary" type="button">
+              Login
+            </button>
+            <Link className="btn" to="/sign-up">
+              Sign Up
+            </Link>
+          </>
         )}
       </div>
     </nav>

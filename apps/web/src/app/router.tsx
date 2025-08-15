@@ -1,7 +1,6 @@
 import { Routes, Route } from 'react-router-dom';
 import Landing from '@/pages/Landing/Landing';
 import About from '@/pages/About/About';
-import Auth from '@/pages/Auth/Auth';
 import World from '@/pages/World';
 import SessionLeave from '@/pages/Session/SessionLeave';
 import Profile from '@/pages/Profile/Profile';
@@ -14,13 +13,12 @@ export function AppRoutes(): JSX.Element {
     <Routes>
       <Route path="/" element={<Landing />} />
       <Route path="/about" element={<About />} />
-      <Route path="/auth" element={<Auth />} />
       <Route path="/world" element={<World />} />
       <Route path="/profile" element={<Profile />} />
       <Route path="/session/create" element={<SessionCreate />} />
       <Route path="/session/leave" element={<SessionLeave />} />
       <Route path="/session/:sessionId" element={<SessionDetail />} />
-      <Route path="/signup" element={<SignUpPage />} />
+      <Route path="/sign-up" element={<SignUpPage />} />
     </Routes>
   );
 }

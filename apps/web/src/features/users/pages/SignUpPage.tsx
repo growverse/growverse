@@ -1,5 +1,9 @@
 import { SignUpForm } from '../components/SignUpForm';
 
 export default function SignUpPage(): JSX.Element {
-  return <SignUpForm />;
+  return (
+    <div className="container">
+      <SignUpForm />
+    </div>
+  );
 }
