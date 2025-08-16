@@ -15,10 +15,9 @@ import type {
   AvatarUser as BasicUser,
 } from '@/domain/roles';
 import { useBots, botControls } from '@/state/bots';
-import type { AvatarUserPreferences, PerformancePreset } from '@/types/preferences';
 import { worldBridge } from '@/world/bridge/worldBridge';
 import { applyCurrentPreset } from '@/engine/perf/presets';
-import type { UserSnapshot } from '@/world/types';
+import type { UserSnapshot, UserPreferences, GraphicsQuality } from '@/world/types';
 
 export interface AvatarUser {
   id: string;
@@ -26,7 +25,7 @@ export interface AvatarUser {
   role: Role;
   subRole?: InstructorSubRole | LearnerSubRole;
   isAdmin: boolean;
-  preferences: AvatarUserPreferences;
+  preferences: UserPreferences;
 }
 
 interface UserState {
@@ -35,7 +34,7 @@ interface UserState {
 
 interface UpdatePrefsAction {
   type: 'UPDATE_PREFS';
-  payload: Partial<AvatarUserPreferences>;
+  payload: Partial<UserPreferences>;
 }
 interface UpdateRoleAction {
   type: 'UPDATE_ROLE';
@@ -75,12 +74,7 @@ function snapshotToAvatarUser(snapshot: UserSnapshot): AvatarUser {
     role: (snapshot.role === 'admin' ? 'instructor' : snapshot.role) as Role,
     subRole: snapshot.subRole as InstructorSubRole | LearnerSubRole | undefined,
     isAdmin: snapshot.role === 'admin',
-    preferences: {
-      performancePreset: snapshot.preferences.graphics as PerformancePreset,
-      timeFormat: '24h',
-      enableNotifications: false,
-      enableDarkMode: false,
-    },
+    preferences: snapshot.preferences,
   };
 }
 
@@ -90,10 +84,14 @@ const fallbackUser: AvatarUser = {
   role: 'learner',
   isAdmin: true,
   preferences: {
-    performancePreset: 'high',
-    timeFormat: '24h',
-    enableNotifications: false,
-    enableDarkMode: false,
+    language: 'en',
+    timezone: 'UTC',
+    graphics: 'high',
+    audioVolume: 70,
+    micEnabled: false,
+    chatEnabled: true,
+    notifications: true,
+    theme: 'light',
   },
 };
 
@@ -127,13 +125,13 @@ export function UserProvider({ children }: { children: ReactNode }): JSX.Element
   }, []);
 
   useEffect(() => {
-    if (state.user.preferences.enableDarkMode) document.body.classList.add('dark');
+    if (state.user.preferences.theme === 'dark') document.body.classList.add('dark');
     else document.body.classList.remove('dark');
-  }, [state.user.preferences.enableDarkMode]);
+  }, [state.user.preferences.theme]);
 
   useEffect(() => {
-    applyCurrentPreset(state.user.preferences.performancePreset);
-  }, [state.user.preferences.performancePreset]);
+    applyCurrentPreset(state.user.preferences.graphics);
+  }, [state.user.preferences.graphics]);
 
   const value = useMemo(() => ({ state, dispatch }), [state, dispatch]);
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
@@ -174,7 +172,7 @@ export function selectOnlineUsers(): BasicUser[] {
   return [localBasic, ...botControls.getBots()];
 }
 
-export function updatePreferences(partial: Partial<AvatarUserPreferences>): void {
+export function updatePreferences(partial: Partial<UserPreferences>): void {
   userStore._dispatch?.({ type: 'UPDATE_PREFS', payload: partial });
 }
 
@@ -182,8 +180,8 @@ export function updateLocalRole(role: Role, subRole?: InstructorSubRole | Learne
   userStore._dispatch?.({ type: 'UPDATE_ROLE', role, subRole });
 }
 
-export function setPerformancePreset(preset: PerformancePreset): void {
-  userStore._dispatch?.({ type: 'UPDATE_PREFS', payload: { performancePreset: preset } });
+export function setGraphicsQuality(preset: GraphicsQuality): void {
+  userStore._dispatch?.({ type: 'UPDATE_PREFS', payload: { graphics: preset } });
 }
 
 export const userStore = {
