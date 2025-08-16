@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import type { PerformancePreset } from '@/types/preferences';
+import type { GraphicsQuality } from '@/world/types';
 
 export interface EngineHandles {
   renderer: THREE.WebGLRenderer;
@@ -12,7 +12,7 @@ export interface EngineHandles {
   nft?: { object?: THREE.Object3D; setEnabled?: (v: boolean) => void };
 }
 
-export function applyPerformancePreset(preset: PerformancePreset, handles: EngineHandles): void {
+export function applyPerformancePreset(preset: GraphicsQuality, handles: EngineHandles): void {
   try {
     switch (preset) {
       case 'low':

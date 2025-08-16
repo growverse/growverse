@@ -23,15 +23,17 @@ describe('useHydrateAuthToWorld', () => {
         displayName: 'Bob',
         role: 'learner',
         subRole: 'basic',
-        preferences: {
-          language: 'en',
-          timezone: 'UTC',
-          graphics: 'medium',
-          audioVolume: 70,
-          micEnabled: false,
-          chatEnabled: true,
-        },
+      preferences: {
+        language: 'en',
+        timezone: 'UTC',
+        graphics: 'medium',
+        audioVolume: 70,
+        micEnabled: false,
+        chatEnabled: true,
+        notifications: true,
+        theme: 'light',
       },
+    },
       status: 'authenticated',
     });
     render(<TestComponent />);

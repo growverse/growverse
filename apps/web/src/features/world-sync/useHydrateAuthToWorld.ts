@@ -28,6 +28,8 @@ export function useHydrateAuthToWorld(): void {
           audioVolume: 70,
           micEnabled: false,
           chatEnabled: true,
+          notifications: true,
+          theme: 'light',
         },
       });
     }

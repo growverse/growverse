@@ -10,7 +10,16 @@ export function useHydrateWorldUser(user?: User) {
       displayName: user.displayName,
       role: user.role,
       subRole: user.subRole,
-      preferences: user.preferences,
+      preferences: {
+        language: user.preferences.language,
+        timezone: user.preferences.timezone,
+        graphics: user.preferences.graphics,
+        audioVolume: user.preferences.audioVolume,
+        micEnabled: user.preferences.micEnabled,
+        chatEnabled: user.preferences.chatEnabled,
+        notifications: user.preferences.notifications,
+        theme: user.preferences.theme,
+      },
     });
   }, [user]);
 }

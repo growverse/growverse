@@ -51,7 +51,7 @@ export function InfoTab(): JSX.Element {
 
   const heading = ((utils.deg(avatar.rotY) % 360) + 360) % 360;
   const timeStr = activeSession
-    ? formatTimePref(activeSession.currentTime, local.preferences.timeFormat)
+    ? formatTimePref(activeSession.currentTime, '24h')
     : '';
   const remainingMs = activeSession ? clampToZero(activeSession.countdownEndAt - now) : 0;
   const finished = remainingMs === 0;

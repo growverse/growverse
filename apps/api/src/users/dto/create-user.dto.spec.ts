@@ -26,11 +26,15 @@ describe('CreateUserDto', () => {
       preferences: {
         audioVolume: 80,
         language: 'es',
+        notifications: false,
+        theme: 'dark',
       },
     };
 
     expect(dto.preferences).toBeDefined();
     expect(dto.preferences?.audioVolume).toBe(80);
     expect(dto.preferences?.language).toBe('es');
+    expect(dto.preferences?.notifications).toBe(false);
+    expect(dto.preferences?.theme).toBe('dark');
   });
 });

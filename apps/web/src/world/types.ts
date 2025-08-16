@@ -6,6 +6,8 @@ export interface UserPreferences {
   audioVolume: number;
   micEnabled: boolean;
   chatEnabled: boolean;
+  notifications: boolean;
+  theme: 'dark' | 'light';
 }
 export interface UserSnapshot {
   id: string;

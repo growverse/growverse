@@ -31,6 +31,8 @@ describe('UpdateUserPreferencesDto', () => {
       audioVolume: 25,
       micEnabled: true,
       chatEnabled: false,
+      notifications: false,
+      theme: 'dark',
     };
 
     expect(dto.language).toBe('fr');
@@ -39,5 +41,7 @@ describe('UpdateUserPreferencesDto', () => {
     expect(dto.audioVolume).toBe(25);
     expect(dto.micEnabled).toBe(true);
     expect(dto.chatEnabled).toBe(false);
+    expect(dto.notifications).toBe(false);
+    expect(dto.theme).toBe('dark');
   });
 });

@@ -18,4 +18,10 @@ export class UpdateUserPreferencesDto {
 
   @ApiProperty({ required: false, type: Boolean })
   chatEnabled?: boolean;
+
+  @ApiProperty({ required: false, type: Boolean })
+  notifications?: boolean;
+
+  @ApiProperty({ required: false, enum: ['dark', 'light'] })
+  theme?: 'dark' | 'light';
 }

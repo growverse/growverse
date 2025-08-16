@@ -20,8 +20,7 @@ import { createGrowverseSign } from '@/scene/signage/GrowverseSign';
 import { systemStore } from '@/state/systemStore';
 import { registerTeleport } from '@/systems/teleport';
 import type { EngineHandles } from '@/engine/perf/applyPerformancePreset';
-import { applyPerformancePreset } from '@/engine/perf/applyPerformancePreset';
-import { setEngineHandles } from '@/engine/perf/presets';
+import { setEngineHandles, applyCurrentPreset } from '@/engine/perf/presets';
 import { registerWorldCleanup } from '@/world/lifecycle';
 
 export async function bootstrapWorld(container: HTMLElement): Promise<() => void> {
@@ -327,7 +326,7 @@ export async function bootstrapWorld(container: HTMLElement): Promise<() => void
     nft: { object: nftBuilding, setEnabled: setNftEnabled },
   };
   setEngineHandles(handles);
-  applyPerformancePreset('high', handles);
+  applyCurrentPreset();
 
   animate();
 
