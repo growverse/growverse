@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { usersApi } from '../api/users.client';
 import type { UserPreferences, GraphicsQuality } from '@/world/types';
+import { worldBridge } from '@/world/bridge/worldBridge';
 
 export function UserPrefsForm({ userId }: { userId: string }): JSX.Element {
   const qc = useQueryClient();
@@ -10,7 +11,8 @@ export function UserPrefsForm({ userId }: { userId: string }): JSX.Element {
   useEffect(() => { if (data) setPrefs(data); }, [data]);
   const mutation = useMutation<UserPreferences, unknown, UserPreferences>({
     mutationFn: (patch) => usersApi.updatePrefs(userId, patch),
-    onSuccess: () => {
+    onSuccess: (updated) => {
+      worldBridge.user.update({ preferences: updated });
       qc.invalidateQueries({ queryKey: ['user', userId] }).catch(() => {});
       qc.invalidateQueries({ queryKey: ['userPrefs', userId] }).catch(() => {});
     },

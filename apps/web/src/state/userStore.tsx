@@ -17,6 +17,7 @@ import type {
 import { useBots, botControls } from '@/state/bots';
 import type { AvatarUserPreferences, PerformancePreset } from '@/types/preferences';
 import { worldBridge } from '@/world/bridge/worldBridge';
+import { applyCurrentPreset } from '@/engine/perf/presets';
 import type { UserSnapshot } from '@/world/types';
 
 export interface AvatarUser {
@@ -129,6 +130,10 @@ export function UserProvider({ children }: { children: ReactNode }): JSX.Element
     if (state.user.preferences.enableDarkMode) document.body.classList.add('dark');
     else document.body.classList.remove('dark');
   }, [state.user.preferences.enableDarkMode]);
+
+  useEffect(() => {
+    applyCurrentPreset(state.user.preferences.performancePreset);
+  }, [state.user.preferences.performancePreset]);
 
   const value = useMemo(() => ({ state, dispatch }), [state, dispatch]);
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
