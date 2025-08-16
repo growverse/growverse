@@ -13,4 +13,12 @@ describe('preferences.policy', () => {
   it('rejects invalid graphics', () => {
     expect(() => validatePreferences({ ...DEFAULT_PREFERENCES, graphics: 'ultra' as any })).toThrow();
   });
+
+  it('rejects invalid theme', () => {
+    expect(() => validatePreferences({ ...DEFAULT_PREFERENCES, theme: 'blue' as any })).toThrow();
+  });
+
+  it('rejects non-boolean notifications', () => {
+    expect(() => validatePreferences({ ...DEFAULT_PREFERENCES, notifications: 'yes' as any })).toThrow();
+  });
 });

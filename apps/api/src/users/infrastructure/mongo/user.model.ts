@@ -22,6 +22,8 @@ const PreferencesSchema = new Schema<UserPreferences>({
   audioVolume: { type: Number, default: 70 },
   micEnabled: { type: Boolean, default: false },
   chatEnabled: { type: Boolean, default: true },
+  notifications: { type: Boolean, default: true },
+  theme: { type: String, enum: ['dark', 'light'], default: 'light' },
 }, { _id: false });
 
 export const UserSchema = new Schema<UserDocument>({

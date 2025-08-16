@@ -20,6 +20,8 @@ describe('worldBridge Atom', () => {
         audioVolume: 70,
         micEnabled: false,
         chatEnabled: true,
+        notifications: true,
+        theme: 'light',
       },
     });
     unsub();

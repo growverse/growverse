@@ -23,6 +23,8 @@ describe('UserProvider sync with worldBridge', () => {
         audioVolume: 50,
         micEnabled: false,
         chatEnabled: true,
+        notifications: true,
+        theme: 'light',
       },
     });
 
@@ -46,6 +48,8 @@ describe('UserProvider sync with worldBridge', () => {
           audioVolume: 50,
           micEnabled: false,
           chatEnabled: true,
+          notifications: true,
+          theme: 'light',
         },
       });
     });

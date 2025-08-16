@@ -7,6 +7,8 @@ export interface UserPreferences {
   audioVolume: number; // 0..100
   micEnabled: boolean;
   chatEnabled: boolean;
+  notifications: boolean;
+  theme: 'dark' | 'light';
 }
 
 export const DEFAULT_PREFERENCES: UserPreferences = {
@@ -16,4 +18,6 @@ export const DEFAULT_PREFERENCES: UserPreferences = {
   audioVolume: 70,
   micEnabled: false,
   chatEnabled: true,
+  notifications: true,
+  theme: 'light',
 };

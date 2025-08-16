@@ -20,6 +20,8 @@ describe('UpdateUserDto', () => {
       preferences: {
         audioVolume: 90,
         graphics: 'high',
+        notifications: false,
+        theme: 'dark',
       },
     };
 
@@ -29,5 +31,7 @@ describe('UpdateUserDto', () => {
     expect(dto.subRole).toBe('global');
     expect(dto.preferences?.audioVolume).toBe(90);
     expect(dto.preferences?.graphics).toBe('high');
+    expect(dto.preferences?.notifications).toBe(false);
+    expect(dto.preferences?.theme).toBe('dark');
   });
 });
