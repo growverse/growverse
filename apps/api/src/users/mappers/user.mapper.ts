@@ -5,6 +5,7 @@ export function toDomain(doc: UserDocument): User {
   return User.create(doc._id, {
     email: doc.email,
     username: doc.username,
+    passwordHash: doc.passwordHash,
     displayName: doc.displayName ?? undefined,
     avatarUrl: doc.avatarUrl ?? undefined,
     role: doc.role as any,
@@ -20,6 +21,7 @@ export function toPersistence(user: User) {
     _id: snap.id,
     email: snap.email,
     username: snap.username,
+    passwordHash: snap.passwordHash,
     displayName: snap.displayName,
     avatarUrl: snap.avatarUrl,
     role: snap.role,

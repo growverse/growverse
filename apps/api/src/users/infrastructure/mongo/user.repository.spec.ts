@@ -24,6 +24,7 @@ describe('UserRepository (integration)', () => {
     const user = User.create('u1', {
       email: 'a@a.com',
       username: 'u1',
+      passwordHash: 'hash',
       role: 'learner',
       subRole: 'basic',
     });
@@ -32,6 +33,8 @@ describe('UserRepository (integration)', () => {
 
     const found = await repo.findById(created.snapshot.id);
     expect(found?.snapshot.username).toBe('u1');
+    const byUsername = await repo.findByUsername('u1');
+    expect(byUsername?.snapshot.email).toBe('a@a.com');
 
     created.changeRole('admin', 'global');
     const updated = await repo.update(created);

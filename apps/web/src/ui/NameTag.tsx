@@ -1,13 +1,11 @@
 // No React import needed for JSX in React 18+
+import { useLocalUser } from '@/state/userStore';
 
-export interface NameTagProps {
-  name?: string;
-}
-
-export function NameTag({ name = 'macaris64' }: NameTagProps): JSX.Element {
+export function NameTag(): JSX.Element {
+  const user = useLocalUser();
   return (
     <div className="name-tag" id="nameTag">
-      {name}
+      {user.name}
     </div>
   );
 }

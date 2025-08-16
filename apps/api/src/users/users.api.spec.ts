@@ -78,7 +78,7 @@ describe('Users API (e2e)', () => {
   it.skip('CRUD flow', async () => {
     const createRes = await request(app.getHttpServer())
       .post('/users')
-      .send({ email: 'a@a.com', username: 'u1', role: 'learner', subRole: 'basic' })
+      .send({ email: 'a@a.com', username: 'u1', password: 'pw', role: 'learner', subRole: 'basic' })
       .expect(201);
     const id = createRes.body.id;
 

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { useAuth } from '@/context/auth/AuthContext';
+import { useAuth } from '@/features/auth/hooks/useAuth';
 import { sessions } from '@/modules/session/sessions.mock';
 
 export default function Landing(): JSX.Element {
