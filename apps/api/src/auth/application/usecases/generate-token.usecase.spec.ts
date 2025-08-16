@@ -2,13 +2,13 @@ import { describe, it, expect, vi } from 'vitest';
 import { GenerateTokenUseCase } from './generate-token.usecase.js';
 import { User } from '../../../users/domain/entities/user.entity.js';
 import { ApiError } from '../../../core/errors/api-error.js';
-import { hashSync } from 'bcryptjs';
+import bcrypt from 'bcryptjs';
 
 function createUser(status: 'active' | 'inactive') {
   return User.create('1', {
     email: 'a@a.com',
     username: 'u1',
-    passwordHash: hashSync('pw', 10),
+    passwordHash: bcrypt.hashSync('pw', 10),
     role: 'learner',
     subRole: 'basic',
     status,

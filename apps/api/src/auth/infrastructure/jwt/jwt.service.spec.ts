@@ -16,7 +16,8 @@ describe('JwtService', () => {
 
   it('fails on tampered token', async () => {
     const token = await svc.signAccess({ sub: '1', role: 'learner', subRole: 'basic' });
-    const tampered = token.slice(0, -1) + 'x';
+    const last = token.at(-1)!;
+    const tampered = token.slice(0, -1) + (last === 'a' ? 'b' : 'a');
     await expect(svc.verify(tampered)).rejects.toThrow();
   });
 

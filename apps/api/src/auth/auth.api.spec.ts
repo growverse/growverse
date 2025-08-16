@@ -10,7 +10,7 @@ import { AuthModule } from './auth.module.js';
 import { UserRepository } from '../users/infrastructure/mongo/user.repository.js';
 import { User } from '../users/domain/entities/user.entity.js';
 import { randomUUID } from 'crypto';
-import { hashSync } from 'bcryptjs';
+import bcrypt from 'bcryptjs';
 import { RedisModule } from '../core/redis/redis.module.js';
 
 describe('Auth API', () => {
@@ -38,7 +38,7 @@ describe('Auth API', () => {
     const user = User.create(randomUUID(), {
       email: 'a@a.com',
       username: 'u1',
-      passwordHash: hashSync('pw', 10),
+      passwordHash: bcrypt.hashSync('pw', 10),
       role: 'learner',
       subRole: 'basic',
     });
