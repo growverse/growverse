@@ -13,7 +13,7 @@ function InnerApp(): JSX.Element {
     <UserProvider>
       <SessionProvider>
         <DesktopGate />
-        <NameTag name="macaris64" />
+        <NameTag />
         {teleportEnabled && <PortalUI />}
         <Dock />
       </SessionProvider>

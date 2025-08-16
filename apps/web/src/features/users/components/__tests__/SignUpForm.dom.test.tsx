@@ -36,6 +36,8 @@ describe('SignUpForm', () => {
     await user.type(screen.getByLabelText('Username'), 'alice');
     await user.selectOptions(screen.getByLabelText('Role'), 'learner');
     await user.selectOptions(screen.getByLabelText('Sub Role'), 'pro');
+    await user.type(screen.getByLabelText('Password'), 'pw');
+    await user.type(screen.getByLabelText('Confirm Password'), 'pw');
     await user.type(screen.getByLabelText('Language'), 'en');
     await user.type(screen.getByLabelText('Timezone'), 'UTC');
     await user.selectOptions(screen.getByLabelText('Graphics'), 'high');
@@ -49,6 +51,8 @@ describe('SignUpForm', () => {
         username: 'alice',
         role: 'learner',
         subRole: 'pro',
+        password: 'pw',
+        passwordConfirmation: 'pw',
         preferences: {
           language: 'en',
           timezone: 'UTC',
@@ -78,6 +82,8 @@ describe('SignUpForm', () => {
     await user.type(screen.getByLabelText('Username'), 'alice');
     await user.selectOptions(screen.getByLabelText('Role'), 'learner');
     await user.selectOptions(screen.getByLabelText('Sub Role'), 'pro');
+    await user.type(screen.getByLabelText('Password'), 'pw');
+    await user.type(screen.getByLabelText('Confirm Password'), 'pw');
     await user.click(screen.getByRole('button', { name: /sign up/i }));
     const modal = await screen.findByRole('alertdialog');
     expect(modal.textContent).toContain('Email address is already registered');

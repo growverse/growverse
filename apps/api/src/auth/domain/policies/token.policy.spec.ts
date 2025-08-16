@@ -19,6 +19,7 @@ describe('token.policy', () => {
     const active = User.create('1', {
       email: 'a@a.com',
       username: 'u1',
+      passwordHash: 'hash',
       role: 'learner',
       subRole: 'basic',
       status: 'active',
@@ -26,6 +27,7 @@ describe('token.policy', () => {
     const inactive = User.create('2', {
       email: 'b@b.com',
       username: 'u2',
+      passwordHash: 'hash',
       role: 'learner',
       subRole: 'basic',
       status: 'inactive',

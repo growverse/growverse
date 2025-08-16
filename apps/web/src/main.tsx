@@ -5,7 +5,7 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { App } from '@/app/App';
 import './styles/global.css';
 import './app/app.css';
-import { AuthProvider } from '@/context/auth/AuthContext';
+import { AuthProvider } from '@/features/auth/hooks/useAuth';
 import { queryClient } from '@/app/queryClient';
 
 const appElement = document.getElementById('app');
